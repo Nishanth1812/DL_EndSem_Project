@@ -1,0 +1,6 @@
+.venv/
+external/
+data/
+runs/
+results/
+__pycache__/

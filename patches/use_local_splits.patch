@@ -1,0 +1,51 @@
+diff --git a/run_evaluation.py b/run_evaluation.py
+index dd53483..e5ff314 100644
+--- a/run_evaluation.py
++++ b/run_evaluation.py
+@@ -1,4 +1,5 @@
+ import argparse
++import os
+ import yaml
+ from multiprocessing import cpu_count
+ import torch.multiprocessing as mp
+@@ -156,6 +157,10 @@ if __name__ == "__main__":
+         print("Unknown split.")
+         raise ValueError("Unknown split.")
+ 
++    # Optional override (not in upstream): use the split CSV that download.py wrote for the shots on disk
++    if config.get("data_splits_dir"):
++        DATA_SPLIT = os.path.join(os.path.abspath(REPO_ROOT + config["data_splits_dir"]), f"shots_{args.split}.csv")
++
+     # ------------------------------------------------------------------------------------------------------------------
+     # Initialize MAST datasets
+     # ------------------------------------------------------------------------------------------------------------------
+diff --git a/run_training.py b/run_training.py
+index 917f806..5d44978 100644
+--- a/run_training.py
++++ b/run_training.py
+@@ -1,4 +1,5 @@
+ import argparse
++import os
+ from torch.utils.data.dataloader import DataLoader
+ from typing import Any
+ import yaml
+@@ -182,6 +183,10 @@ if __name__ == "__main__":
+     
+     else:
+         raise ValueError('Split Unknkwn')
++
++    # Optional override (not in upstream): use the split CSV that download.py wrote for the shots on disk
++    if config.get("data_splits_dir"):
++        DATA_SPLIT = os.path.join(os.path.abspath(REPO_ROOT + config["data_splits_dir"]), f"shots_{args.split}.csv")
+         
+ 
+     # ------------------------------------------------------------------------------------------------------------------
+@@ -193,6 +198,8 @@ if __name__ == "__main__":
+         shuffle=config["shuffle"],
+         data_splits_file_path = DATA_SPLIT        
+     )
++    print(f"Shots: train {len(train_shots_)}, val {len(val_shots_)}, test {len(test_shots_)} "
++          f"(split file: {DATA_SPLIT})", flush=True)
+ 
+     local_flag = config["local"]
+ 

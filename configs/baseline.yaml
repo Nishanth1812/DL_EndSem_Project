@@ -1,0 +1,24 @@
+# Upstream tokamark_baseline/src/config/config_model.yaml, with our data/output paths.
+# deviates in two ways, both marked below
+subset_of_shots:
+shuffle: false            # upstream: true. false keeps the shot order deterministic between runs
+local: true
+
+store_manager_settings:
+  base_local_zarr_path: data
+
+# not an upstream key: read by run_training.py / run_evaluation.py, which take the split CSV from it.
+# download.py writes data/shots_random.csv and data/shots_temporal.csv for the shots actually on disk.
+data_splits_dir: /../../data
+
+dataloader_setting:
+  batch_size: 512
+  num_workers: 8
+
+training_args:
+  lr: 0.0001
+  max_steps: 10000000
+  patience: 10
+
+paths:
+  data_output_directory: /../../runs/baseline
