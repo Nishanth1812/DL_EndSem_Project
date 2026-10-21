@@ -8,14 +8,14 @@ clone() { [ -d external/$1 ] || { git clone -q https://github.com/UKAEA-IBM-STFC
 clone tokamark 1a200f4588addaad2ae3d53d438d9e1946c09294
 clone tokamark_baseline 1e7c489653716a60ffe0b4c2a6a2e51883228695
 
-# Lets run_training.py / run_evaluation.py take the split CSV from configs/baseline.yaml, i.e. the
-# shots download.py actually wrote to ./data. Upstream always reads the full official split.
-if git -C external/tokamark_baseline apply --check "$DIR/patches/use_local_splits.patch" 2>/dev/null; then
-  git -C external/tokamark_baseline apply "$DIR/patches/use_local_splits.patch"
-  echo "[setup] patched run_training.py / run_evaluation.py for local split files"
+# Our only upstream changes: split CSV from configs/baseline.yaml (the shots download.py wrote to ./data;
+# upstream reads the full official split), validation once per epoch, DataParallel over visible GPUs.
+if git -C external/tokamark_baseline apply --check "$DIR/patches/tokamark_baseline.patch" 2>/dev/null; then
+  git -C external/tokamark_baseline apply "$DIR/patches/tokamark_baseline.patch"
+  echo "[setup] patched tokamark_baseline (local splits, epochs, multi-GPU)"
 else
-  echo "[setup] NOTE: split-file patch not applied (already patched, or upstream moved)." >&2
-  echo "[setup] runs will use the FULL official split file if it is not applied." >&2
+  echo "[setup] NOTE: patch not applied (already patched, or upstream moved)." >&2
+  echo "[setup] runs would use the FULL official split and step-based validation." >&2
 fi
 
 if [ -z "$PIP" ]; then uv venv --python 3.11 .venv; PIP="uv pip install --python .venv"; fi

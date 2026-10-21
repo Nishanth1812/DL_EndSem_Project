@@ -1,0 +1,226 @@
+diff --git a/run_evaluation.py b/run_evaluation.py
+index dd53483..e5ff314 100644
+--- a/run_evaluation.py
++++ b/run_evaluation.py
+@@ -1,4 +1,5 @@
+ import argparse
++import os
+ import yaml
+ from multiprocessing import cpu_count
+ import torch.multiprocessing as mp
+@@ -156,6 +157,10 @@ if __name__ == "__main__":
+         print("Unknown split.")
+         raise ValueError("Unknown split.")
+ 
++    # Optional override (not in upstream): use the split CSV that download.py wrote for the shots on disk
++    if config.get("data_splits_dir"):
++        DATA_SPLIT = os.path.join(os.path.abspath(REPO_ROOT + config["data_splits_dir"]), f"shots_{args.split}.csv")
++
+     # ------------------------------------------------------------------------------------------------------------------
+     # Initialize MAST datasets
+     # ------------------------------------------------------------------------------------------------------------------
+diff --git a/run_training.py b/run_training.py
+index 917f806..e02e073 100644
+--- a/run_training.py
++++ b/run_training.py
+@@ -1,4 +1,5 @@
+ import argparse
++import os
+ from torch.utils.data.dataloader import DataLoader
+ from typing import Any
+ import yaml
+@@ -182,6 +183,10 @@ if __name__ == "__main__":
+     
+     else:
+         raise ValueError('Split Unknkwn')
++
++    # Optional override (not in upstream): use the split CSV that download.py wrote for the shots on disk
++    if config.get("data_splits_dir"):
++        DATA_SPLIT = os.path.join(os.path.abspath(REPO_ROOT + config["data_splits_dir"]), f"shots_{args.split}.csv")
+         
+ 
+     # ------------------------------------------------------------------------------------------------------------------
+@@ -193,6 +198,8 @@ if __name__ == "__main__":
+         shuffle=config["shuffle"],
+         data_splits_file_path = DATA_SPLIT        
+     )
++    print(f"Shots: train {len(train_shots_)}, val {len(val_shots_)}, test {len(test_shots_)} "
++          f"(split file: {DATA_SPLIT})", flush=True)
+ 
+     local_flag = config["local"]
+ 
+@@ -292,6 +299,11 @@ if __name__ == "__main__":
+     else:
+         raise ValueError('Model Unknown')
+         
++    # Use every visible GPU (run.py --gpu picks them); the batch is split across them
++    if torch.cuda.device_count() > 1:
++        print(f"DataParallel over {torch.cuda.device_count()} GPUs", flush=True)
++        model = torch.nn.DataParallel(model)
++
+     # ------------------------------------------------------------------------------------------------------------------
+     # Training loop
+     # ------------------------------------------------------------------------------------------------------------------
+diff --git a/src/trainer.py b/src/trainer.py
+index 2aab963..0ed589e 100644
+--- a/src/trainer.py
++++ b/src/trainer.py
+@@ -172,12 +172,14 @@ class BatchStepTrainer:
+         val_loader,
+         lr,
+         max_steps,
+-        patience,
++        patience,  # in epochs (upstream: validations of validate_every steps)
+         output_dir,
+         device=DEVICE,
+-        validate_every=100,  # Validate every k batches
++        validate_every=100,  # unused: validation now runs once per epoch
+         verbose=True,
++        max_epochs=100,
+     ):
++        self.max_epochs = max_epochs
+         self.model = model
+         self.train_loader = train_loader
+         self.val_loader = val_loader
+@@ -216,6 +218,44 @@ class BatchStepTrainer:
+         self.train_sample_count = 0
+         self.epoch_count = 0
+ 
++    # ------------------------------------------------------------------------------------------------------------------
++    def end_epoch(self) -> bool:
++        """Validate after a full pass over the training data; False when training should stop."""
++        first = self.epoch_count == 0
++        result = validate(self.model, self.val_loader, self.criterion, self.device, count_stats=first, return_stats=first)
++        val_loss, val_stats = result if first else (result, None)
++        avg_train_loss = sum(self.current_batch_loss) / max(1, len(self.current_batch_loss))
++        if first:
++            stats = {
++                "train_samples": self.train_sample_count,
++                "train_unique_shots": len(self.train_unique_shots),
++                "val_samples": val_stats["samples"],
++                "val_unique_shots": val_stats["unique_shots"],
++            }
++            torch.save(stats, os.path.join(self.output_dir, "first_epoch_stats.pt"))
++            print(f"First epoch: {stats}", flush=True)
++        self.epoch_count += 1
++
++        self.history["step"].append(self.current_step)
++        self.history["train_loss"].append(avg_train_loss)
++        self.history["val_loss"].append(val_loss)
++        torch.save(self.history, self.history_file)
++        print(f"=== Epoch {self.epoch_count}/{self.max_epochs} | step {self.current_step} | "
++              f"train_loss={avg_train_loss:.4f} | val_loss={val_loss:.4f}", flush=True)
++
++        if val_loss < self.best_val_loss:
++            self.best_val_loss = val_loss
++            self.valid_no_improve = 0
++            # unwrap DataParallel so best_model.pt loads into the plain model (the evaluator does)
++            torch.save(getattr(self.model, "module", self.model).state_dict(),
++                       os.path.join(self.output_dir, "best_model.pt"))
++        else:
++            self.valid_no_improve += 1
++            if self.valid_no_improve >= self.patience:
++                print(f"Early stopping: no improvement for {self.patience} epochs.", flush=True)
++                return False
++        return self.epoch_count < self.max_epochs
++
+     # ------------------------------------------------------------------------------------------------------------------
+     def step_batch(  # NOSONAR - Ignore cognitive complexity
+             self
+@@ -224,49 +264,12 @@ class BatchStepTrainer:
+         try:
+             batch = next(self.batch_iter)
+         except StopIteration:
+-            # End of epoch, reset iterator
++            # End of epoch: validate once, checkpoint, early-stop (patience counts epochs)
++            if not self.end_epoch():
++                return False
+             self.batch_iter = iter(self.train_loader)
+             batch = next(self.batch_iter)
+             self.current_batch_loss = []  # reset running loss per epoch
+-            self.epoch_count += 1
+-            
+-            # Save and print first epoch statistics when epoch 0 ends
+-            if self.epoch_count == 1 and not self.first_epoch_stats_printed:
+-                # Get validation stats - returns tuple when return_stats=True
+-                result = validate(
+-                    self.model, self.val_loader, self.criterion,
+-                    self.device, count_stats=True, return_stats=True
+-                )
+-                # Unpack tuple
+-                if isinstance(result, tuple):
+-                    val_loss_temp, val_stats = result
+-                else:
+-                    val_loss_temp = result
+-                    val_stats = None
+-                
+-                # Create stats dictionary
+-                first_epoch_stats = {
+-                    "train_samples": self.train_sample_count,
+-                    "train_unique_shots": len(self.train_unique_shots),
+-                    "val_samples": val_stats["samples"] if val_stats else 0,
+-                    "val_unique_shots": val_stats["unique_shots"] if val_stats else 0,
+-                }
+-                
+-                # Save to file
+-                stats_file = os.path.join(self.output_dir, "first_epoch_stats.pt")
+-                torch.save(first_epoch_stats, stats_file)
+-                
+-                # Print statistics
+-                print(f"\n{'='*60}")
+-                print("FIRST EPOCH STATISTICS:")
+-                print(f"{'='*60}")
+-                print(f"Train - Total samples: {self.train_sample_count}")
+-                print(f"Train - Unique shots: {len(self.train_unique_shots)}")
+-                print(f"Val - Total samples: {first_epoch_stats['val_samples']}")
+-                print(f"Val - Unique shots: {first_epoch_stats['val_unique_shots']}")
+-                print(f"Saved to: {stats_file}")
+-                print(f"{'='*60}\n")
+-                self.first_epoch_stats_printed = True
+ 
+         if batch is None:
+             return True  # skip empty batch
+@@ -295,40 +298,9 @@ class BatchStepTrainer:
+         # ---- Average train loss so far in this step/epoch ----
+         avg_train_loss = sum(self.current_batch_loss) / len(self.current_batch_loss)
+ 
+-        # ---- Perform validation every k batches ----
+-        val_loss = None
+-        if self.current_step % self.validate_every == 0:
+-            result = validate(self.model, self.val_loader, self.criterion, self.device, count_stats=False, return_stats=False)
+-            # Ensure val_loss is a float, not a tuple
+-            val_loss = result if not isinstance(result, tuple) else result[0]
+-
+-            # ---- Save history for this step ----
+-            self.history["step"].append(self.current_step)
+-            self.history["train_loss"].append(avg_train_loss)
+-            self.history["val_loss"].append(val_loss)  # None if not validated
+-            torch.save(self.history, self.history_file)
+-
+-            # Early stopping
+-            if val_loss < self.best_val_loss:
+-                self.best_val_loss = val_loss
+-                self.valid_no_improve = 0
+-                torch.save(
+-                    self.model.state_dict(),
+-                    os.path.join(self.output_dir, "best_model.pt"),
+-                )
+-            else:
+-                self.valid_no_improve += 1
+-                if self.valid_no_improve >= self.patience:
+-                    if self.verbose:
+-                        print("Early stopping triggered.")
+-                    return False
+-
+-            # ---- Print info ----
+-            if self.verbose:
+-                msg = f"Step {self.current_step} | train_loss={avg_train_loss:.4f}"
+-                if val_loss is not None:
+-                    msg += f" | val_loss={val_loss:.4f}"
+-                print(msg)
++        # ---- Progress only (validation runs once per epoch, see end_epoch) ----
++        if self.verbose and self.current_step % 100 == 0:
++            print(f"Epoch {self.epoch_count + 1} | step {self.current_step} | train_loss={avg_train_loss:.4f}", flush=True)
+ 
+         # ---- Stop if max steps reached ----
+         if self.current_step >= self.max_steps:

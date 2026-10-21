@@ -8,7 +8,7 @@ store_manager_settings:
   base_local_zarr_path: data
 
 # not an upstream key: read by run_training.py / run_evaluation.py, which take the split CSV from it.
-# download.py writes data/shots_random.csv and data/shots_temporal.csv for the shots actually on disk.
+# download.py writes data/shots_random.csv for the shots actually on disk.
 data_splits_dir: /../../data
 
 dataloader_setting:
@@ -18,7 +18,8 @@ dataloader_setting:
 training_args:
   lr: 0.0001
   max_steps: 10000000
-  patience: 10
+  max_epochs: 20            # not upstream: we validate once per epoch, see patches/
+  patience: 3               # upstream: 10 validations of 100 steps; here 3 epochs without improvement
 
 paths:
   data_output_directory: /../../runs/baseline

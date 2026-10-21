@@ -47,7 +47,7 @@ flowchart LR
         B --> C["plan()<br/>keep task_1-3 arrays + 1-D + metadata"]
         C --> D["write_shot()<br/>float64 blosc → float32 zstd"]
         D --> E[("data/&lt;shot&gt;.zarr")]
-        E --> F["write_splits()<br/>data/shots_random.csv<br/>data/shots_temporal.csv"]
+        E --> F["write_splits()<br/>data/shots_random.csv"]
     end
 
     subgraph TR["upstream tokamark_baseline (pinned clone)"]
@@ -69,7 +69,7 @@ code, untouched except for one optional config key (see §6).
 | `download.py` | Hub → lean local zarr + per-split shot lists. Time-boxed, resumable. |
 | `run.py` | One baseline run: preflight, train, evaluate, print NRMSE. |
 | `kaggle_main.py` | Session driver: install, download with a budget, one run per GPU, copy artifacts to `/kaggle/working`. |
-| `setup.sh` | Pinned clones, deps, applies `patches/use_local_splits.patch`. |
+| `setup.sh` | Pinned clones, deps, applies `patches/tokamark_baseline.patch`. |
 | `configs/baseline.yaml` | Upstream config, local paths, `data_splits_dir`. |
 
 ---
@@ -104,8 +104,8 @@ threads (blosc and zlib release the GIL).
 ```
 [0]   setup.sh        clone tokamark + tokamark_baseline (pinned), install deps, apply patch   ~2 min
 [1]   download.py     75 min budget, batches in order, each batch → ~200 lean shots
-[2]   write_splits()  official split ∩ shots on disk → data/shots_{random,temporal}.csv
-[3]   run.py ×2       GPU0 = random split, GPU1 = temporal split, in parallel
+[2]   write_splits()  official random split ∩ shots on disk → data/shots_random.csv
+[3]   run.py          one LSTM run on the random split (GPU0+GPU1, DataParallel)
 [4]   run.py          evaluation runs even if training hit its timeout (best_model.pt)
 [5]   kaggle_main.py  copy runs/ + results/ into /kaggle/working/out, print last 6 log lines
 ```
@@ -153,13 +153,14 @@ that dies still leaves usable split files.
 Upstream always reads the full official split CSV (11 574 shots) and would ask the loader for
 shots that are not on disk. So:
 
-* `download.py` writes `data/shots_random.csv` and `data/shots_temporal.csv` — the official rows,
-  restricted to the shots present, so **train/val/test membership is still the paper's**;
+* `download.py` writes `data/shots_random.csv` — the official random rows, restricted to the shots
+  present, so **train/val/test membership is still the paper's**;
 * `configs/baseline.yaml` sets `data_splits_dir: /../../data`;
-* the two entry points read `shots_<split>.csv` from there when the key is present.
+* the training and evaluation entry points read the random split CSV from there when the key is present.
 
-That is the only change to upstream (`patches/use_local_splits.patch`, 2 hunks + 1 log line), and
-it is a no-op when the key is absent.
+The split change is a no-op when the key is absent. `patches/tokamark_baseline.patch` also makes training
+epoch-based (validate, checkpoint and early-stop once per epoch; `max_epochs`, `patience` in epochs) and wraps
+the model in `DataParallel` when more than one GPU is visible. Those are the only changes to upstream.
 
 ---
 
@@ -191,10 +192,9 @@ python download.py --minutes 20       # short pull
 python download.py --batches 2        # just batch_00000/00001
 python download.py --max-gb 40        # allow the 15 large batches too
 
-# train + evaluate one split (CPU here, 2×T4 on Kaggle)
-python run.py --model lstm --split random  --gpu 0
-python run.py --model lstm --split temporal --gpu 1
-python run.py --model cnn  --split random --timeout 600   # cheap pipeline check
+# train + evaluate the random split
+python run.py --model lstm --gpu 0,1
+python run.py --model cnn --timeout 600   # cheap pipeline check
 
 # whole Kaggle session
 python kaggle_main.py
@@ -206,7 +206,7 @@ Artifacts: `runs/baseline/<split>/<model>/task_1-3/seed_<n>/` (checkpoints, logs
 
 ### Kaggle notebook setup
 
-1. Accelerator **GPU T4 ×2**, Internet **on**.
+1. Accelerator **GPU T4**, Internet **on**.
 2. Upload this zip as a dataset, attach it.
 3. One cell: `!python /kaggle/input/<dataset>/kaggle_main.py`
 4. **Save Version → Save & Run All** (background run survives the tab).

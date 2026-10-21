@@ -13,9 +13,9 @@ every 1-D array in the same groups (channel maps etc., 1 chunk each), and the gr
 That is ~65 objects per shot instead of ~285. float64 blosc chunks are rewritten as float32
 zstd - the trainer casts to float32 anyway - which halves the bytes on disk.
 
-Resumable: a finished shot carries a .done marker, processed batch tars are listed in
-<cache>/done.json, and data/shots_{random,temporal}.csv are rewritten after every batch. Delete
-data/<shot>.zarr to redo one shot.
+Resumable: a finished shot carries a .done2 marker, processed batch tars are listed in
+<cache>/done2.json, and data/shots_random.csv is rewritten after every batch. Delete data/<shot>.zarr
+to redo one shot.
 """
 import argparse
 import io
@@ -32,10 +32,11 @@ from concurrent.futures import ThreadPoolExecutor
 import numcodecs
 import numpy as np
 import pandas as pd
+import xarray as xr
 from huggingface_hub import hf_hub_download
-from tokamark.tools.path import RANDOM_SPLIT_TOKAMARK_DATA_SPLITS_FILE, TEMPORAL_SPLIT_TOKAMARK_DATA_SPLITS_FILE
+from tokamark.tools.path import RANDOM_SPLIT_TOKAMARK_DATA_SPLITS_FILE
 
-RANDOM_SPLIT, TEMPORAL_SPLIT = RANDOM_SPLIT_TOKAMARK_DATA_SPLITS_FILE, TEMPORAL_SPLIT_TOKAMARK_DATA_SPLITS_FILE
+RANDOM_SPLIT = RANDOM_SPLIT_TOKAMARK_DATA_SPLITS_FILE
 REPO = "UKAEA-IBM-STFC/tokamark-v1"
 GROUPS = ("equilibrium", "magnetics", "pf_active", "summary")
 SIGNALS = {  # task_1-3.yaml input/output names; everything 1-D in these groups is kept too
@@ -45,6 +46,7 @@ SIGNALS = {  # task_1-3.yaml input/output names; everything 1-D in these groups 
     "pf_active": ("coil_current", "solenoid_current"),
     "summary": ("ip",),
 }
+DONE = ".done2"  # bumped when the on-disk layout changed, so older extractions are redone
 NEW = numcodecs.Blosc(cname="zstd", clevel=5, shuffle=numcodecs.Blosc.SHUFFLE)
 OLD = numcodecs.Blosc()  # decode() reads the settings from each chunk's own header
 
@@ -116,6 +118,12 @@ def write_shot(zf, dst):
     """Materialise one shot's zip into dst, narrowing float64 chunks as it goes."""
     m = members(zf)
     keep, narrow, meta = plan(zf, m)
+    # some Hub zips (e.g. shot 17097) hold a group's arrays but no <group>/.zgroup, so the group cannot be opened
+    groups = {n.split("/")[0] for n in keep if n.count("/") >= 2 and n.split("/")[0] in GROUPS}
+    for g in groups:
+        os.makedirs(os.path.join(dst, g), exist_ok=True)
+        if f"{g}/.zgroup" not in keep:
+            open(os.path.join(dst, g, ".zgroup"), "w").write('{"zarr_format": 2}')
     for n in keep:
         out = os.path.join(dst, *n.split("/"))
         os.makedirs(os.path.dirname(out), exist_ok=True)
@@ -128,19 +136,31 @@ def write_shot(zf, dst):
         open(out, "wb").write(data)
     if meta is not None:  # consolidated metadata must list exactly what is on disk, or zarr raises on lookup
         meta["metadata"] = {k: v for k, v in meta["metadata"].items() if k in keep}
+        for g in groups:
+            meta["metadata"].setdefault(f"{g}/.zgroup", {"zarr_format": 2})
         for arr, za in narrow.items():
             meta["metadata"][f"{arr}/.zarray"] = za
         json.dump(meta, open(os.path.join(dst, ".zmetadata"), "w"), indent=4)
 
 
-def write_splits(out):
-    """Rewrite shots_random.csv / shots_temporal.csv: the official split restricted to what is on disk.
-    run_training.py and run_evaluation.py read these instead of the full CSV (see patches/)."""
+def check(dst):
+    """Raise unless the loader will find every task_1-3 signal in this shot (same open call as MAST_dataset).
+    A shot that fails here is left out of the split files instead of crashing training hours in."""
+    for g, names in SIGNALS.items():
+        with xr.open_zarr(dst, group=g) as ds:
+            missing = [v for v in names if v not in ds]
+            if missing:
+                raise KeyError(f"{g} lacks {missing}")
+
+
+def write_splits(out, only=None):
+    """Write the official random split restricted to shots on disk (and to `only`, if given)."""
     have = {int(d.split(".")[0]) for d in os.listdir(out)
-            if d.endswith(".zarr") and os.path.exists(os.path.join(out, d, ".done"))}
-    for strategy, source in (("random", RANDOM_SPLIT), ("temporal", TEMPORAL_SPLIT)):
-        table = pd.read_csv(source)
-        table[table.shot_id.isin(have)].to_csv(os.path.join(out, f"shots_{strategy}.csv"), index=False)
+            if d.endswith(".zarr") and os.path.exists(os.path.join(out, d, DONE))}
+    if only is not None:
+        have &= only
+    table = pd.read_csv(RANDOM_SPLIT)
+    table[table.shot_id.isin(have)].to_csv(os.path.join(out, "shots_random.csv"), index=False)
 
 
 def main():
@@ -152,14 +172,19 @@ def main():
     ap.add_argument("--max-gb", type=float, default=6, help="skip batches bigger than this (a few are 15-37 GB)")
     ap.add_argument("--workers", type=int, default=8, help="parallel shot extractions")
     ap.add_argument("--keep-tars", action="store_true", help="keep the staged tars instead of deleting them")
+    ap.add_argument("--shots-from", help="dir holding a previous run's shots_random.csv: fetch exactly those shots, "
+                                         "so every model is tested on the same clean test set")
     a = ap.parse_args()
+    only = None
+    if a.shots_from:
+        only = set(pd.read_csv(f"{a.shots_from}/shots_random.csv").shot_id.astype(int))
 
     os.makedirs(a.out, exist_ok=True)
     os.makedirs(a.cache, exist_ok=True)
     t0 = time.time()
     deadline = t0 + 60 * a.minutes
     batch_list = tars()
-    done_file = os.path.join(a.cache, "done.json")
+    done_file = os.path.join(a.cache, "done2.json")
     done = json.load(open(done_file)) if os.path.exists(done_file) else []
     todo = [(n, s) for n, s in batch_list if n not in done and s <= a.max_gb * 1e9]
     skipped = [(n, s) for n, s in batch_list if n not in done and s > a.max_gb * 1e9]
@@ -188,7 +213,9 @@ def main():
         def one(m):
             shot = posixpath.basename(m.name).split(".zarr.zip")[0]
             dst = os.path.join(a.out, f"{shot}.zarr")
-            if os.path.exists(os.path.join(dst, ".done")):
+            if only is not None and int(shot) not in only:
+                return "skip", shot
+            if os.path.exists(os.path.join(dst, DONE)):
                 return "skip", shot
             tmp = f"{dst}.tmp"
             shutil.rmtree(tmp, ignore_errors=True)
@@ -197,7 +224,8 @@ def main():
                     f.seek(m.offset_data)
                     with zipfile.ZipFile(io.BytesIO(f.read(m.size))) as zf:
                         write_shot(zf, tmp)
-                open(os.path.join(tmp, ".done"), "w").close()
+                check(tmp)
+                open(os.path.join(tmp, DONE), "w").close()
                 shutil.rmtree(dst, ignore_errors=True)
                 os.replace(tmp, dst)
                 return "ok", shot
@@ -223,15 +251,14 @@ def main():
             shutil.rmtree(os.path.join(a.cache, "datasets--UKAEA-IBM-STFC--tokamark-v1"), ignore_errors=True)
         log(f"    batch done: {n_ok} kept, {n_skip} skipped, {n_bad} failed, "
             f"{(time.time() - t1) / 60:.1f} min; {(time.time() - t0) / 60:.0f} min total")
-        write_splits(a.out)  # after every batch, so a kill still leaves runnable split files
+        write_splits(a.out, only)  # after every batch, so a kill still leaves runnable split files
 
-    write_splits(a.out)
+    write_splits(a.out, only)
     table = pd.read_csv(os.path.join(a.out, "shots_random.csv"))
     n = {c: int(table[c].sum()) for c in ("train", "val", "test")}
     total = sum(os.path.getsize(os.path.join(r, f)) for r, _, fs in os.walk(a.out) for f in fs) / 1e9
     print(f"\n{len(table)} shots on disk ({total:.1f} GB): train {n['train']}, val {n['val']}, test {n['test']} "
-          f"(random split)\nwrote data/shots_random.csv and data/shots_temporal.csv - run.py uses them as the "
-          f"split files", flush=True)
+          f"(random split)\nwrote data/shots_random.csv - run.py uses it as the split file", flush=True)
 
 
 if __name__ == "__main__":

@@ -4,3 +4,4 @@ data/
 runs/
 results/
 __pycache__/
+*.zip
