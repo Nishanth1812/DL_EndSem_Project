@@ -5,3 +5,9 @@ runs/
 results/
 __pycache__/
 *.zip
+
+# Model weights & run outputs
+*.pt
+*.pth
+*.ckpt
+out/
