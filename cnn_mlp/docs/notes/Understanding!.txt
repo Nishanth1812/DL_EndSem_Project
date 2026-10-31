@@ -1,0 +1,202 @@
+4 modules that needs to be changed
+1. physics aware evaluation layer.
+
+instead of measuring it in pixels, we measure it in cm. because the nmrse holds low information value. because if in the cold regions the nmrse is high, but then if the centre of the plasma is shifted by some minute distance it can collapse with the wall and then boom.
+
+
+though the doubt I really have here is that. the NMRSE is basically the actuall - predicted with obviously some function, root, square and all. Ohh this just tells us, how correct is our prediction compared to the actuall one. like in terms of the pixel values. but then again, this should also be able to indreclty take into consideration the centre right. the problem is it doesn't majorly look into this only.
+
+for example our predicted could be drifted a bit, in terms of its centre. but then because roughly all our regions are close to what the actual is, the nmrse value wouldn't be that bad. however it doesn't tell us about how far the centre is from it. alrigth, but then again is the centre fixed or what? like how do we get the centre in this exactly? like we can get it from edges too (just felt like if we look to the edges too that would give us an idea about it too right)
+
+
+
+so basically to find out this particular value. what we do is that we calculate certain values. We have 4 values that we must calculate for this thing according to what she sent and what you decided.
+
+
+Plasma boundary error ( in cm ):
+
+where exactly is the outermost contour line of the plasma (iskho the last closed flux surface bolte he). basically you just compare the outermost edge of predicted and true one. Then say something like, the edge was within this much cm from the true edge.
+got it this one. basically the same thing as what I said about the edge.
+
+
+Magnetic Axis Shift (in cm):
+
+basically it describes the hottest and densest point in he plasma. so we find the peak value in our grid and then tell how much far it is from the actually one. though you said you will calculate cm here. 
+how tho? like can pixels values corresponds to cm in some way. because right now those are pixel values right. all you can tell from
+this is how different it is from the actual value. or is there some other theory or idea behind it. I think there is. I don't know how you convert an image to grid or pixel value. an image consist of an infinite small values, so obviously you have to do a discrete sampling right from it. from a continuous thing, we sample to get discrete points right or something?
+
+X-point location error (in cm):
+
+So basically in some tokamaks, they have funnel which is used to divert the heat and ash into water cooling area. we track how properly ai detects this? but does it detect this? is this thing even there in the 65*65 true grid? I didn't see anywhere from the heatmap that's why I am asking. like if such a location even exist. can you confirm and tell me. because if such a thing doesn't exist then yea we would be able to do anything at all actually.
+
+False Wall-proximity alarm rate:
+
+so plasma edge comes within 5 cm of the chamber wall the automated safetly system aborts the shots. like this is more of practical view point but can it actually abort. actually to be honest i dont know how fusion reactors work, plasme is a 4th state thats formed when you mereg nucleus together, the heat that emates from it while this plasma is formed is what we use actually. also the plasma is up for only a while, so is it possibly for us to suddenly abort it when the plasme is already formed, how does that even happen, like its a state thats formed which is floated in the air through the magnetic coils actually. so how would it work exactly?
+
+so in this particular measurement we are calculating, how often does the sensors pick on trick into ai to sounding a false alarm. but how do we know that, we are not testing an alarm here right? like we are working on the reconstruction task right, will it work here, or in the reconstruction process only we can get the output of this?
+
+does she want us to do all the task instead of one? what does the document says here? anyways i need some clarification here.
+
+
+also now once we have all these measurements, do we use some heauistic function or something, to generate a final value. are all these together be put to generate a single value. what is the actuall plan here?
+
+
+
+Module 2 : Failure Aware and phsyics constrained AI model.
+
+
+so bascialy it wants us to obey the laws of phsyics. right.
+
+two things, first is how does it handle the loss of sensors data and all.
+
+we used a masked autoencoder to train it by corrupting osme randoms sensors. basically denoising autoencoder type variants ro something is being used here. our goal is to let it handle the failure sensor data also without an issue.
+
+second is, phsyics informed flux loop consistency loss (pinn constraint)
+
+so we have these15 magnetics loops fixed at certain coordinates right. we use a custom loss function to check whether the predicted field, at the exact wall coordinates must equal the phsyics voltage read by loop k? how will this work tho, i mean you cant directly compare the predicted value of the grid (final grid) to those voltage right? because they are not of same unit, and the meaning differes so hwo will it work exactly? or do you mean that, we ensure that our predicted value is equal to the values at those location in the actuall image?. however do we have the cooridnates of the where these loops are placed and  how do they correspond to the actuall image? like just take a pixel value of coorindate (5,10) something, then yea compare that?
+
+i understand the use case of it, tho still more clarification is needed.
+
+
+
+Module3 : Physics grounded sensor criticality and the minimal sensor set
+
+yea so basically checking what sensors matters in terms of safety right? though dont understand the cheapest thing. most probably telling that, something of low cost since these sensors cost a lost. so minimal no of sensors needed to be working properly to run the setup safely?
+
+two things in this.
+
+1. criticality in cm:
+
+utilising the idea of cm how far it is, rather than pixels or just nmrse.
+
+we can know how much the plasma is shifted if one sensor fails.
+This gives a much better idea, which sensors amtters more in this scenario behaviour of each with respect to the other. 
+
+also reason why we need the first module in this, because it directly uses the idea of cm in this.
+
+2. spatial error heatmaps.
+
+shows 2d maps in areas where the red error patches concentrate when each sensor drops out, added with the position of the sensor also.
+
+3.  The minimal sensor set( design answer):
+
+since fusion reactors cost a shit ton of money.
+we answer the question, what is the smallest subset of sensors that keeps the plasma boundary error below a safe tolerance. 
+
+got it, but how you are planning to do it. need some idea. like basically for each sensor remove, or damged, or droped off. sorry for each probe, but do we have each probe location. we check how much cm shift in the boundary is there.
+
+secondly we then create the heatmap showing where the error concentreate more for each sensors and added with its physical position.
+
+then we give a conclusion or result of the smallest set. thats how it will be done right?
+
+
+4th module: Smart Adaptive Mitigration Brain (with calibrated confidence as per you)
+
+instead of simply using statis rules, what if we create an automated docter that diagnoses faults, fixes them and gives a confidence score.
+
+more of an application perseptive idea actually.
+
+steps of doing this are.
+
+step 1 -automated fault detection
+basially check the sensors real time and decided whether they are fualty or not and generates a mask(whts this)masked encoder isn't needed here right. this is the inference movement right?
+
+step 2:  smart adaptive routing (basically the treatment if the sensors id drifted)
+instead of fixing one rule for everything:
+	ifs it momentary change < 10ms, isn't our window frame 5 ms, for each 5ms window frame we are outputting right?
+	ifs its unimportant, redundant sensors, we estimate values from neigbhours, good idea but have to really cross check as in whether its redundant or useless. nothin would be useless to begin with right?
+
+
+	if its a safely critical sensor that died, we route to the 2 failure module? the Physics based loss one right. masked autoencoder used for train it right. so it should automatically be abel to handle this scanrio.
+and the phsyics based informed loss ensures that the the voltage or value we predcited is exact as what the value of voltage of the probe at that specific location is like.
+
+
+step 3 -  calibrated confidence score ( the safety guage)
+along witht he with the 2d flux map, the ai outputs uncertaintiy bound too. if it goes below a threshold we say to not trust it.
+
+
+understood the table aspect too. though would need more better calirficatoin on it. anwyays this is the txt file, about what i understand and what i dont. what needs to be calirfied to cross check my own understanding and all that.
+
+apart from this, the the building pipeline. how we train it, do we train the masked auto encoder and the physics loss first the 2nd module.
+or what module we do.
+
+
+how do we keep modularity and arrange everything properly, so that we can run it all properly, visually present it and be able to explain and utilise the things.
+
+Thats the main things. anyways go through it and tell me. 
+
+
+Doubt clearing section: one by one. improved understanding of the entire setup.
+
+
+first one: 
+yes nrmse does take it into account, but not completely. because its an issue of precision and recall here. if major portion is cold, and you shift by a little the portion would still be there with only few pixels differing from the actual, resulting with almost similar nrmse value. 
+
+However in real life. if the centre of the plasma moves even a bit that causes it to hit the wall. which can cause lot of issues.
+
+Thats why we need to calculate or take into consideration in terms of cm. how far or close it is.
+
+doubt 2 :  how does the pixel corresponds to the cm.
+
+actually this so called grid, is not just an image, but a direct interpolation of the internal spatial of the device. the hroiztonal and the vertical is fixed. and the correspondin pixels each of them corresponds to roughly some cm or something. 
+also like i said because its continuour we need to smaple ti and we decided to sample it at, 65  * 65 points. with each point corresponding to a certain x,y values in the space in terms of space it covers.
+
+
+axis shift? basically centre, provided by the most hottest densest core of the plasma.
+we then apply some formula to get like the Euclidean or a difference between the true axis and the predicted one.
+
+
+doubt three -  X point. basically a certain point in the bottom of the device through which the heat and everything is dissipated to the floor tiles or something.
+
+so whether something like that actually exist, yup it exist, at the very point the flux or the temp is 0 the gradient. so if you use calculus and calculate it you will find out this point. though we would need to clearly understand whether such a calculation is possible or not. otherwise it would be useless.
+
+doubt 3 : how does plasma abort work.
+
+if it detects that the plasma is closer to the wall, it shoots pellet of cyogenic neo or argon gas which reacts with the plasma core and brings it down.
+
+basically false alarm or true alarm is important because these pellets are costly. so shooting the plasma down based on false alarm. or missing it out and letting it hit the wall, can cause lot of issues thats why.
+
+we compute this in our reconstruction task.
+by calculating the distance between the true and predicted ones and then checking how far or close they are.
+
+
+we have a rate to find it out too. anyways understood how this will work.
+
+
+doubt 5 :  measurments combined?
+the first module we emasure many values in terms of cm right. so those values we are not merging? from what you said, i thought you mean the table values. there obvsioualy separate but what about here? if our prupose is a single one, then together we have to use all the measurmenet to decide how far it is or something.
+
+
+D6 - masking training how does it work.
+basically we just pass a masked list. which tells us which sensor is gone and which is working. then during training we pass few like this. which helps it to train the thing without any issues at all
+
+d7 - predicted value compare to the flup loop voltage.
+
+yeah because its not direct values from it, it passes thorug a alot of processing and all. the final values of it are in wbeer.so direct comparison is possible.
+
+so basically these flus loops are fixed in certainlocation, and outer boundary. us checking our values witht eh volateg ensforces a strict rule ithorugh the loss function. thats helps it to ensure that the values are not drstifically changing.
+
+
+d8-  cheapest basically in terms of the subset of sensors which are important for this entire setup to work properly without any issues.
+
+the steps are there, we just turn it off and calulte the shift. which can simply terlls us which one causes the most.
+then the 2d maps which can display where the error concentration happens the most.
+
+
+D9 :how does real time fault detection work, isn't our window 5ms?
+
+
+i understood the three different scenaior in it.
+
+
+anyways i have a clear and better idea now. maybe just to have it in my memory i will go through it a few more times.
+
+
+
+
+
+
+
+
+
+
