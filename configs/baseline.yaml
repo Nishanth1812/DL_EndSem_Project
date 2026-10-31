@@ -13,7 +13,7 @@ data_splits_dir: /../../data
 
 dataloader_setting:
   batch_size: 512
-  num_workers: 8
+  num_workers: 0            # 0 = main process (avoids silent Kaggle dataloader deadlock in 64MB /dev/shm)
 
 training_args:
   lr: 0.0001
