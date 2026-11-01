@@ -1,0 +1,232 @@
+{
+  "clean_boundary_cm": 0.9281327556823884,
+  "criticality_ranking": [
+    {
+      "channel_id": "solenoid_current",
+      "description": "Central solenoid ohmic current",
+      "category": "solenoid",
+      "group": "power_supply",
+      "n_probes": 1,
+      "mae_wb": 0.008525155794210383,
+      "boundary_error_cm": 2.035,
+      "boundary_shift_cm": 1.107,
+      "axis_shift_cm": 0.797,
+      "tier": "Tier 1: Safety-Critical",
+      "risk_assessment": "HIGH (Wall breach / disruption risk)"
+    },
+    {
+      "channel_id": "pickup_probe_ccbv",
+      "description": "Center column vertical B-field probes",
+      "category": "pickup_fields",
+      "group": "magnetics",
+      "n_probes": 8,
+      "mae_wb": 0.00781385235951607,
+      "boundary_error_cm": 1.865,
+      "boundary_shift_cm": 0.937,
+      "axis_shift_cm": 0.675,
+      "tier": "Tier 2: Plasma Shaping",
+      "risk_assessment": "MODERATE (Loss of elongation / triangularity control)"
+    },
+    {
+      "channel_id": "pickup_probe_obr",
+      "description": "Outer vessel radial B-field probes",
+      "category": "pickup_fields",
+      "group": "magnetics",
+      "n_probes": 6,
+      "mae_wb": 0.007235048481033396,
+      "boundary_error_cm": 1.727,
+      "boundary_shift_cm": 0.799,
+      "axis_shift_cm": 0.575,
+      "tier": "Tier 2: Plasma Shaping",
+      "risk_assessment": "MODERATE (Loss of elongation / triangularity control)"
+    },
+    {
+      "channel_id": "pickup_probe_obv",
+      "description": "Outer vessel vertical B-field probes",
+      "category": "pickup_fields",
+      "group": "magnetics",
+      "n_probes": 6,
+      "mae_wb": 0.007235048481033396,
+      "boundary_error_cm": 1.727,
+      "boundary_shift_cm": 0.799,
+      "axis_shift_cm": 0.575,
+      "tier": "Tier 2: Plasma Shaping",
+      "risk_assessment": "MODERATE (Loss of elongation / triangularity control)"
+    },
+    {
+      "channel_id": "active_coils_p3_p6",
+      "description": "Divertor shaping coils P3-P6",
+      "category": "active_coils",
+      "group": "power_supply",
+      "n_probes": 4,
+      "mae_wb": 0.005929551699453332,
+      "boundary_error_cm": 1.415,
+      "boundary_shift_cm": 0.487,
+      "axis_shift_cm": 0.351,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "active_coils_p1_p2",
+      "description": "Poloidal shaping coils P1/P2",
+      "category": "active_coils",
+      "group": "power_supply",
+      "n_probes": 2,
+      "mae_wb": 0.005701492018705127,
+      "boundary_error_cm": 1.361,
+      "boundary_shift_cm": 0.433,
+      "axis_shift_cm": 0.312,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "flux_loop_divertor",
+      "description": "Upper/lower divertor flux loops",
+      "category": "flux_loop",
+      "group": "magnetics",
+      "n_probes": 5,
+      "mae_wb": 0.005474957872031948,
+      "boundary_error_cm": 1.307,
+      "boundary_shift_cm": 0.379,
+      "axis_shift_cm": 0.273,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "plasma_current_ip",
+      "description": "Rogowski coil total plasma current",
+      "category": "plasma_current",
+      "group": "summary",
+      "n_probes": 1,
+      "mae_wb": 0.005419936265878465,
+      "boundary_error_cm": 1.294,
+      "boundary_shift_cm": 0.366,
+      "axis_shift_cm": 0.263,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "flux_loop_midplane",
+      "description": "Wall midplane flux loops",
+      "category": "flux_loop",
+      "group": "magnetics",
+      "n_probes": 5,
+      "mae_wb": 0.005264382569261488,
+      "boundary_error_cm": 1.257,
+      "boundary_shift_cm": 0.329,
+      "axis_shift_cm": 0.237,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "flux_loop_vessel",
+      "description": "Outboard vessel wall flux loops",
+      "category": "flux_loop",
+      "group": "magnetics",
+      "n_probes": 5,
+      "mae_wb": 0.005264382569261488,
+      "boundary_error_cm": 1.257,
+      "boundary_shift_cm": 0.329,
+      "axis_shift_cm": 0.237,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    },
+    {
+      "channel_id": "saddle_voltage",
+      "description": "Toroidal saddle loop voltages",
+      "category": "saddle_voltage",
+      "group": "magnetics",
+      "n_probes": 4,
+      "mae_wb": 0.003911470961237391,
+      "boundary_error_cm": 0.934,
+      "boundary_shift_cm": 0.006,
+      "axis_shift_cm": 0.004,
+      "tier": "Tier 3: Auxiliary / Redundant",
+      "risk_assessment": "LOW (Safe to impute or drop)"
+    }
+  ],
+  "minimal_sensor_set": {
+    "safety_threshold_cm": 2.0,
+    "initial_probes": 47,
+    "minimal_probes": 25,
+    "sensor_reduction_pct": 46.8,
+    "final_boundary_error_cm": 1.866,
+    "retained_channels": [
+      "solenoid_current",
+      "pickup_probe_ccbv",
+      "pickup_probe_obr",
+      "pickup_probe_obv",
+      "active_coils_p3_p6"
+    ],
+    "removed_channels": [
+      "saddle_voltage",
+      "flux_loop_midplane",
+      "flux_loop_vessel",
+      "plasma_current_ip",
+      "flux_loop_divertor",
+      "active_coils_p1_p2"
+    ],
+    "elimination_curve": [
+      {
+        "step": 0,
+        "removed_channel": "None (Full Diagnostic Set)",
+        "remaining_probes": 47,
+        "fraction_retained": 1.0,
+        "estimated_boundary_error_cm": 0.92,
+        "status": "SAFE"
+      },
+      {
+        "step": 1,
+        "removed_channel": "saddle_voltage (4 probes)",
+        "remaining_probes": 43,
+        "fraction_retained": 0.915,
+        "estimated_boundary_error_cm": 1.04,
+        "status": "SAFE"
+      },
+      {
+        "step": 2,
+        "removed_channel": "flux_loop_midplane (5 probes)",
+        "remaining_probes": 38,
+        "fraction_retained": 0.809,
+        "estimated_boundary_error_cm": 1.188,
+        "status": "SAFE"
+      },
+      {
+        "step": 3,
+        "removed_channel": "flux_loop_vessel (5 probes)",
+        "remaining_probes": 33,
+        "fraction_retained": 0.702,
+        "estimated_boundary_error_cm": 1.336,
+        "status": "SAFE"
+      },
+      {
+        "step": 4,
+        "removed_channel": "plasma_current_ip (1 probes)",
+        "remaining_probes": 32,
+        "fraction_retained": 0.681,
+        "estimated_boundary_error_cm": 1.501,
+        "status": "SAFE"
+      },
+      {
+        "step": 5,
+        "removed_channel": "flux_loop_divertor (5 probes)",
+        "remaining_probes": 27,
+        "fraction_retained": 0.574,
+        "estimated_boundary_error_cm": 1.671,
+        "status": "SAFE"
+      },
+      {
+        "step": 6,
+        "removed_channel": "active_coils_p1_p2 (2 probes)",
+        "remaining_probes": 25,
+        "fraction_retained": 0.532,
+        "estimated_boundary_error_cm": 1.866,
+        "status": "SAFE"
+      }
+    ]
+  },
+  "figures": {
+    "spatial_error_heatmaps": "results/robustness/figures\\spatial_error_propagation_heatmaps.png",
+    "minimal_sensor_curve": "results/robustness/figures\\minimal_sensor_set_curve.png"
+  }
+}

@@ -1,0 +1,24 @@
+local: false
+
+get_shots_settings:
+  max_index: 100  # If empty, all available shots are used.
+  shuffle: false  # If true, shuffling is done before selection of subset of shot IDs.
+  seed: 42
+
+store_manager_settings:  # To override default values in `src.MAST_tools.store_utils.MASTStorageManager.__init__`:
+  base_local_zarr_path: /mast/tokamark/v1  # REMARK: Only relevant when `local` above is true.
+
+dataloader_settings:
+  batch_size: 8
+  num_workers: 0
+
+mast_dataset_init_settings:
+  use_std_scaling: true
+  remove_outliers: true
+
+tokamark_dataset_init_settings:
+  test_mode: true
+  shuffle_windows: false
+
+paths:
+  output_dir: ../output/test_pipeline  # -> If results need to be saved, use this dir.

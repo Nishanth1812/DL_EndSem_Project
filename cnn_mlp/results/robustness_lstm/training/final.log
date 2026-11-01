@@ -1,0 +1,239 @@
+task_1-3, random split, lstm: train 558, val 70, test 70 shots
+[final] training_args {'lr': 0.0001, 'max_steps': 10000000, 'max_epochs': 100, 'patience': 3} batch_size 512
+Number of available CPU cores: 4
+
+Shots: train 558, val 70, test 70 (split file: /tmp/proj/data/shots_random.csv)
+[INFO] Local Zarr database identified under `data` with 698 Zarr files in it.
+[INFO] Local Zarr database identified under `data` with 698 Zarr files in it.
+0
+25148
+[(1, 1, 1, 65, 65)]
+===============================================================================================
+Layer (type:depth-idx)                        Output Shape              Param #
+===============================================================================================
+LSTM_v3                                       [2, 1, 65, 65]            16
+├─ModuleList: 1-1                             --                        --
+│    └─Conv2DEncoder: 2-1                     [2, 16]                   --
+│    │    └─Sequential: 3-1                   --                        6,002
+│    │    └─Linear: 3-2                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-2                     [2, 16]                   --
+│    │    └─Sequential: 3-3                   --                        6,002
+│    │    └─Linear: 3-4                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-3                     [2, 16]                   --
+│    │    └─Sequential: 3-5                   --                        6,002
+│    │    └─Linear: 3-6                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-4                     [2, 16]                   --
+│    │    └─Sequential: 3-7                   --                        6,002
+│    │    └─Linear: 3-8                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-5                     [2, 16]                   --
+│    │    └─Sequential: 3-9                   --                        6,002
+│    │    └─Linear: 3-10                      [2, 16]                   1,040
+│    └─Conv2DEncoder: 2-6                     [2, 16]                   --
+│    │    └─Sequential: 3-11                  --                        6,002
+│    │    └─Linear: 3-12                      [2, 16]                   528
+│    └─Conv1DEncoder: 2-7                     [2, 16]                   --
+│    │    └─Sequential: 3-13                  --                        2,114
+│    │    └─Linear: 3-14                      [2, 16]                   528
+│    └─Conv1DEncoder: 2-8                     [2, 16]                   --
+│    │    └─Sequential: 3-15                  --                        2,114
+│    │    └─Linear: 3-16                      [2, 16]                   528
+├─LSTM: 1-2                                   [2, 1, 16]                13,696
+├─LSTM: 1-3                                   [2, 1, 16]                6,528
+├─ModuleList: 1-4                             --                        --
+│    └─Conv3DDecoder: 2-9                     [2, 1, 1, 65, 65]         --
+│    │    └─Linear: 3-17                      [2, 288]                  4,896
+│    │    └─Sequential: 3-18                  --                        17,569
+===============================================================================================
+Total params: 87,681
+Trainable params: 87,681
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 14.87
+===============================================================================================
+Input size (MB): 0.04
+Forward/backward pass size (MB): 0.62
+Params size (MB): 0.35
+Estimated Total Size (MB): 1.01
+===============================================================================================
+DataParallel over 2 GPUs
+First epoch: {'train_samples': 37888, 'train_unique_shots': 522, 'val_samples': 4954, 'val_unique_shots': 66}
+=== Epoch 1/100 | step 74 | train_loss=1.0561 | val_loss=0.9161 | gap=-0.1400
+    saved best_model.pt (val_loss 0.9161)
+Epoch 2 | step 100 | train_loss=1.1715
+=== Epoch 2/100 | step 148 | train_loss=0.9226 | val_loss=0.7848 | gap=-0.1378
+    saved best_model.pt (val_loss 0.7848)
+Epoch 3 | step 200 | train_loss=0.8620
+=== Epoch 3/100 | step 222 | train_loss=0.7893 | val_loss=0.6372 | gap=-0.1521
+    saved best_model.pt (val_loss 0.6372)
+=== Epoch 4/100 | step 296 | train_loss=0.6358 | val_loss=0.4837 | gap=-0.1521
+    saved best_model.pt (val_loss 0.4837)
+Epoch 5 | step 300 | train_loss=0.5061
+=== Epoch 5/100 | step 370 | train_loss=0.5041 | val_loss=0.3732 | gap=-0.1309
+    saved best_model.pt (val_loss 0.3732)
+Epoch 6 | step 400 | train_loss=0.5961
+=== Epoch 6/100 | step 444 | train_loss=0.4095 | val_loss=0.2950 | gap=-0.1145
+    saved best_model.pt (val_loss 0.2950)
+Epoch 7 | step 500 | train_loss=0.3872
+=== Epoch 7/100 | step 518 | train_loss=0.3424 | val_loss=0.2343 | gap=-0.1081
+    saved best_model.pt (val_loss 0.2343)
+=== Epoch 8/100 | step 592 | train_loss=0.2930 | val_loss=0.1951 | gap=-0.0979
+    saved best_model.pt (val_loss 0.1951)
+Epoch 9 | step 600 | train_loss=0.2829
+=== Epoch 9/100 | step 666 | train_loss=0.2588 | val_loss=0.1638 | gap=-0.0950
+    saved best_model.pt (val_loss 0.1638)
+Epoch 10 | step 700 | train_loss=0.3800
+=== Epoch 10/100 | step 740 | train_loss=0.2359 | val_loss=0.1425 | gap=-0.0933
+    saved best_model.pt (val_loss 0.1425)
+Epoch 11 | step 800 | train_loss=0.2488
+=== Epoch 11/100 | step 814 | train_loss=0.2199 | val_loss=0.1320 | gap=-0.0879
+    saved best_model.pt (val_loss 0.1320)
+=== Epoch 12/100 | step 888 | train_loss=0.2100 | val_loss=0.1264 | gap=-0.0835
+    saved best_model.pt (val_loss 0.1264)
+Epoch 13 | step 900 | train_loss=0.1608
+=== Epoch 13/100 | step 962 | train_loss=0.2025 | val_loss=0.1212 | gap=-0.0813
+    saved best_model.pt (val_loss 0.1212)
+Epoch 14 | step 1000 | train_loss=0.3025
+=== Epoch 14/100 | step 1036 | train_loss=0.1969 | val_loss=0.1166 | gap=-0.0802
+    saved best_model.pt (val_loss 0.1166)
+Epoch 15 | step 1100 | train_loss=0.2114
+=== Epoch 15/100 | step 1110 | train_loss=0.1929 | val_loss=0.1163 | gap=-0.0766
+    saved best_model.pt (val_loss 0.1163)
+=== Epoch 16/100 | step 1184 | train_loss=0.1883 | val_loss=0.1129 | gap=-0.0754
+    saved best_model.pt (val_loss 0.1129)
+Epoch 17 | step 1200 | train_loss=0.1317
+=== Epoch 17/100 | step 1258 | train_loss=0.1832 | val_loss=0.1188 | gap=-0.0644
+    val_loss did not improve (1/3); best 0.1129
+Epoch 18 | step 1300 | train_loss=0.2676
+=== Epoch 18/100 | step 1332 | train_loss=0.1789 | val_loss=0.0954 | gap=-0.0835
+    saved best_model.pt (val_loss 0.0954)
+Epoch 19 | step 1400 | train_loss=0.1883
+=== Epoch 19/100 | step 1406 | train_loss=0.1782 | val_loss=0.1008 | gap=-0.0774
+    val_loss did not improve (1/3); best 0.0954
+=== Epoch 20/100 | step 1480 | train_loss=0.1755 | val_loss=0.0986 | gap=-0.0768
+    val_loss did not improve (2/3); best 0.0954
+Epoch 21 | step 1500 | train_loss=0.1087
+=== Epoch 21/100 | step 1554 | train_loss=0.1754 | val_loss=0.0921 | gap=-0.0833
+    saved best_model.pt (val_loss 0.0921)
+Epoch 22 | step 1600 | train_loss=0.2403
+=== Epoch 22/100 | step 1628 | train_loss=0.1717 | val_loss=0.0927 | gap=-0.0790
+    val_loss did not improve (1/3); best 0.0921
+Epoch 23 | step 1700 | train_loss=0.1721
+=== Epoch 23/100 | step 1702 | train_loss=0.1691 | val_loss=0.0869 | gap=-0.0822
+    saved best_model.pt (val_loss 0.0869)
+=== Epoch 24/100 | step 1776 | train_loss=0.1701 | val_loss=0.0842 | gap=-0.0859
+    saved best_model.pt (val_loss 0.0842)
+Epoch 25 | step 1800 | train_loss=0.1013
+=== Epoch 25/100 | step 1850 | train_loss=0.1663 | val_loss=0.0854 | gap=-0.0808
+    val_loss did not improve (1/3); best 0.0842
+Epoch 26 | step 1900 | train_loss=0.2219
+=== Epoch 26/100 | step 1924 | train_loss=0.1672 | val_loss=0.0811 | gap=-0.0861
+    saved best_model.pt (val_loss 0.0811)
+=== Epoch 27/100 | step 1998 | train_loss=0.1652 | val_loss=0.0833 | gap=-0.0819
+    val_loss did not improve (1/3); best 0.0811
+Epoch 28 | step 2000 | train_loss=0.0758
+=== Epoch 28/100 | step 2072 | train_loss=0.1624 | val_loss=0.0774 | gap=-0.0850
+    saved best_model.pt (val_loss 0.0774)
+Epoch 29 | step 2100 | train_loss=0.3333
+=== Epoch 29/100 | step 2146 | train_loss=0.1628 | val_loss=0.0772 | gap=-0.0856
+    saved best_model.pt (val_loss 0.0772)
+Epoch 30 | step 2200 | train_loss=0.2059
+=== Epoch 30/100 | step 2220 | train_loss=0.1633 | val_loss=0.0784 | gap=-0.0850
+    val_loss did not improve (1/3); best 0.0772
+=== Epoch 31/100 | step 2294 | train_loss=0.1600 | val_loss=0.0752 | gap=-0.0848
+    saved best_model.pt (val_loss 0.0752)
+Epoch 32 | step 2300 | train_loss=0.0674
+=== Epoch 32/100 | step 2368 | train_loss=0.1590 | val_loss=0.0756 | gap=-0.0834
+    val_loss did not improve (1/3); best 0.0752
+Epoch 33 | step 2400 | train_loss=0.2964
+=== Epoch 33/100 | step 2442 | train_loss=0.1581 | val_loss=0.0739 | gap=-0.0843
+    saved best_model.pt (val_loss 0.0739)
+Epoch 34 | step 2500 | train_loss=0.1902
+=== Epoch 34/100 | step 2516 | train_loss=0.1602 | val_loss=0.0737 | gap=-0.0865
+    saved best_model.pt (val_loss 0.0737)
+=== Epoch 35/100 | step 2590 | train_loss=0.1571 | val_loss=0.0739 | gap=-0.0831
+    val_loss did not improve (1/3); best 0.0737
+Epoch 36 | step 2600 | train_loss=0.0770
+=== Epoch 36/100 | step 2664 | train_loss=0.1566 | val_loss=0.0746 | gap=-0.0820
+    val_loss did not improve (2/3); best 0.0737
+Epoch 37 | step 2700 | train_loss=0.0836
+=== Epoch 37/100 | step 2738 | train_loss=0.1558 | val_loss=0.0717 | gap=-0.0841
+    saved best_model.pt (val_loss 0.0717)
+Epoch 38 | step 2800 | train_loss=0.1783
+=== Epoch 38/100 | step 2812 | train_loss=0.1567 | val_loss=0.0717 | gap=-0.0850
+    val_loss did not improve (1/3); best 0.0717
+=== Epoch 39/100 | step 2886 | train_loss=0.1594 | val_loss=0.0732 | gap=-0.0862
+    val_loss did not improve (2/3); best 0.0717
+Epoch 40 | step 2900 | train_loss=0.1044
+=== Epoch 40/100 | step 2960 | train_loss=0.1549 | val_loss=0.0707 | gap=-0.0842
+    saved best_model.pt (val_loss 0.0707)
+Epoch 41 | step 3000 | train_loss=0.2431
+=== Epoch 41/100 | step 3034 | train_loss=0.1544 | val_loss=0.0716 | gap=-0.0828
+    val_loss did not improve (1/3); best 0.0707
+Epoch 42 | step 3100 | train_loss=0.1621
+=== Epoch 42/100 | step 3108 | train_loss=0.1502 | val_loss=0.0725 | gap=-0.0776
+    val_loss did not improve (2/3); best 0.0707
+=== Epoch 43/100 | step 3182 | train_loss=0.1554 | val_loss=0.0721 | gap=-0.0833
+    val_loss did not improve (3/3); best 0.0707
+Early stopping: no improvement for 3 epochs.
+training finished; evaluating /kaggle/working/out/best_model.pt on 70 test shots
+Number of available CPU cores: 4
+
+23
+[INFO] Local Zarr database identified under `data` with 698 Zarr files in it.
+0
+26784
+[(1, 1, 1, 65, 65)]
+===============================================================================================
+Layer (type:depth-idx)                        Output Shape              Param #
+===============================================================================================
+LSTM_v3                                       [2, 1, 65, 65]            16
+├─ModuleList: 1-1                             --                        --
+│    └─Conv2DEncoder: 2-1                     [2, 16]                   --
+│    │    └─Sequential: 3-1                   --                        6,002
+│    │    └─Linear: 3-2                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-2                     [2, 16]                   --
+│    │    └─Sequential: 3-3                   --                        6,002
+│    │    └─Linear: 3-4                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-3                     [2, 16]                   --
+│    │    └─Sequential: 3-5                   --                        6,002
+│    │    └─Linear: 3-6                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-4                     [2, 16]                   --
+│    │    └─Sequential: 3-7                   --                        6,002
+│    │    └─Linear: 3-8                       [2, 16]                   528
+│    └─Conv2DEncoder: 2-5                     [2, 16]                   --
+│    │    └─Sequential: 3-9                   --                        6,002
+│    │    └─Linear: 3-10                      [2, 16]                   1,040
+│    └─Conv2DEncoder: 2-6                     [2, 16]                   --
+│    │    └─Sequential: 3-11                  --                        6,002
+│    │    └─Linear: 3-12                      [2, 16]                   528
+│    └─Conv1DEncoder: 2-7                     [2, 16]                   --
+│    │    └─Sequential: 3-13                  --                        2,114
+│    │    └─Linear: 3-14                      [2, 16]                   528
+│    └─Conv1DEncoder: 2-8                     [2, 16]                   --
+│    │    └─Sequential: 3-15                  --                        2,114
+│    │    └─Linear: 3-16                      [2, 16]                   528
+├─LSTM: 1-2                                   [2, 1, 16]                13,696
+├─LSTM: 1-3                                   [2, 1, 16]                6,528
+├─ModuleList: 1-4                             --                        --
+│    └─Conv3DDecoder: 2-9                     [2, 1, 1, 65, 65]         --
+│    │    └─Linear: 3-17                      [2, 288]                  4,896
+│    │    └─Sequential: 3-18                  --                        17,569
+===============================================================================================
+Total params: 87,681
+Trainable params: 87,681
+Non-trainable params: 0
+Total mult-adds (Units.MEGABYTES): 14.87
+===============================================================================================
+Input size (MB): 0.04
+Forward/backward pass size (MB): 0.62
+Params size (MB): 0.35
+Estimated Total Size (MB): 1.01
+===============================================================================================
+in cnn_unstd_evaluation_per_shot
+eval batch 0
+eval batch 20
+eval batch 40
+💅🏼 UNSTD Evaluation done. RMSEs and MSEs saved (incrementally).
+saved /tmp/proj/external/tokamark_baseline/../../runs/_links/final/random/lstm/task_1-3/seed_23/prediction.png
+outputs in /kaggle/working/out: best_model.pt, config.yaml, final.log, first_epoch_stats.pt, last.pt, loss_curve.png, prediction.png, shots_random.csv, task_metrics.csv, training_history.pt, windows_metrics.csv
+ n_shots  NRMSE_mean  NRMSE_std_pop
+    66.0    0.196856       0.115334

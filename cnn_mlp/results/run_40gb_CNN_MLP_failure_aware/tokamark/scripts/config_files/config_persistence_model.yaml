@@ -1,0 +1,28 @@
+local: false
+
+get_shots_settings:
+  max_index:        # If empty, all available shots are used.
+  shuffle: false    # If true, shuffling is done before selection of subset of shot IDs.
+  seed: 42
+
+# User-defined settings to override default values in `src.MAST_tools.store_utils.MASTStorageManager.__init__`:
+store_manager_settings:
+  base_local_zarr_path: /mast/tokamark/v1  # REMARK: Only relevant when `local` above is true.
+
+dataloader_settings:
+  batch_size: 10  # 4
+  num_workers: 10  # 0
+
+persistence_settings:
+  model: persistence
+  compute_summary_metrics: true
+  save_windows_metrics: false
+  save_task_metrics: true
+  output_dir: ../output/persistence
+  ar_tasks:  # REMARK: From the persistence point of view, tasks "task_4-1" and "task_4-2" are identical to "task_3-2".
+    - task_3-1
+    - task_3-2
+    - task_4-1
+    - task_4-2
+    - task_4-4
+    - task_4-5
