@@ -1,0 +1,685 @@
+{
+ "config": {
+  "scenarios": [
+   "random_dropout",
+   "channel_ablation",
+   "category_abl",
+   "temporal_gap",
+   "group_failure",
+   "disruption_proximate"
+  ],
+  "imputes": [
+   "zero",
+   "mean",
+   "ffill"
+  ],
+  "seed": 42,
+  "clean_only": false,
+  "batch": 512
+ },
+ "tasks": [
+  {
+   "id": "random_dropout|0.1|zero",
+   "scenario": "random_dropout",
+   "severity": 0.1,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.1|mean",
+   "scenario": "random_dropout",
+   "severity": 0.1,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.1|ffill",
+   "scenario": "random_dropout",
+   "severity": 0.1,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.25|zero",
+   "scenario": "random_dropout",
+   "severity": 0.25,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.25|mean",
+   "scenario": "random_dropout",
+   "severity": 0.25,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.25|ffill",
+   "scenario": "random_dropout",
+   "severity": 0.25,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.5|zero",
+   "scenario": "random_dropout",
+   "severity": 0.5,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.5|mean",
+   "scenario": "random_dropout",
+   "severity": 0.5,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "random_dropout|0.5|ffill",
+   "scenario": "random_dropout",
+   "severity": 0.5,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|1|zero",
+   "scenario": "channel_ablation",
+   "severity": 1,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|1|mean",
+   "scenario": "channel_ablation",
+   "severity": 1,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|1|ffill",
+   "scenario": "channel_ablation",
+   "severity": 1,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|3|zero",
+   "scenario": "channel_ablation",
+   "severity": 3,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|3|mean",
+   "scenario": "channel_ablation",
+   "severity": 3,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|3|ffill",
+   "scenario": "channel_ablation",
+   "severity": 3,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|6|zero",
+   "scenario": "channel_ablation",
+   "severity": 6,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|6|mean",
+   "scenario": "channel_ablation",
+   "severity": 6,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "channel_ablation|6|ffill",
+   "scenario": "channel_ablation",
+   "severity": 6,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "category_abl|flux_loop|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "flux_loop",
+   "chans": [
+    0
+   ]
+  },
+  {
+   "id": "category_abl|pickup_fields|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "pickup_fields",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "category_abl|saddle_voltage|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "saddle_voltage",
+   "chans": [
+    4
+   ]
+  },
+  {
+   "id": "category_abl|active_coils|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "active_coils",
+   "chans": [
+    5
+   ]
+  },
+  {
+   "id": "category_abl|solenoid|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "solenoid",
+   "chans": [
+    6
+   ]
+  },
+  {
+   "id": "category_abl|plasma_current|zero",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "zero",
+   "group": "plasma_current",
+   "chans": [
+    7
+   ]
+  },
+  {
+   "id": "category_abl|flux_loop|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "flux_loop",
+   "chans": [
+    0
+   ]
+  },
+  {
+   "id": "category_abl|pickup_fields|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "pickup_fields",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "category_abl|saddle_voltage|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "saddle_voltage",
+   "chans": [
+    4
+   ]
+  },
+  {
+   "id": "category_abl|active_coils|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "active_coils",
+   "chans": [
+    5
+   ]
+  },
+  {
+   "id": "category_abl|solenoid|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "solenoid",
+   "chans": [
+    6
+   ]
+  },
+  {
+   "id": "category_abl|plasma_current|mean",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "mean",
+   "group": "plasma_current",
+   "chans": [
+    7
+   ]
+  },
+  {
+   "id": "category_abl|flux_loop|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "flux_loop",
+   "chans": [
+    0
+   ]
+  },
+  {
+   "id": "category_abl|pickup_fields|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "pickup_fields",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "category_abl|saddle_voltage|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "saddle_voltage",
+   "chans": [
+    4
+   ]
+  },
+  {
+   "id": "category_abl|active_coils|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "active_coils",
+   "chans": [
+    5
+   ]
+  },
+  {
+   "id": "category_abl|solenoid|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "solenoid",
+   "chans": [
+    6
+   ]
+  },
+  {
+   "id": "category_abl|plasma_current|ffill",
+   "scenario": "category_abl",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "plasma_current",
+   "chans": [
+    7
+   ]
+  },
+  {
+   "id": "temporal_gap|0.2|zero",
+   "scenario": "temporal_gap",
+   "severity": 0.2,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.2|mean",
+   "scenario": "temporal_gap",
+   "severity": 0.2,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.2|ffill",
+   "scenario": "temporal_gap",
+   "severity": 0.2,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.4|zero",
+   "scenario": "temporal_gap",
+   "severity": 0.4,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.4|mean",
+   "scenario": "temporal_gap",
+   "severity": 0.4,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.4|ffill",
+   "scenario": "temporal_gap",
+   "severity": 0.4,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.6|zero",
+   "scenario": "temporal_gap",
+   "severity": 0.6,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.6|mean",
+   "scenario": "temporal_gap",
+   "severity": 0.6,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "temporal_gap|0.6|ffill",
+   "scenario": "temporal_gap",
+   "severity": 0.6,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "group_failure|magnetic_probes|zero",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "zero",
+   "group": "magnetic_probes",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "group_failure|power_supply|zero",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "zero",
+   "group": "power_supply",
+   "chans": [
+    5,
+    6
+   ]
+  },
+  {
+   "id": "group_failure|magnetics_all|zero",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "zero",
+   "group": "magnetics_all",
+   "chans": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "group_failure|magnetic_probes|mean",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "mean",
+   "group": "magnetic_probes",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "group_failure|power_supply|mean",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "mean",
+   "group": "power_supply",
+   "chans": [
+    5,
+    6
+   ]
+  },
+  {
+   "id": "group_failure|magnetics_all|mean",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "mean",
+   "group": "magnetics_all",
+   "chans": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "group_failure|magnetic_probes|ffill",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "magnetic_probes",
+   "chans": [
+    1,
+    2,
+    3
+   ]
+  },
+  {
+   "id": "group_failure|power_supply|ffill",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "power_supply",
+   "chans": [
+    5,
+    6
+   ]
+  },
+  {
+   "id": "group_failure|magnetics_all|ffill",
+   "scenario": "group_failure",
+   "severity": 1,
+   "impute": "ffill",
+   "group": "magnetics_all",
+   "chans": [
+    0,
+    1,
+    2,
+    3,
+    4
+   ]
+  },
+  {
+   "id": "disruption_proximate|0.1|zero",
+   "scenario": "disruption_proximate",
+   "severity": 0.1,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.1|mean",
+   "scenario": "disruption_proximate",
+   "severity": 0.1,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.1|ffill",
+   "scenario": "disruption_proximate",
+   "severity": 0.1,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.25|zero",
+   "scenario": "disruption_proximate",
+   "severity": 0.25,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.25|mean",
+   "scenario": "disruption_proximate",
+   "severity": 0.25,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.25|ffill",
+   "scenario": "disruption_proximate",
+   "severity": 0.25,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.5|zero",
+   "scenario": "disruption_proximate",
+   "severity": 0.5,
+   "impute": "zero",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.5|mean",
+   "scenario": "disruption_proximate",
+   "severity": 0.5,
+   "impute": "mean",
+   "group": null,
+   "chans": null
+  },
+  {
+   "id": "disruption_proximate|0.5|ffill",
+   "scenario": "disruption_proximate",
+   "severity": 0.5,
+   "impute": "ffill",
+   "group": null,
+   "chans": null
+  }
+ ],
+ "signals": [
+  "magnetics/flux_loop_flux",
+  "magnetics/b_field_pol_probe_ccbv_field",
+  "magnetics/b_field_pol_probe_obr_field",
+  "magnetics/b_field_pol_probe_obv_field",
+  "magnetics/b_field_tor_probe_saddle_voltage",
+  "pf_active/coil_current",
+  "pf_active/solenoid_current",
+  "summary/ip"
+ ],
+ "categories": {
+  "flux_loop": [
+   0
+  ],
+  "pickup_fields": [
+   1,
+   2,
+   3
+  ],
+  "saddle_voltage": [
+   4
+  ],
+  "active_coils": [
+   5
+  ],
+  "solenoid": [
+   6
+  ],
+  "plasma_current": [
+   7
+  ]
+ },
+ "correlated_groups": {
+  "magnetic_probes": [
+   1,
+   2,
+   3
+  ],
+  "power_supply": [
+   5,
+   6
+  ],
+  "magnetics_all": [
+   0,
+   1,
+   2,
+   3,
+   4
+  ]
+ },
+ "severities": {
+  "random_dropout": [
+   0.1,
+   0.25,
+   0.5
+  ],
+  "channel_ablation": [
+   1,
+   3,
+   6
+  ],
+  "category_abl": [
+   1
+  ],
+  "temporal_gap": [
+   0.2,
+   0.4,
+   0.6
+  ],
+  "group_failure": [
+   1
+  ],
+  "disruption_proximate": [
+   0.1,
+   0.25,
+   0.5
+  ]
+ }
+}

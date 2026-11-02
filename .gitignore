@@ -11,3 +11,20 @@ __pycache__/
 *.pth
 *.ckpt
 out/
+
+# Allow cnn_mlp benchmark tables, reports, and publication figures
+!cnn_mlp/results/
+!cnn_mlp/results/*.md
+!cnn_mlp/results/*.tex
+!cnn_mlp/results/*.json
+!cnn_mlp/results/robustness/figures/
+!cnn_mlp/results/robustness/figures/*.png
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/*.md
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/*.json
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/*.png
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/results/
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/results/task_1-3/
+!cnn_mlp/results/run_40gb_CNN_MLP_failure_aware/out/random/results/task_1-3/*.csv

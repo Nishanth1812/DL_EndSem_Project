@@ -1,0 +1,31 @@
+task_name: task_3-2
+task_type: markovian
+
+sources_and_signals:
+  input_name: &input_keys
+    - [thomson_scattering, t_e]
+    - [thomson_scattering, n_e]
+    - [spectrometer_visible, filter_spectrometer_dalpha_voltage]  # Possible
+    - [soft_x_rays, horizontal_cam_lower]  # Possible
+    - [soft_x_rays, horizontal_cam_upper]
+
+  actuator_name: &actuator_keys
+    - [pulse_schedule, i_plasma]
+    - [pulse_schedule, n_e_line]
+    - [summary, power_nbi]
+    - [gas_injection, total_injected]
+
+  output_name: &output_keys
+    - [spectrometer_visible, filter_spectrometer_dalpha_voltage]
+    - [soft_x_rays, horizontal_cam_lower]
+    - [soft_x_rays, horizontal_cam_upper]
+
+task_window_segmenter:
+  input_keys: *input_keys
+  actuator_keys: *actuator_keys
+  output_keys: *output_keys
+  input_length: 0.005
+  output_length: 0.050
+  delta: 0  # This is forecasting
+
+stride_window: 0.001
