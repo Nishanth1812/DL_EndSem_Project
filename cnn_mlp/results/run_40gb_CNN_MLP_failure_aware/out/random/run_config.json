@@ -1,0 +1,48 @@
+{
+ "task": "task_1-3",
+ "split": "random",
+ "seed": 23,
+ "batch_size": 512,
+ "lr": 0.0001,
+ "weight_decay": 0.0001,
+ "max_steps": 10000000,
+ "validate_every": 100,
+ "patience": 10,
+ "train_deadline_h": 7.0,
+ "use_dp": "auto",
+ "failure_aware": true,
+ "fail_aug_p": 0.5,
+ "pinn_lambda": 0.1,
+ "git_revs": "tokamark@1a200f4,tokamark_baseline@1e7c489",
+ "shots": {
+  "train": 606,
+  "val": 74,
+  "test": 60
+ },
+ "report": {
+  "train": {
+   "official": 8963,
+   "in_archives": 1927,
+   "selected": 606,
+   "gb": 32.04,
+   "fraction_of_official": 0.0676,
+   "downloaded": 606
+  },
+  "val": {
+   "official": 1115,
+   "in_archives": 220,
+   "selected": 74,
+   "gb": 3.98,
+   "fraction_of_official": 0.0664,
+   "downloaded": 74
+  },
+  "test": {
+   "official": 1110,
+   "in_archives": 252,
+   "selected": 60,
+   "gb": 3.96,
+   "fraction_of_official": 0.0541,
+   "downloaded": 60
+  }
+ }
+}

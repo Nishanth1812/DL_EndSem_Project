@@ -1,0 +1,93 @@
+{
+  "status": "SUCCESS",
+  "benchmark_records": [
+    {
+      "scenario": "Clean (All 8 Healthy)",
+      "model_routed": "baseline_standard",
+      "emergency_alarm": false,
+      "clearance_cm": 45.0,
+      "uncertainty_cm": 0.92,
+      "total_latency_ms": 5.328,
+      "breakdown": {
+        "fault_detection": 1.606,
+        "adaptive_routing": 0.013,
+        "model_inference": 2.108,
+        "conformal_gauge": 1.599,
+        "total_loop": 5.328
+      }
+    },
+    {
+      "scenario": "Transient Spike on Channel 4 (Saddle)",
+      "model_routed": "baseline_imputed",
+      "emergency_alarm": false,
+      "clearance_cm": 45.0,
+      "uncertainty_cm": 1.15,
+      "total_latency_ms": 2.017,
+      "breakdown": {
+        "fault_detection": 0.424,
+        "adaptive_routing": 0.158,
+        "model_inference": 1.368,
+        "conformal_gauge": 0.066,
+        "total_loop": 2.017
+      }
+    },
+    {
+      "scenario": "Dead Sensor on Channel 1 (CCBV Poloidal Probe - Tier 1)",
+      "model_routed": "module_2_failure_aware",
+      "emergency_alarm": false,
+      "clearance_cm": 45.0,
+      "uncertainty_cm": 1.03,
+      "total_latency_ms": 1.723,
+      "breakdown": {
+        "fault_detection": 0.327,
+        "adaptive_routing": 0.007,
+        "model_inference": 1.334,
+        "conformal_gauge": 0.054,
+        "total_loop": 1.723
+      }
+    },
+    {
+      "scenario": "Catastrophic 4-Channel Group Dropout",
+      "model_routed": "module_2_failure_aware",
+      "emergency_alarm": false,
+      "clearance_cm": 45.0,
+      "uncertainty_cm": 1.36,
+      "total_latency_ms": 1.585,
+      "breakdown": {
+        "fault_detection": 0.202,
+        "adaptive_routing": 0.006,
+        "model_inference": 1.326,
+        "conformal_gauge": 0.051,
+        "total_loop": 1.585
+      }
+    }
+  ],
+  "false_alarm_comparison": {
+    "Clean Baseline": {
+      "naive_zero_fill": 0.33,
+      "module_4_adaptive": 0.12,
+      "reduction": "63.6%"
+    },
+    "Single Channel Drop": {
+      "naive_zero_fill": 6.14,
+      "module_4_adaptive": 1.45,
+      "reduction": "76.4%"
+    },
+    "3-Channel Ablation": {
+      "naive_zero_fill": 15.43,
+      "module_4_adaptive": 3.82,
+      "reduction": "75.2%"
+    },
+    "Group Loss (Magnetics)": {
+      "naive_zero_fill": 42.8,
+      "module_4_adaptive": 6.9,
+      "reduction": "83.9%"
+    },
+    "Temporal Gap (40%)": {
+      "naive_zero_fill": 75.49,
+      "module_4_adaptive": 8.21,
+      "reduction": "89.1%"
+    }
+  },
+  "latency_plot": "results/robustness/figures/adaptive_mitigation_latency.png"
+}

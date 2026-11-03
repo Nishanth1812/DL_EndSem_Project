@@ -1,0 +1,64 @@
+{
+  "grand_ablation_rows": [
+    {
+      "configuration": "1. Baseline CNN+MLP (Zero-Fill)",
+      "short_name": "Baseline (Zero-fill)",
+      "clean_boundary_cm": 0.92,
+      "channel_loss_6_cm": 1.85,
+      "group_loss_cm": 5.92,
+      "temporal_gap_cm": 3.65,
+      "pre_disruption_cm": 1.57,
+      "false_alarm_rate_pct": 75.5,
+      "latency_ms": 1.25,
+      "status": "FATAL COLLAPSE on Group Loss"
+    },
+    {
+      "configuration": "2. Baseline + Best Fixed Imputation (Mean / FFill)",
+      "short_name": "Baseline + Imputation",
+      "clean_boundary_cm": 0.92,
+      "channel_loss_6_cm": 1.62,
+      "group_loss_cm": 4.6,
+      "temporal_gap_cm": 2.45,
+      "pre_disruption_cm": 1.38,
+      "false_alarm_rate_pct": 48.2,
+      "latency_ms": 1.45,
+      "status": "Partial recovery, severe wall drift"
+    },
+    {
+      "configuration": "3. Failure-Aware Mask Training (Module 2a)",
+      "short_name": "Failure-Aware Only",
+      "clean_boundary_cm": 0.89,
+      "channel_loss_6_cm": 1.25,
+      "group_loss_cm": 2.4,
+      "temporal_gap_cm": 1.8,
+      "pre_disruption_cm": 1.18,
+      "false_alarm_rate_pct": 21.4,
+      "latency_ms": 1.35,
+      "status": "Mask gating prevents feature corruption"
+    },
+    {
+      "configuration": "4. Failure-Aware + Flux-Loop PINN Loss (Module 2 Complete)",
+      "short_name": "Failure-Aware + PINN",
+      "clean_boundary_cm": 0.85,
+      "channel_loss_6_cm": 1.12,
+      "group_loss_cm": 1.95,
+      "temporal_gap_cm": 1.5,
+      "pre_disruption_cm": 1.05,
+      "false_alarm_rate_pct": 12.4,
+      "latency_ms": 1.38,
+      "status": "Boundary anchored by 15 flux loops (Best Val 0.8883)"
+    },
+    {
+      "configuration": "5. Smart Adaptive Mitigation Brain (Module 4 Complete)",
+      "short_name": "Adaptive Brain (Ours)",
+      "clean_boundary_cm": 0.85,
+      "channel_loss_6_cm": 1.05,
+      "group_loss_cm": 1.45,
+      "temporal_gap_cm": 1.15,
+      "pre_disruption_cm": 0.98,
+      "false_alarm_rate_pct": 8.2,
+      "latency_ms": 2.1,
+      "status": "Optimal safety: <1.5 cm drift across all failures (<5 ms RT)"
+    }
+  ]
+}

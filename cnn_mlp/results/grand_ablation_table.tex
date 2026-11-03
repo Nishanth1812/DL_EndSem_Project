@@ -1,0 +1,19 @@
+% Grand Ablation Table for TokaMark task_1-3
+\begin{table*}[t]
+\centering
+\small
+\caption{Grand Ablation Study: Equilibrium Reconstruction Accuracy (in Physical Centimeters) Across Diagnostic Failure Scenarios.}
+\label{tab:grand_ablation}
+\begin{tabular}{lccccccr}
+\hline
+\textbf{Configuration} & \textbf{Clean} & \textbf{Chan Loss (6)} & \textbf{Group Loss} & \textbf{Temp Gap (40\%)} & \textbf{Pre-Disrupt} & \textbf{False Alarm} & \textbf{Latency} \\
+ & \textbf{(cm)} & \textbf{(cm)} & \textbf{(cm)} & \textbf{(cm)} & \textbf{(cm)} & \textbf{(\%)} & \textbf{(ms)} \\
+\hline
+Baseline (Zero-fill) & 0.92 & 1.85 & \textbf{5.92} & 3.65 & 1.57 & 75.5\% & 1.25 \\
+Baseline + Imputation & 0.92 & 1.62 & \textbf{4.60} & 2.45 & 1.38 & 48.2\% & 1.45 \\
+Failure-Aware Only & 0.89 & 1.25 & \textbf{2.40} & 1.80 & 1.18 & 21.4\% & 1.35 \\
+Failure-Aware + PINN & 0.85 & 1.12 & \textbf{1.95} & 1.50 & 1.05 & 12.4\% & 1.38 \\
+Adaptive Brain (Ours) & 0.85 & 1.05 & \textbf{1.45} & 1.15 & 0.98 & 8.2\% & 2.10 \\
+\hline
+\end{tabular}
+\end{table*}

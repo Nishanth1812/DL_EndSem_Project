@@ -1,0 +1,17 @@
+data_splits_dir: /../../data
+dataloader_setting:
+  batch_size: 512
+  num_workers: 8
+local: true
+model_D: 8
+paths:
+  data_output_directory: /../../runs/_links/final
+shuffle: false
+store_manager_settings:
+  base_local_zarr_path: data
+subset_of_shots: null
+training_args:
+  lr: 0.0001
+  max_epochs: 100
+  max_steps: 10000000
+  patience: 3

@@ -1,0 +1,51 @@
+{
+ "stop_reason": "early stopping (official patience rule)",
+ "steps": 4200,
+ "epochs": 53,
+ "best_val": 0.8883468889342951,
+ "parallel": "single GPU (DataParallel not clearly faster)",
+ "cuda_oom_events": 0,
+ "data_errors": 0,
+ "duration_min": 194.4,
+ "model_dir": "/kaggle/working/out/random/model/",
+ "task": "task_1-3",
+ "split": "random",
+ "seed": 23,
+ "batch_size": 512,
+ "lr": 0.0001,
+ "weight_decay": 0.0001,
+ "validate_every": 100,
+ "patience": 10,
+ "git_revs": "tokamark@1a200f4,tokamark_baseline@1e7c489",
+ "shots": {
+  "train": 606,
+  "val": 74,
+  "test": 60
+ },
+ "report": {
+  "train": {
+   "official": 8963,
+   "in_archives": 1927,
+   "selected": 606,
+   "gb": 32.04,
+   "fraction_of_official": 0.0676,
+   "downloaded": 606
+  },
+  "val": {
+   "official": 1115,
+   "in_archives": 220,
+   "selected": 74,
+   "gb": 3.98,
+   "fraction_of_official": 0.0664,
+   "downloaded": 74
+  },
+  "test": {
+   "official": 1110,
+   "in_archives": 252,
+   "selected": 60,
+   "gb": 3.96,
+   "fraction_of_official": 0.0541,
+   "downloaded": 60
+  }
+ }
+}

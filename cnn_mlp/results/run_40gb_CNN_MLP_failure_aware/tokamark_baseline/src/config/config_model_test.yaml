@@ -1,0 +1,19 @@
+subset_of_shots: 8
+shuffle: false
+local: true
+
+store_manager_settings:
+  base_local_zarr_path: ./data  # REMARK: Only relevant when `local` above is true.
+
+dataloader_setting:
+  batch_size: 4
+  num_workers: 2 #16
+  # shuffle: True
+
+training_args:
+  lr: 0.0001
+  max_steps: 500
+  patience: 3
+
+paths:
+  data_output_directory: /output_test

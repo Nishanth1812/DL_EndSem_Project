@@ -1,0 +1,18 @@
+graft src
+
+# Include top-level docs/licensing
+include README.md
+include LICENSE
+include pyproject.toml
+
+# Include benchmark configs (non-code files) in sdist
+recursive-include src/benchmark/metadata *
+recursive-include src/benchmark/task_configs *
+
+# Keep private dirs out of sdist
+prune artifacts
+prune tests
+prune notebooks
+
+# Be tidy
+global-exclude *.pyc __pycache__/

@@ -1,0 +1,26 @@
+task_name: task_0
+task_type: markovian
+
+sources_and_signals:
+  input_name: &input_keys
+    - [equilibrium, x_point_r]
+
+  actuator_name: &actuator_keys
+    - [equilibrium, beta_tor]
+    - [equilibrium, beta_normal]
+
+  output_name: &output_keys
+    - [equilibrium, x_point_z]
+    - [magnetics, b_field_pol_probe_omv_voltage]
+    - [magnetics, b_field_tor_probe_cc_field]
+
+task_window_segmenter:
+  input_keys: *input_keys
+  actuator_keys: *actuator_keys
+  output_keys: *output_keys
+  input_length: 0.025
+  output_length: 0.005
+  delta: 0  # This is reconstruction, i.e., -delta = input_length = output_length
+  verbose: false
+
+stride_window: 0.001

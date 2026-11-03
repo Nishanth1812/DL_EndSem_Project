@@ -1,0 +1,53 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "tokamark"
+version = "0.1.0"
+description = "Data preprocessing and benchmarking tools for FAIR-MAST"
+readme = "README.md"
+requires-python = ">=3.10"
+license-files = ["LICENSE.md"]
+
+dependencies = [
+  "zarr==3.1.5",
+  "fsspec==2025.3.0",
+  "s3fs==2025.3.0",
+  "xarray",
+  "google_crc32c",
+  "matplotlib",
+  "notebook",
+  "opencv-python",
+  "tqdm",
+  "ipywidgets==8.1.8",
+  "jupyterlab-widgets==3.0.15",
+  "black",
+  "pyarrow",
+  "rich",
+  "torch",
+  "torchvision",
+  "numpy",
+  "scikit-learn",
+  "tensordict",
+  "tensorboard",
+  "optuna",
+  "seaborn",
+  "imageio",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pre-commit>=3.8",
+  "ruff>=0.6",
+]
+
+[tool.ruff]
+line-length = 120
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["MAST_tools*", "tokamark*"]

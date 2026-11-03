@@ -1,0 +1,27 @@
+task_name: task_3-1
+task_type: markovian
+
+sources_and_signals:
+  input_name: &input_keys
+    - [thomson_scattering, t_e]
+    - [thomson_scattering, n_e]
+
+  actuator_name: &actuator_keys
+    - [pulse_schedule, i_plasma]
+    - [pulse_schedule, n_e_line]
+    - [summary, power_nbi]
+    - [gas_injection, total_injected]
+
+  output_name: &output_keys
+    - [thomson_scattering, t_e]
+    - [thomson_scattering, n_e]
+
+task_window_segmenter:
+  input_keys: *input_keys
+  actuator_keys: *actuator_keys
+  output_keys: *output_keys
+  input_length: 0.005
+  output_length: 0.050
+  delta: 0  # This is forecasting
+
+stride_window: 0.001
