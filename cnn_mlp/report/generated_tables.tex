@@ -1,0 +1,121 @@
+\newcommand{\TrainTable}{%
+CNN+MLP, plain baseline$^{a}$ & 3\,500 / 44 & 154.9 & 0.8723 & 0.1419 & 0.00389 \\
+CNN+MLP, failure-aware (step loop) & 4\,200 / 53 & 194.4 & 0.8883 & 0.1590 & 0.00396 \\
+CNN+MLP, failure-aware (epoch loop)$^{b}$ & 4\,056 / 52 & 198.2 & 0.9025 & 0.1512 & 0.00418 \\
+CNN+LSTM, failure-aware (step loop) & 4\,200 / 53 & 190.2 & 0.9198 & 0.1680 & 0.00511 \\
+}
+\newcommand{\CleanTable}{%
+CNN+MLP & 0.1514 $\pm$ 0.1215 & 0.0762 & 0.00832 & 0.00419 & 3\,450 \\
+CNN+LSTM & 0.1681 $\pm$ 0.1036 & 0.0930 & 0.00923 & 0.00511 & 3\,450 \\
+}
+\newcommand{\RSTable}{%
+Random dropout & 2.247 & 0.07 & 0.878 & 0.19 \\
+Temporal gap & 0.904 & 0.17 & 0.615 & 0.27 \\
+Disruption-proximate & 0.486 & 0.31 & 0.449 & 0.37 \\
+Channel ablation & 0.341 & 0.44 & 0.316 & 0.53 \\
+Group failure & 0.263 & 0.58 & 0.262 & 0.64 \\
+Category ablation & 0.176 & 0.86 & 0.186 & 0.90 \\
+}
+\newcommand{\SweepTable}{%
+\texttt{category\_abl|active\_coils} & 0.1549 & 0.1699 & 0.978 & 0.989 \\
+\texttt{category\_abl|flux\_loop} & 0.1560 & 0.1762 & 0.970 & 0.954 \\
+\texttt{category\_abl|pickup\_fields} & 0.1757 & 0.1858 & 0.862 & 0.905 \\
+\texttt{category\_abl|plasma\_current} & 0.1530 & 0.1754 & 0.990 & 0.958 \\
+\texttt{category\_abl|saddle\_voltage} & 0.1440 & 0.1629 & 1.052 & 1.032 \\
+\texttt{category\_abl|solenoid} & 0.1563 & 0.1680 & 0.969 & 1.000 \\
+\texttt{channel\_ablation|1} & 0.1602 & 0.1760 & 0.945 & 0.955 \\
+\texttt{channel\_ablation|3} & 0.1928 & 0.2024 & 0.785 & 0.830 \\
+\texttt{channel\_ablation|6} & 0.3415 & 0.3158 & 0.443 & 0.532 \\
+\texttt{disruption\_proximate|0.1} & 0.2305 & 0.2090 & 0.657 & 0.804 \\
+\texttt{disruption\_proximate|0.25} & 0.2553 & 0.2135 & 0.593 & 0.787 \\
+\texttt{disruption\_proximate|0.5} & 0.4859 & 0.4488 & 0.312 & 0.375 \\
+\texttt{group\_failure|magnetic\_probes} & 0.1757 & 0.1858 & 0.862 & 0.905 \\
+\texttt{group\_failure|magnetics\_all} & 0.2626 & 0.2624 & 0.576 & 0.641 \\
+\texttt{group\_failure|power\_supply} & 0.1573 & 0.1704 & 0.962 & 0.987 \\
+\texttt{random\_dropout|0.1} & 0.9365 & 0.3602 & 0.162 & 0.467 \\
+\texttt{random\_dropout|0.25} & 1.5495 & 0.6125 & 0.098 & 0.274 \\
+\texttt{random\_dropout|0.5} & 2.2473 & 0.8776 & 0.067 & 0.192 \\
+\texttt{temporal\_gap|0.2} & 0.4577 & 0.2809 & 0.331 & 0.598 \\
+\texttt{temporal\_gap|0.4} & 0.5966 & 0.4100 & 0.254 & 0.410 \\
+\texttt{temporal\_gap|0.6} & 0.9039 & 0.6147 & 0.167 & 0.273 \\
+}
+\newcommand{\ImputeTable}{%
+Random dropout & CNN+MLP & 2.247 & 2.244 & 3.739 \\
+ & CNN+LSTM & 0.878 & 0.922 & 0.609 \\
+\midrule
+Temporal gap & CNN+MLP & 0.904 & 0.849 & 1.718 \\
+ & CNN+LSTM & 0.615 & 0.598 & 0.594 \\
+\midrule
+Disruption-proximate & CNN+MLP & 0.486 & 0.486 & 0.382 \\
+ & CNN+LSTM & 0.449 & 0.449 & 0.312 \\
+\midrule
+Channel ablation & CNN+MLP & 0.341 & 0.431 & 0.459 \\
+ & CNN+LSTM & 0.316 & 0.421 & 0.444 \\
+\midrule
+Group failure & CNN+MLP & 0.263 & 0.263 & 0.263 \\
+ & CNN+LSTM & 0.262 & 0.262 & 0.262 \\
+\midrule
+Category ablation & CNN+MLP & 0.176 & 0.176 & 0.176 \\
+ & CNN+LSTM & 0.186 & 0.186 & 0.186 \\
+}
+\newcommand{\PhysTable}{%
+Clean & CNN+MLP & 3.48 & 17.8 & 16.2 & 62.2 & 25.0 & 0.0 \\
+ & CNN+LSTM & 4.87 & 22.1 & 10.1 & 60.0 & 25.0 & 0.0 \\
+\midrule
+6 channels lost & CNN+MLP & 10.71 & 33.2 & 15.7 & 65.7 & 25.0 & 3.7 \\
+ & CNN+LSTM & 8.64 & 28.7 & 16.2 & 63.6 & 25.0 & 7.4 \\
+\midrule
+Magnetics group lost & CNN+MLP & 7.65 & 29.9 & 15.4 & 56.3 & 25.0 & 0.0 \\
+ & CNN+LSTM & 8.38 & 31.2 & 15.2 & 56.4 & 25.0 & 0.0 \\
+\midrule
+Temporal gap 40\% & CNN+MLP & 13.49 & 43.5 & 36.4 & 62.7 & 25.0 & 55.6 \\
+ & CNN+LSTM & 11.62 & 37.2 & 22.9 & 75.7 & 25.0 & 25.9 \\
+\midrule
+Pre-disruption 25\% & CNN+MLP & 8.29 & 34.1 & 25.6 & 67.0 & 12.5 & 0.0 \\
+ & CNN+LSTM & 8.21 & 30.3 & 22.0 & 60.3 & 50.0 & 7.4 \\
+\midrule
+Random dropout 10\% & CNN+MLP & 11.54 & 41.8 & 27.5 & 70.8 & 50.0 & 3.7 \\
+ & CNN+LSTM & 8.49 & 28.8 & 13.8 & 59.8 & 25.0 & 11.1 \\
+}
+\newcommand{\CritTable}{%
+\texttt{flux\_loop} & 15 & 4.12 & +0.64 & 6.44 & +1.57 \\
+\texttt{ccbv} & 40 & 3.32 & -0.15 & 4.71 & -0.16 \\
+\texttt{obr} & 18 & 3.86 & +0.38 & 5.14 & +0.27 \\
+\texttt{obv} & 18 & 3.62 & +0.15 & 4.95 & +0.09 \\
+\texttt{saddle\_v} & 12 & 3.57 & +0.09 & 4.79 & -0.08 \\
+\texttt{coil\_i} & 10 & 3.37 & -0.11 & 6.12 & +1.26 \\
+\texttt{solenoid\_i} & 1 & 3.57 & +0.09 & 5.96 & +1.09 \\
+\texttt{ip} & 1 & 3.24 & -0.24 & 5.52 & +0.65 \\
+}
+\newcommand{\CleanBndMLP}{3.48}
+\newcommand{\CleanBndLSTM}{4.87}
+\newcommand{\MitTable}{%
+CNN+MLP & clean & 3.48 & 4.99 & 25 / 100 / 100 & 0 / 0 / 0 & 18.8 \\
+ & spike & 23.18 & 4.93 & 75 / 100 / 100 & 26 / 0 / 0 & 18.5 \\
+ & redundant probe dead & 4.52 & 6.15 & 50 / 100 / 100 & 0 / 0 / 0 & 18.6 \\
+ & critical branch dead & 8.74 & 6.15 & 12 / 100 / 100 & 15 / 0 / 0 & 18.9 \\
+ & group loss & 12.69 & 7.93 & 12 / 100 / 100 & 30 / 0 / 0 & 18.5 \\
+ & 6 channels lost & 12.88 & 14.69 & 0 / 100 / 100 & 81 / 0 / 0 & 18.6 \\
+ & gap 40\% & 12.35 & 4.32 & 25 / 100 / 100 & 30 / 0 / 0 & 21.4 \\
+ & pre-disr. 25\% & 11.21 & 4.37 & 50 / 100 / 100 & 11 / 0 / 0 & 20.3 \\
+\midrule
+CNN+LSTM & clean & 4.87 & 6.57 & 25 / 100 / 100 & 0 / 0 / 0 & 19.6 \\
+ & spike & 14.25 & 6.56 & 50 / 100 / 100 & 37 / 0 / 0 & 20.3 \\
+ & redundant probe dead & 5.68 & 7.65 & 12 / 100 / 100 & 0 / 0 / 0 & 19.2 \\
+ & critical branch dead & 8.59 & 7.65 & 12 / 100 / 100 & 4 / 0 / 0 & 18.9 \\
+ & group loss & 11.79 & 8.55 & 12 / 100 / 100 & 30 / 0 / 0 & 19.5 \\
+ & 6 channels lost & 15.95 & 15.34 & 12 / 100 / 100 & 48 / 0 / 0 & 18.4 \\
+ & gap 40\% & 10.69 & 6.67 & 38 / 100 / 100 & 19 / 0 / 0 & 20.9 \\
+ & pre-disr. 25\% & 15.59 & 6.69 & 75 / 100 / 100 & 4 / 0 / 0 & 20.7 \\
+}
+\newcommand{\DeltaMLP}{88.4}
+\newcommand{\LatMLP}{19.2}
+\newcommand{\NcalMLP}{792}
+\newcommand{\DeltaLSTM}{93.5}
+\newcommand{\LatLSTM}{19.7}
+\newcommand{\NcalLSTM}{792}
+\newcommand{\NHazard}{27}
+\newcommand{\NSafe}{8}
+\newcommand{\NRMSEmlp}{0.1512}
+\newcommand{\NRMSElstm}{0.1680}
+\newcommand{\NRMSEmlpold}{0.1590}

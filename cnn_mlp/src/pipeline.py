@@ -797,12 +797,41 @@ def apply_structured_failure(x, p_fail=0.5):
     return x_aug, mask
 
 
+def _resolve_mask(model, args, kwargs):
+    """Split forward args into (inputs, exogenous, health mask (B, n_in)).
+
+    A missing mask is inferred from the inputs: a branch that is exactly zero counts as dead."""
+    import torch
+    n_in, n_exo = len(model.input_branches), len(model.exogenous_branches)
+    inputs, exogenous = args[:n_in], args[n_in:n_in + n_exo]
+    mask = kwargs.get("mask", None)
+    if mask is None and len(args) > n_in + n_exo:
+        mask = args[n_in + n_exo]
+    B, dev, dtype = inputs[0].shape[0], inputs[0].device, inputs[0].dtype
+    if mask is None:
+        mask = torch.ones((B, n_in), device=dev, dtype=dtype)
+        for i, x_chan in enumerate(inputs):
+            is_zero = (x_chan.abs().sum(dim=tuple(range(1, x_chan.dim()))) == 0.0)
+            mask[:, i] = torch.where(is_zero, 0.0, 1.0)
+    elif mask.dim() == 1:
+        mask = mask.unsqueeze(0).expand(B, -1)
+    return inputs, exogenous, mask
+
+
 def make_failure_aware_model(loader, meta):
+    """Module 2 network for the chosen backbone (TM_MODEL = mlp | lstm).
+
+    Both keep the upstream one-CNN-encoder-per-sensor layout. Each encoder output is gated by its sensor's health
+    flag, and the flag vector is also fed to the backbone (MLP bottleneck / LSTM input) so it knows what is missing."""
     setup_imports()
     import torch
     import torch.nn as nn
     from torch.utils.checkpoint import checkpoint
-    from src.multi_conv_mlp_model import MultiConv_MLP, bb_factor
+    is_lstm = CFG["model"].lower().strip() == "lstm"
+    if is_lstm:
+        from src.multi_conv_lstm_model import LSTM_v3 as Base, bb_factor
+    else:
+        from src.multi_conv_mlp_model import MultiConv_MLP as Base, bb_factor
     from tokamark.tools.utils import get_device
 
     device = get_device()
@@ -816,7 +845,7 @@ def make_failure_aware_model(loader, meta):
         except Exception:
             continue
 
-    class MultiConv_FailureAware_MLP(MultiConv_MLP):
+    class MultiConv_FailureAware_MLP(Base):
         def __init__(self, in_shapes, exo_shapes, out_shapes, dict_meta, D=16):
             super().__init__(in_shapes, exo_shapes, out_shapes, dict_meta, D=D)
             self.n_in = len(self.input_branches)
@@ -876,14 +905,38 @@ def make_failure_aware_model(loader, meta):
                 outputs.append(out)
             return outputs
 
-    model = MultiConv_FailureAware_MLP(
-        in_shapes=input_shapes,
-        exo_shapes=exogenous_shapes,
-        out_shapes=output_shapes,
-        dict_meta=meta,
-        D=16
-    ).to(device)
-    return model
+    class MultiConv_FailureAware_LSTM(Base):
+        def __init__(self, in_shapes, exo_shapes, out_shapes, dict_meta, D=16):
+            super().__init__(in_shapes, exo_shapes, out_shapes, dict_meta, D=D)
+            self.n_in = len(self.input_branches)
+            old = self.encoder_lstm  # same LSTM, with room for the health flags appended to every timestep
+            self.encoder_lstm = nn.LSTM(input_size=old.input_size + self.n_in, hidden_size=old.hidden_size,
+                                        num_layers=old.num_layers, batch_first=True, dropout=old.dropout)
+
+        def forward(self, *args, **kwargs):
+            inputs, exogenous, mask = _resolve_mask(self, args, kwargs)
+
+            input_branch_outputs = []
+            for i, (branch, x) in enumerate(zip(self.input_branches, inputs)):
+                out = checkpoint(self._run_cnn_encoder, branch, x, use_reentrant=False)
+                input_branch_outputs.append(out * mask[:, i].view(-1, 1, 1))  # mask feature gating h_i * m_i
+            input_seq = torch.cat(input_branch_outputs, dim=2)
+            input_seq = torch.cat([input_seq, mask.unsqueeze(1).expand(-1, input_seq.shape[1], -1)], dim=2)
+
+            enc_out, (h, c) = self.encoder_lstm(input_seq)
+            decoder_input = self.start_token.to(enc_out.device).repeat(enc_out.size(0), self.W_out, 1)
+            if len(self.exogenous_branches) > 0 and len(exogenous) > 0:
+                exo_branch_outputs = [checkpoint(self._run_cnn_encoder, b, x, use_reentrant=False)
+                                      for b, x in zip(self.exogenous_branches, exogenous)]
+                decoder_input = torch.cat([decoder_input, torch.cat(exo_branch_outputs, dim=2)], dim=2)
+            dec_out, _ = self.decoder_lstm(decoder_input, (h, c))
+
+            return [checkpoint(self._run_cnn_decoder, branch, goal_shape, dec_out, use_reentrant=False)
+                    for branch, goal_shape in zip(self.output_branches, self.output_shapes)]
+
+    FailureAware = MultiConv_FailureAware_LSTM if is_lstm else MultiConv_FailureAware_MLP
+    return FailureAware(in_shapes=input_shapes, exo_shapes=exogenous_shapes, out_shapes=output_shapes,
+                        dict_meta=meta, D=16).to(device)
 
 
 def make_model(loader, meta):
@@ -957,7 +1010,7 @@ def cmd_train(split):
     P = paths(split)
     os.makedirs(P["model_dir"], exist_ok=True)
     sel = json.load(open(P["sel"]))
-    run_config = dict(task=CFG["task"], split=split, seed=CFG["seed"], batch_size=CFG["batch_size"],
+    run_config = dict(task=CFG["task"], model=CFG["model"], split=split, seed=CFG["seed"], batch_size=CFG["batch_size"],
                       lr=CFG["lr"], weight_decay=CFG["weight_decay"], max_steps=CFG["max_steps"],
                       validate_every=CFG["validate_every"], patience=CFG["patience"],
                       train_deadline_h=CFG["train_deadline_h"], use_dp=CFG["use_dp"],
@@ -1009,7 +1062,7 @@ def cmd_train(split):
     opt = torch.optim.Adam(model.parameters(), lr=CFG["lr"], weight_decay=CFG["weight_decay"])
     sched = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode="min", factor=0.5, patience=3, min_lr=1e-6)
     st = dict(step=0, best=float("inf"), no_improve=0, epoch=0, oom=0,
-              hist=dict(step=[], train_loss=[], val_loss=[], lr=[], t=[]))
+              hist=dict(step=[], train_loss=[], val_loss=[], lr=[], t=[], mse=[], pinn=[]))
     last = os.path.join(P["model_dir"], "last.pt")
     if os.path.exists(last) and not CFG["train_from_scratch"]:
         ck = torch.load(last, map_location=dev, weights_only=False)
@@ -1019,6 +1072,8 @@ def cmd_train(split):
         st.setdefault("oom", 0)
         st["hist"].setdefault("t", [])
         st["hist"].setdefault("lr", [])
+        st["hist"].setdefault("mse", [])
+        st["hist"].setdefault("pinn", [])
         log(f"RESUMED from step {st['step']} (best val {st['best']:.5f})")
     elif CFG["train_from_scratch"] and os.path.exists(last):
         log("TM_TRAIN_FROM_SCRATCH=1: ignoring existing checkpoint, training from step 0")
@@ -1054,6 +1109,7 @@ def cmd_train(split):
     phase["p"] = "training loop"
     it, run_loss, errs, bad, oom, t_last_ck, t_tr = iter(loaders["train"]), [], 0, 0, 0, time.time(), time.time()
     stop_reason = "max_steps"
+    run_parts = []  # (mse, pinn) per step, for the loss-component plot
     while st["step"] < CFG["max_steps"]:
         if time.time() > deadline:
             stop_reason = "time deadline"; break
@@ -1061,7 +1117,7 @@ def cmd_train(split):
         try:
             batch = next(it)
         except StopIteration:
-            it = iter(loaders["train"]); st["epoch"] += 1; run_loss = []; log(f"epoch {st['epoch']} done"); continue
+            it = iter(loaders["train"]); st["epoch"] += 1; run_loss = []; run_parts = []; log(f"epoch {st['epoch']} done"); continue
         except Exception as e:  # noqa  (e.g. a corrupt shot inside a worker)
             errs += 1; log(f"data error #{errs}: {repr(e)[:200]}")
             if errs > 20: raise
@@ -1079,6 +1135,7 @@ def cmd_train(split):
                 if CFG["pinn_lambda"] > 0:
                     loss_fl = flux_loop_pinn_loss(out[0], y[0], mask_fl=mask_train[:, 0])
                     loss = loss_mse + CFG["pinn_lambda"] * loss_fl
+                    run_parts.append((loss_mse.item(), loss_fl.item()))
                 else:
                     loss = loss_mse
             else:
@@ -1113,6 +1170,9 @@ def cmd_train(split):
             cur_lr = opt.param_groups[0]["lr"]
             for k, val in zip(("step", "train_loss", "val_loss", "lr", "t"), (st["step"], sum(run_loss) / len(run_loss), v, cur_lr, time.time() - T0)):
                 h[k].append(val)
+            if run_parts:
+                h["mse"].append(sum(a for a, _ in run_parts) / len(run_parts))
+                h["pinn"].append(sum(b for _, b in run_parts) / len(run_parts))
             sched.step(v)
             if v < st["best"]:
                 st["best"], st["no_improve"] = v, 0
@@ -1175,73 +1235,280 @@ def cmd_eval(split):
 
 
 # ======================================================================================
-# PLOT: history curves + optional reconstruction-quality viz (never blocks core results)
+# PLOT: training dashboard, reconstruction samples, LCFS overlay, error diagnostics, per-shot error
+# (never blocks core results)
 # ======================================================================================
+_DR_CM, _DZ_CM = 180.0 / 64, 300.0 / 64          # MAST 65x65 grid: cm per pixel (R, Z)
+_PSI_EXTENT = [0.2, 2.0, -1.5, 1.5]               # R [m], Z [m]; array rows = Z, columns = R
+
+
+def _run_title():
+    kind = "failure-aware + PINN" if CFG["failure_aware"] else "baseline"
+    return f"TokaMark {CFG['task']} CNN+{CFG['model'].upper()} ({kind})"
+
+
+def _lcfs_segments(field, level):
+    """Contour vertices (col, row) of `field` at `level`; short speckle segments are dropped."""
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    segs = [s for s in ax.contour(field, levels=[level]).allsegs[0] if len(s) >= 8]
+    plt.close(fig)
+    return segs
+
+
+def _boundary_offset_cm(true, pred, frac=0.35):
+    """Mean symmetric distance (cm) between the true and predicted LCFS, both cut at the TRUE field's flux level."""
+    import numpy as np
+    level = true.min() + frac * (true.max() - true.min())
+    st, sp = _lcfs_segments(true, level), _lcfs_segments(pred, level)
+    if not st or not sp:
+        return None
+    a = np.concatenate(st) * [_DR_CM, _DZ_CM]
+    b = np.concatenate(sp) * [_DR_CM, _DZ_CM]
+    d = np.sqrt(((a[:, None, :] - b[None, :, :]) ** 2).sum(-1))
+    return float(0.5 * (d.min(1).mean() + d.min(0).mean()))
+
+
+def _fig_loss_dashboard(h, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    steps, tr, va = np.array(h["step"]), np.array(h["train_loss"]), np.array(h["val_loss"])
+    best_i = int(np.argmin(va))
+    fig, ax = plt.subplots(2, 2, figsize=(12, 7.5))
+    a = ax[0, 0]
+    a.plot(steps, tr, color="#4C78A8", lw=1.8, label="train (running mean)")
+    a.plot(steps, va, color="#E4572E", lw=1.8, label="validation")
+    a.axvline(steps[best_i], color="grey", ls="--", lw=1)
+    a.scatter([steps[best_i]], [va[best_i]], color="#E4572E", zorder=5, s=45)
+    a.annotate(f"best val {va[best_i]:.4f}\nstep {int(steps[best_i])}", (steps[best_i], va[best_i]),
+               textcoords="offset points", xytext=(12, -42), fontsize=8,
+               arrowprops=dict(arrowstyle="->", color="grey", lw=0.8))
+    a.set_title("Train vs validation loss"); a.set_xlabel("step"); a.set_ylabel("MultiOutputMSELoss (standardised)")
+    a.legend(); a.grid(alpha=0.3)
+    a = ax[0, 1]
+    a.fill_between(steps, 0, va - tr, color="#9467BD", alpha=0.35)
+    a.plot(steps, va - tr, color="#9467BD", lw=1.5)
+    a.axvline(steps[best_i], color="grey", ls="--", lw=1)
+    a.set_title("Generalisation gap (val - train)"); a.set_xlabel("step"); a.set_ylabel("loss gap"); a.grid(alpha=0.3)
+    a = ax[1, 0]
+    if h.get("lr"):
+        a.semilogy(steps[:len(h["lr"])], h["lr"], color="#2CA02C", drawstyle="steps-post", lw=1.8)
+    a.set_title("Learning rate (ReduceLROnPlateau)"); a.set_xlabel("step"); a.set_ylabel("lr"); a.grid(alpha=0.3, which="both")
+    a = ax[1, 1]
+    if h.get("mse") and h.get("pinn") and len(h["mse"]) == len(steps):
+        a.plot(steps, h["mse"], color="#4C78A8", lw=1.8, label="MSE term")
+        a.set_ylabel("MSE term", color="#4C78A8"); a.set_xlabel("step")
+        b = a.twinx()
+        b.plot(steps, h["pinn"], color="#F58518", lw=1.8, label="flux-loop PINN term (unweighted)")
+        b.set_ylabel("PINN term", color="#F58518")
+        a.set_title("Loss components (train, running mean)")
+    elif h.get("t"):
+        a.plot(steps[:len(h["t"])], np.array(h["t"]) / 60, color="#17BECF", lw=1.8)
+        a.set_title("Wall-clock time"); a.set_xlabel("step"); a.set_ylabel("minutes since session start")
+    a.grid(alpha=0.3)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_samples(true, pred, labels, path, title):
+    """true/pred: (n, H, W) in Wb. One row per window: true | pred | |error|."""
+    import numpy as np
+    import matplotlib.pyplot as plt
+    n = len(true)
+    fig, axes = plt.subplots(n, 3, figsize=(12, 3.6 * n), squeeze=False)
+    for i in range(n):
+        err = np.abs(pred[i] - true[i])
+        lo, hi = min(true[i].min(), pred[i].min()), max(true[i].max(), pred[i].max())
+        for j, (img, ttl, cm, kw) in enumerate((
+                (true[i], "True psi", "viridis", dict(vmin=lo, vmax=hi)),
+                (pred[i], "Predicted psi", "viridis", dict(vmin=lo, vmax=hi)),
+                (err, f"|Error|  (MAE {err.mean():.4f} Wb, max {err.max():.4f})", "magma", {}))):
+            im = axes[i][j].imshow(img, cmap=cm, origin="lower", extent=_PSI_EXTENT, aspect="auto", **kw)
+            axes[i][j].set_title(f"{ttl}\n{labels[i]}" if j == 0 else ttl, fontsize=9)
+            axes[i][j].set_xlabel("R [m]", fontsize=8); axes[i][j].set_ylabel("Z [m]", fontsize=8)
+            fig.colorbar(im, ax=axes[i][j], fraction=0.046)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_boundary(true, pred, labels, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    n = len(true)
+    fig, axes = plt.subplots(1, n, figsize=(5.2 * n, 5.2), squeeze=False)
+    for i in range(n):
+        a = axes[0][i]
+        level = true[i].min() + 0.35 * (true[i].max() - true[i].min())
+        a.imshow(true[i], cmap="Greys", origin="lower", extent=_PSI_EXTENT, aspect="auto", alpha=0.55)
+        x = np.linspace(_PSI_EXTENT[0], _PSI_EXTENT[1], true[i].shape[1])
+        z = np.linspace(_PSI_EXTENT[2], _PSI_EXTENT[3], true[i].shape[0])
+        a.contour(x, z, true[i], levels=[level], colors="#1F77B4", linewidths=2.2)
+        a.contour(x, z, pred[i], levels=[level], colors="#D62728", linewidths=1.8, linestyles="--")
+        off = _boundary_offset_cm(true[i], pred[i])
+        a.set_title(f"{labels[i]}\nLCFS offset: " + (f"{off:.2f} cm" if off is not None else "n/a"), fontsize=9)
+        a.set_xlabel("R [m]"); a.set_ylabel("Z [m]")
+    axes[0][0].plot([], [], color="#1F77B4", lw=2.2, label="true LCFS")
+    axes[0][0].plot([], [], color="#D62728", lw=1.8, ls="--", label="predicted LCFS")
+    axes[0][0].legend(loc="upper right", fontsize=8)
+    fig.suptitle(title + " - last closed flux surface (35% level of the true field)", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_error_diagnostics(err_map, win_mae, sc_t, sc_p, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(2, 2, figsize=(12, 9))
+    a = ax[0, 0]
+    im = a.imshow(err_map, cmap="magma", origin="lower", extent=_PSI_EXTENT, aspect="auto")
+    fig.colorbar(im, ax=a, fraction=0.046, label="mean |error| [Wb]")
+    fl = np.array(FLUX_LOOP_COORDS)
+    a.scatter(_PSI_EXTENT[0] + fl[:, 0] / 64 * 1.8, _PSI_EXTENT[2] + fl[:, 1] / 64 * 3.0, s=22, facecolors="none",
+              edgecolors="cyan", linewidths=1, label="15 flux loops (PINN)")
+    a.set_title("Mean absolute error over all test windows"); a.set_xlabel("R [m]"); a.set_ylabel("Z [m]")
+    a.legend(loc="upper right", fontsize=8)
+    a = ax[0, 1]
+    a.hist(win_mae, bins=40, color="#4C78A8", alpha=0.9)
+    a.axvline(np.mean(win_mae), color="#E4572E", lw=1.8, label=f"mean {np.mean(win_mae):.4f}")
+    a.axvline(np.median(win_mae), color="k", ls="--", lw=1.5, label=f"median {np.median(win_mae):.4f}")
+    a.set_title(f"Per-window MAE ({len(win_mae)} windows)"); a.set_xlabel("MAE [Wb]"); a.set_ylabel("windows")
+    a.legend(); a.grid(alpha=0.3)
+    a = ax[1, 0]
+    hb = a.hexbin(sc_t, sc_p, gridsize=60, bins="log", cmap="viridis", mincnt=1)
+    lim = [min(sc_t.min(), sc_p.min()), max(sc_t.max(), sc_p.max())]
+    a.plot(lim, lim, color="white", lw=1.2, ls="--")
+    r2 = 1.0 - np.sum((sc_t - sc_p) ** 2) / max(np.sum((sc_t - sc_t.mean()) ** 2), 1e-12)
+    a.set_title(f"Predicted vs true psi (R2 = {r2:.4f})"); a.set_xlabel("true psi [Wb]"); a.set_ylabel("predicted psi [Wb]")
+    fig.colorbar(hb, ax=a, fraction=0.046, label="log10 count")
+    a = ax[1, 1]
+    fl_err = np.array([err_map[z, r] for r, z in FLUX_LOOP_COORDS])
+    a.bar(range(len(fl_err)), fl_err, color="#F58518")
+    a.axhline(err_map.mean(), color="k", ls="--", lw=1.3, label=f"grid-wide mean {err_map.mean():.4f}")
+    a.set_title("Error at the 15 flux-loop pixels (PINN anchor points)")
+    a.set_xlabel("flux loop #"); a.set_ylabel("mean |error| [Wb]"); a.legend(); a.grid(alpha=0.3, axis="y")
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_per_shot(csv_path, path, title):
+    import csv as _csv
+    import numpy as np
+    import matplotlib.pyplot as plt
+    rows = list(_csv.DictReader(open(csv_path)))
+    by_shot = {}
+    for r in rows:
+        by_shot.setdefault(r["shot_id"], []).append((int(r["window_index"]), float(r["MAE"])))
+    order = sorted(by_shot, key=lambda s: np.mean([m for _, m in by_shot[s]]))
+    means = [float(np.mean([m for _, m in by_shot[s]])) for s in order]
+    overall = float(np.mean([float(r["MAE"]) for r in rows]))
+    fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+    a = ax[0]
+    a.bar(range(len(order)), means, color=["#E4572E" if m > overall else "#4C78A8" for m in means])
+    a.axhline(overall, color="k", ls="--", lw=1.3, label=f"all windows {overall:.4f}")
+    a.set_xticks(range(len(order))); a.set_xticklabels(order, rotation=90, fontsize=6)
+    a.set_title(f"Mean MAE per test shot ({len(order)} shots, red = above average)")
+    a.set_ylabel("MAE [Wb]"); a.legend(); a.grid(alpha=0.3, axis="y")
+    a = ax[1]
+    grid = np.linspace(0, 1, 21)
+    curves = []
+    for s in by_shot:
+        w = sorted(by_shot[s])
+        if len(w) < 5:
+            continue
+        pos = np.linspace(0, 1, len(w))
+        curves.append(np.interp(grid, pos, [m for _, m in w]))
+    if curves:
+        c = np.array(curves)
+        a.fill_between(grid, np.percentile(c, 10, axis=0), np.percentile(c, 90, axis=0), color="#4C78A8", alpha=0.25,
+                       label="10-90th percentile over shots")
+        a.plot(grid, np.median(c, axis=0), color="#4C78A8", lw=2, label="median shot")
+    a.set_title("Error along the discharge (normalised time)"); a.set_xlabel("normalised time in shot"); a.set_ylabel("window MAE [Wb]")
+    a.legend(); a.grid(alpha=0.3)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
 def cmd_plot(split):
     setup_imports()
+    import numpy as np
     import torch
     import matplotlib
     matplotlib.use("Agg")
-    import matplotlib.pyplot as plt
     P = paths(split)
     os.makedirs(P["figures"], exist_ok=True)
+    title = f"{_run_title()} - {split} split, seed {CFG['seed']}"
 
-    # (a) training/validation curves - core, from saved history
-    hp = os.path.join(P["model_dir"], "training_history.pt")
+    # (a) training dashboard - from the saved history
     try:
-        h = torch.load(hp, map_location="cpu", weights_only=False)
-        steps, tr_, va_ = h["step"], h["train_loss"], h["val_loss"]
-        fig, ax = plt.subplots(figsize=(7, 4))
-        ax.plot(steps, tr_, label="train loss (running mean at validation)")
-        ax.plot(steps, va_, label="validation loss")
-        ax.set_xlabel("step"); ax.set_ylabel("MultiOutputMSELoss (standardised)")
-        ax.set_title(f"TokaMark {CFG['task']} baseline - {split} split, seed {CFG['seed']}")
-        ax.legend(); ax.grid(alpha=0.3); fig.tight_layout()
-        fig.savefig(os.path.join(P["figures"], "loss_curves.png"), dpi=120)
-        plt.close(fig)
-        log(f"saved loss_curves.png ({len(steps)} validation points)")
+        h = torch.load(os.path.join(P["model_dir"], "training_history.pt"), map_location="cpu", weights_only=False)
+        _fig_loss_dashboard(h, os.path.join(P["figures"], "loss_curves.png"), title)
+        log(f"saved loss_curves.png ({len(h['step'])} validation points)")
     except Exception as e:  # noqa
         log("loss-curve plot failed:", repr(e)[:200])
 
-    # (b) reconstruction-quality viz: predicted vs true psi on a few test windows
+    # (b)-(d) run the best model over the test windows once and feed the reconstruction figures
     try:
         from src.trainer import move_batch_to_device
-        from src.evaluator import cnn_unstd_evaluation_per_shot  # noqa: F401 (kept for parity)
         dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
         loaders, meta = build_data(split, ["test"])
         model = make_model(loaders["test"], meta).to(dev)
         model.load_state_dict(torch.load(os.path.join(P["model_dir"], "best_model.pt"), map_location=dev, weights_only=False))
         model.eval()
-        batch = first_batch(loaders["test"])
-        # move_batch_to_device returns only (inputs, targets); shot/window ids stay on the
-        # raw batch tuple (sid, wid, xs, ys), so read them from there.
-        raw = batch
-        x, y = move_batch_to_device(batch, dev)
-        shot_ids, win_ids = raw[0], raw[1]
-        with torch.no_grad():
-            y_pred = model(*x)
-        mstd = meta["output"]["equilibrium-psi"]
-        mu, sd = float(mstd["mean"]), float(mstd["std"])
-        n = min(CFG["plot_windows"], y[0].shape[0])
-        fig, axes = plt.subplots(n, 3, figsize=(11, 3.2 * n))
-        if n == 1:
-            axes = [axes]
-        for i in range(n):
-            true = (y[0][i, 0].cpu().numpy() * sd + mu)
-            pred = (y_pred[0][i, 0].cpu().numpy() * sd + mu)
-            err = abs(pred - true)
-            mae_w = float(err.mean())
-            for j, (img, ttl) in enumerate(((true, "True psi"), (pred, "Pred psi"), (err, f"|Error| (MAE: {mae_w:.4f} Wb)"))):
-                im = axes[i][j].imshow(img, cmap="viridis" if j < 2 else "magma")
-                axes[i][j].set_title(f"{ttl} (shot {int(shot_ids[i])})", fontsize=9)
-                axes[i][j].axis("off")
-                fig.colorbar(im, ax=axes[i][j], fraction=0.046)
-        fig.tight_layout()
-        fig.savefig(os.path.join(P["figures"], "psi_reconstruction_samples.png"), dpi=120)
-        plt.close(fig)
+        ps = meta["output"]["equilibrium-psi"]
+        mu, sd = float(ps["mean"]), float(ps["std"])
+        err_sum, n_win, win_mae, sc_t, sc_p, first = None, 0, [], [], [], None
+        rng = np.random.default_rng(0)
+        for bi, batch in enumerate(loaders["test"]):
+            if batch is None:
+                continue
+            if bi >= 8:
+                break
+            x, y = move_batch_to_device(batch, dev)
+            with torch.no_grad():
+                yp = model(*x)
+            t = y[0][:, 0].float().cpu().numpy() * sd + mu
+            p = yp[0][:, 0].float().cpu().numpy() * sd + mu
+            e = np.abs(p - t)
+            err_sum = e.sum(0) if err_sum is None else err_sum + e.sum(0)
+            n_win += len(e)
+            win_mae.extend(e.mean((1, 2)).tolist())
+            pick = rng.choice(t.size, size=min(20000, t.size), replace=False)
+            sc_t.append(t.ravel()[pick]); sc_p.append(p.ravel()[pick])
+            if first is None:
+                first = (t, p, [int(s) for s in batch[0]])
+        if n_win == 0:
+            raise RuntimeError("no test windows")
+        win_mae = np.array(win_mae)
+        t, p, sids = first
+        wm = np.abs(p - t).mean((1, 2))
+        pick = [int(np.argmin(wm)), int(np.argsort(wm)[len(wm) // 2]), int(np.argmax(wm))]
+        labels = [f"{nm}: shot {sids[i]}, MAE {wm[i]:.4f} Wb" for nm, i in zip(("best", "median", "worst"), pick)]
+        _fig_samples(t[pick], p[pick], labels, os.path.join(P["figures"], "psi_reconstruction_samples.png"), title)
         log("saved psi_reconstruction_samples.png")
+        _fig_boundary(t[pick], p[pick], labels, os.path.join(P["figures"], "boundary_overlay.png"), title)
+        log("saved boundary_overlay.png")
+        _fig_error_diagnostics(err_sum / n_win, win_mae, np.concatenate(sc_t), np.concatenate(sc_p),
+                               os.path.join(P["figures"], "test_error_diagnostics.png"), title)
+        log(f"saved test_error_diagnostics.png ({n_win} test windows)")
     except Exception as e:  # noqa
-        log("optional psi reconstruction viz failed (core results unaffected):", repr(e)[:300])
+        log("reconstruction figures failed (core results unaffected):", repr(e)[:300])
+
+    # (e) per-shot error from the official evaluator's window metrics
+    try:
+        wm_csv = os.path.join(P["results"], CFG["task"], "windows_metrics.csv")
+        _fig_per_shot(wm_csv, os.path.join(P["figures"], "per_shot_error.png"), title)
+        log("saved per_shot_error.png")
+    except Exception as e:  # noqa
+        log("per-shot figure failed (run eval first):", repr(e)[:200])
     log(f"figures in {P['figures']}")
 
 

@@ -1,0 +1,14 @@
+{
+  "id": "nishanthdevabathini/tokamark-train-lstm-fa",
+  "title": "tokamark-train-lstm-fa",
+  "code_file": "tokamark_baseline_kaggle.ipynb",
+  "language": "python",
+  "kernel_type": "notebook",
+  "is_private": true,
+  "enable_gpu": true,
+  "enable_internet": true,
+  "dataset_sources": [],
+  "competition_sources": [],
+  "kernel_sources": [],
+  "model_sources": []
+}

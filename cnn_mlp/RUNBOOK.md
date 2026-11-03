@@ -146,3 +146,19 @@ Budget/time notes measured on real data:
 - A parallel working copy `tokamark_baseline_kaggle_fixed_v4.ipynb` (and `_fixed`,
   `_fixed_v2`) exists in this folder from earlier iterations; the canonical deliverable
   is `tokamark_baseline_kaggle.ipynb`.
+
+## CNN+LSTM (failure-aware) on Kaggle dual T4
+
+The LSTM run is the CNN+MLP run with only `MODEL_TYPE = "lstm"`: same shots (the MLP run's `selection.json` is embedded), batch 512,
+Adam lr 1e-4 / wd 1e-4, patience 10, validate every 100 steps, failure augmentation p=0.5, flux-loop PINN weight 0.1, seed 23.
+`USE_DP = "1"` forces DataParallel over both T4s. The LSTM gets the health mask appended to every encoder timestep.
+
+```
+python scripts/build_lstm_kernel.py        # rebuild after any edit of src/pipeline.py (also run scripts/sync_nb.py)
+kaggle kernels push -p kernels/tokamark-train-lstm-fa --accelerator NvidiaTeslaT4
+kaggle kernels output nishanthdevabathini/tokamark-train-lstm-fa -p runs/lstm_fa
+```
+
+Figures written to `out/random/figures/`: `loss_curves.png` (train/val, generalisation gap, lr, MSE vs PINN terms),
+`psi_reconstruction_samples.png` (best/median/worst), `boundary_overlay.png` (true vs predicted LCFS in cm),
+`test_error_diagnostics.png`, `per_shot_error.png`.
