@@ -1,0 +1,7813 @@
+{
+ "description": "Real MAST sensor/coil geometry for the 115 TokaMark task_1-3 inputs (all values copied, none invented).",
+ "source_shot": "30421 (MAST). Geometry is machine-fixed over the campaign it covers; it was NOT verified for the older shots (e.g. 12384, 13222) that the TokaMark random split also contains.",
+ "obr_obv_note": "geometry has 19 OBR and 19 OBV coils; the TokaMark level-1 zarr of the test shots carries 18 (AMB_OBR01..18). Matched by name (OBR01..18); OBR19/OBV19 dropped. If the dropped coil is not #19 positions shift.",
+ "sensors": [
+  {
+   "name": "AMB_FL/CC03",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "CC03",
+   "R": 0.1785,
+   "Z": 0.6249,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/CC04",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "CC04",
+   "R": 0.1785,
+   "Z": 0.3199,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/CC05",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "CC05",
+   "R": 0.1785,
+   "Z": 0.0149,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/CC07",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "CC07",
+   "R": 0.1785,
+   "Z": -0.3231,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/CC09",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "CC09",
+   "R": 0.1785,
+   "Z": -0.9331,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P3L/4",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P3L/4",
+   "R": 1.0354,
+   "Z": -1.0886,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P3U/1",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P3U/1",
+   "R": 1.163,
+   "Z": 1.08259,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P3U/4",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P3U/4",
+   "R": 1.0354,
+   "Z": 1.08309,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P4L/1",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P4L/1",
+   "R": 1.5984,
+   "Z": -1.04443,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P4L/4",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P4L/4",
+   "R": 1.4005,
+   "Z": -1.14403,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P4U/4",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P4U/4",
+   "R": 1.4001,
+   "Z": 1.15079,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P5L/1",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P5L/1",
+   "R": 1.7463,
+   "Z": -0.44224,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P5L/4",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P5L/4",
+   "R": 1.5495,
+   "Z": -0.54724,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P5U/1",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P5U/1",
+   "R": 1.7493,
+   "Z": 0.44221,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_FL/P6L/1",
+   "group": "flux_loop",
+   "kind": "flux_loop",
+   "quantity": "psi",
+   "geometry_channel": "P6L/1",
+   "R": 1.4025,
+   "Z": -0.8876,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays flux_loop_r, flux_loop_z, flux_loop_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "full toroidal loop -> poloidal flux (axisymmetric)"
+  },
+  {
+   "name": "AMB_CCBV01",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv01",
+   "R": 0.1803,
+   "Z": 1.44875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV02",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv02",
+   "R": 0.1803,
+   "Z": 1.3725,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV03",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv03",
+   "R": 0.1803,
+   "Z": 1.29625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV04",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv04",
+   "R": 0.1803,
+   "Z": 1.22,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV05",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv05",
+   "R": 0.1803,
+   "Z": 1.14375,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV06",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv06",
+   "R": 0.1803,
+   "Z": 1.0675,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV07",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv07",
+   "R": 0.1803,
+   "Z": 0.99125,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV08",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv08",
+   "R": 0.1803,
+   "Z": 0.915,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV09",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv09",
+   "R": 0.1803,
+   "Z": 0.83875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV10",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv10",
+   "R": 0.1803,
+   "Z": 0.75887,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV11",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv11",
+   "R": 0.1803,
+   "Z": 0.68625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV12",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv12",
+   "R": 0.1803,
+   "Z": 0.61,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV13",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv13",
+   "R": 0.1803,
+   "Z": 0.53375,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV14",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv14",
+   "R": 0.1803,
+   "Z": 0.4575,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV15",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv15",
+   "R": 0.1803,
+   "Z": 0.38125,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV16",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv16",
+   "R": 0.1803,
+   "Z": 0.305,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV17",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv17",
+   "R": 0.1803,
+   "Z": 0.22875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV18",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv18",
+   "R": 0.1803,
+   "Z": 0.1525,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV19",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv19",
+   "R": 0.1803,
+   "Z": 0.07625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV20",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv20",
+   "R": 0.1803,
+   "Z": 0.0,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV21",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv21",
+   "R": 0.1803,
+   "Z": -0.07625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV22",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv22",
+   "R": 0.1803,
+   "Z": -0.1525,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV23",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv23",
+   "R": 0.1803,
+   "Z": -0.22875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV24",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv24",
+   "R": 0.1803,
+   "Z": -0.305,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV25",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv25",
+   "R": 0.1803,
+   "Z": -0.38125,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV26",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv26",
+   "R": 0.1803,
+   "Z": -0.4575,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV27",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv27",
+   "R": 0.1803,
+   "Z": -0.53375,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV28",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv28",
+   "R": 0.1803,
+   "Z": -0.61,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV29",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv29",
+   "R": 0.1803,
+   "Z": -0.68625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV30",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv30",
+   "R": 0.1803,
+   "Z": -0.7625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV31",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv31",
+   "R": 0.1803,
+   "Z": -0.83875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV32",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv32",
+   "R": 0.1803,
+   "Z": -0.915,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV33",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv33",
+   "R": 0.1803,
+   "Z": -0.99125,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV34",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv34",
+   "R": 0.1803,
+   "Z": -1.0675,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV35",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv35",
+   "R": 0.1803,
+   "Z": -1.14375,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV36",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv36",
+   "R": 0.1803,
+   "Z": -1.22,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV37",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv37",
+   "R": 0.1803,
+   "Z": -1.29625,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV38",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv38",
+   "R": 0.1803,
+   "Z": -1.3725,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV39",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv39",
+   "R": 0.1803,
+   "Z": -1.44875,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_CCBV40",
+   "group": "ccbv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "ccbv40",
+   "R": 0.1803,
+   "Z": -1.525,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_ccbv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR01",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr01",
+   "R": 1.442,
+   "Z": 1.335,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR02",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr02",
+   "R": 1.442,
+   "Z": 1.26,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR03",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr03",
+   "R": 1.5897,
+   "Z": 0.81045,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR04",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr04",
+   "R": 1.5897,
+   "Z": 0.73545,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR05",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr05",
+   "R": 1.5897,
+   "Z": 0.66045,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR06",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr06",
+   "R": 1.8449,
+   "Z": 0.30698,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR07",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr07",
+   "R": 1.8449,
+   "Z": 0.23198,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR08",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr08",
+   "R": 1.8449,
+   "Z": 0.15698,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR09",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr09",
+   "R": 1.8449,
+   "Z": 0.08198,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR10",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr10",
+   "R": 1.8449,
+   "Z": 0.00698,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR11",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr11",
+   "R": 1.8449,
+   "Z": -0.06802,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR12",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr12",
+   "R": 1.8449,
+   "Z": -0.14302,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR13",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr13",
+   "R": 1.8449,
+   "Z": -0.21802,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR14",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr14",
+   "R": 1.8449,
+   "Z": -0.29302,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR15",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr15",
+   "R": 1.5913,
+   "Z": -0.64038,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR16",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr16",
+   "R": 1.5913,
+   "Z": -0.71538,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR17",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr17",
+   "R": 1.5913,
+   "Z": -0.79038,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBR18",
+   "group": "obr",
+   "kind": "pickup_coil",
+   "quantity": "B_R",
+   "geometry_channel": "obr18",
+   "R": 1.4401,
+   "Z": -1.26017,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obr_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV01",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv01",
+   "R": 1.442,
+   "Z": 1.335,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV02",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv02",
+   "R": 1.442,
+   "Z": 1.26,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV03",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv03",
+   "R": 1.5897,
+   "Z": 0.81045,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV04",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv04",
+   "R": 1.5897,
+   "Z": 0.73545,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV05",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv05",
+   "R": 1.5897,
+   "Z": 0.66045,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV06",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv06",
+   "R": 1.8449,
+   "Z": 0.30698,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV07",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv07",
+   "R": 1.8449,
+   "Z": 0.23198,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV08",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv08",
+   "R": 1.8449,
+   "Z": 0.15698,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV09",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv09",
+   "R": 1.8449,
+   "Z": 0.08198,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV10",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv10",
+   "R": 1.8449,
+   "Z": 0.004,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV11",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv11",
+   "R": 1.8449,
+   "Z": -0.06802,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV12",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv12",
+   "R": 1.8449,
+   "Z": -0.14302,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV13",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv13",
+   "R": 1.8449,
+   "Z": -0.21802,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV14",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv14",
+   "R": 1.8449,
+   "Z": -0.29302,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV15",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv15",
+   "R": 1.5913,
+   "Z": -0.64038,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV16",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv16",
+   "R": 1.5913,
+   "Z": -0.71538,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV17",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv17",
+   "R": 1.5913,
+   "Z": -0.79038,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "AMB_OBV18",
+   "group": "obv",
+   "kind": "pickup_coil",
+   "quantity": "B_Z",
+   "geometry_channel": "obv18",
+   "R": 1.4401,
+   "Z": -1.26017,
+   "phi_deg": [
+    150.0,
+    330.0
+   ],
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_pol_probe_obv_r/_z/_phi_1/_phi_2/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "component inferred from the channel name (CCBV/OBV = vertical Bv, OBR = radial Br); the level-2 geometry does not store a coil orientation vector"
+  },
+  {
+   "name": "XMB_SAD/OUT/M01",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m01",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 15.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     4.968223,
+     7.834445,
+     10.700667,
+     13.566889,
+     16.433111,
+     19.299333,
+     22.165555,
+     25.031777,
+     25.031777,
+     25.031777,
+     25.031777,
+     25.031777,
+     25.031777,
+     25.031777,
+     25.031777,
+     22.165555,
+     19.299333,
+     16.433111,
+     13.566889,
+     10.700667,
+     7.834445,
+     4.968223,
+     4.968223,
+     4.968223,
+     4.968223,
+     4.968223,
+     4.968223,
+     4.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M02",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m02",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 45.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     34.968223,
+     37.834445,
+     40.700667,
+     43.566889,
+     46.433111,
+     49.299333,
+     52.165555,
+     55.031777,
+     55.031777,
+     55.031777,
+     55.031777,
+     55.031777,
+     55.031777,
+     55.031777,
+     55.031777,
+     52.165555,
+     49.299333,
+     46.433111,
+     43.566889,
+     40.700667,
+     37.834445,
+     34.968223,
+     34.968223,
+     34.968223,
+     34.968223,
+     34.968223,
+     34.968223,
+     34.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M03",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m03",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 75.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     64.968223,
+     67.834445,
+     70.700667,
+     73.566889,
+     76.433111,
+     79.299333,
+     82.165555,
+     85.031777,
+     85.031777,
+     85.031777,
+     85.031777,
+     85.031777,
+     85.031777,
+     85.031777,
+     85.031777,
+     82.165555,
+     79.299333,
+     76.433111,
+     73.566889,
+     70.700667,
+     67.834445,
+     64.968223,
+     64.968223,
+     64.968223,
+     64.968223,
+     64.968223,
+     64.968223,
+     64.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M04",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m04",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 105.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     94.968223,
+     97.834445,
+     100.700667,
+     103.566889,
+     106.433111,
+     109.299333,
+     112.165555,
+     115.031777,
+     115.031777,
+     115.031777,
+     115.031777,
+     115.031777,
+     115.031777,
+     115.031777,
+     115.031777,
+     112.165555,
+     109.299333,
+     106.433111,
+     103.566889,
+     100.700667,
+     97.834445,
+     94.968223,
+     94.968223,
+     94.968223,
+     94.968223,
+     94.968223,
+     94.968223,
+     94.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M05",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m05",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 135.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     124.968223,
+     127.834445,
+     130.700667,
+     133.566889,
+     136.433111,
+     139.299333,
+     142.165555,
+     145.031777,
+     145.031777,
+     145.031777,
+     145.031777,
+     145.031777,
+     145.031777,
+     145.031777,
+     145.031777,
+     142.165555,
+     139.299333,
+     136.433111,
+     133.566889,
+     130.700667,
+     127.834445,
+     124.968223,
+     124.968223,
+     124.968223,
+     124.968223,
+     124.968223,
+     124.968223,
+     124.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M06",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m06",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 165.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     154.968223,
+     157.834445,
+     160.700667,
+     163.566889,
+     166.433111,
+     169.299333,
+     172.165555,
+     175.031777,
+     175.031777,
+     175.031777,
+     175.031777,
+     175.031777,
+     175.031777,
+     175.031777,
+     175.031777,
+     172.165555,
+     169.299333,
+     166.433111,
+     163.566889,
+     160.700667,
+     157.834445,
+     154.968223,
+     154.968223,
+     154.968223,
+     154.968223,
+     154.968223,
+     154.968223,
+     154.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M07",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m07",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 195.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     184.968223,
+     187.834445,
+     190.700667,
+     193.566889,
+     196.433111,
+     199.299333,
+     202.165555,
+     205.031777,
+     205.031777,
+     205.031777,
+     205.031777,
+     205.031777,
+     205.031777,
+     205.031777,
+     205.031777,
+     202.165555,
+     199.299333,
+     196.433111,
+     193.566889,
+     190.700667,
+     187.834445,
+     184.968223,
+     184.968223,
+     184.968223,
+     184.968223,
+     184.968223,
+     184.968223,
+     184.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M08",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m08",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 225.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     214.968223,
+     217.834445,
+     220.700667,
+     223.566889,
+     226.433111,
+     229.299333,
+     232.165555,
+     235.031777,
+     235.031777,
+     235.031777,
+     235.031777,
+     235.031777,
+     235.031777,
+     235.031777,
+     235.031777,
+     232.165555,
+     229.299333,
+     226.433111,
+     223.566889,
+     220.700667,
+     217.834445,
+     214.968223,
+     214.968223,
+     214.968223,
+     214.968223,
+     214.968223,
+     214.968223,
+     214.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M09",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m09",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 255.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     244.968223,
+     247.834445,
+     250.700667,
+     253.566889,
+     256.433111,
+     259.299333,
+     262.165555,
+     265.031777,
+     265.031777,
+     265.031777,
+     265.031777,
+     265.031777,
+     265.031777,
+     265.031777,
+     265.031777,
+     262.165555,
+     259.299333,
+     256.433111,
+     253.566889,
+     250.700667,
+     247.834445,
+     244.968223,
+     244.968223,
+     244.968223,
+     244.968223,
+     244.968223,
+     244.968223,
+     244.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M10",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m10",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 285.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     274.968223,
+     277.834445,
+     280.700667,
+     283.566889,
+     286.433111,
+     289.299333,
+     292.165555,
+     295.031777,
+     295.031777,
+     295.031777,
+     295.031777,
+     295.031777,
+     295.031777,
+     295.031777,
+     295.031777,
+     292.165555,
+     289.299333,
+     286.433111,
+     283.566889,
+     280.700667,
+     277.834445,
+     274.968223,
+     274.968223,
+     274.968223,
+     274.968223,
+     274.968223,
+     274.968223,
+     274.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M11",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m11",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 315.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     304.968223,
+     307.834445,
+     310.700667,
+     313.566889,
+     316.433111,
+     319.299333,
+     322.165555,
+     325.031777,
+     325.031777,
+     325.031777,
+     325.031777,
+     325.031777,
+     325.031777,
+     325.031777,
+     325.031777,
+     322.165555,
+     319.299333,
+     316.433111,
+     313.566889,
+     310.700667,
+     307.834445,
+     304.968223,
+     304.968223,
+     304.968223,
+     304.968223,
+     304.968223,
+     304.968223,
+     304.968223
+    ]
+   }
+  },
+  {
+   "name": "XMB_SAD/OUT/M12",
+   "group": "saddle_v",
+   "kind": "saddle_loop",
+   "quantity": "dPhi/dt of B_R through a cylindrical patch (voltage)",
+   "geometry_channel": "sad_out_m12",
+   "R": 1.999,
+   "Z": 0.014285714285714287,
+   "phi_deg": 345.0,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group magnetics, arrays b_field_tor_probe_saddle_m_r/_z/_phi/_geometry_channel); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "polygon loop on the cylinder R=const spanning Z in [min,max] and a toroidal angle range; R,Z,phi stored are vertex means (full polygon in 'polygon'). Measures a VOLTAGE (time derivative of flux); name mapping XMB_SAD/OUT/M<k> -> sad_out_m<k> is by name",
+   "polygon": {
+    "R": [
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999,
+     1.999
+    ],
+    "Z": [
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.4,
+     0.285714,
+     0.171429,
+     0.057143,
+     -0.057143,
+     -0.171429,
+     -0.285714,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.4,
+     -0.266667,
+     -0.133333,
+     0.0,
+     0.133333,
+     0.266667,
+     0.4
+    ],
+    "phi_deg": [
+     334.968223,
+     337.834445,
+     340.700667,
+     343.566889,
+     346.433111,
+     349.299333,
+     352.165555,
+     355.031777,
+     355.031777,
+     355.031777,
+     355.031777,
+     355.031777,
+     355.031777,
+     355.031777,
+     355.031777,
+     352.165555,
+     349.299333,
+     346.433111,
+     343.566889,
+     340.700667,
+     337.834445,
+     334.968223,
+     334.968223,
+     334.968223,
+     334.968223,
+     334.968223,
+     334.968223,
+     334.968223
+    ]
+   }
+  },
+  {
+   "name": "AMC_P2IL FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p2_inner_lower",
+   "R": 0.474,
+   "Z": -1.74913,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P2IU FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p2_inner_upper",
+   "R": 0.4754,
+   "Z": 1.7537500000000001,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P2OL FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p2_outer_lower",
+   "R": 0.527,
+   "Z": -1.71113,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P2OU FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p2_outer_upper",
+   "R": 0.5284,
+   "Z": 1.7157499999999999,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P3L FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p3_lower",
+   "R": 1.1027,
+   "Z": -1.09327,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P3U FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p3_upper",
+   "R": 1.103,
+   "Z": 1.09984,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P4L FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p4_lower",
+   "R": 1.4967391304347826,
+   "Z": -1.0970534782608696,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P4U FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p4_upper",
+   "R": 1.496195652173913,
+   "Z": 1.1009291304347826,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P5L FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p5_lower",
+   "R": 1.6467391304347827,
+   "Z": -0.4938354782608696,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_P5U FEED CURRENT",
+   "group": "coil_i",
+   "kind": "pf_coil_current",
+   "quantity": "I_coil (direct measurement)",
+   "geometry_channel": "p5_upper",
+   "R": 1.6467391304347827,
+   "Z": 0.5025094782608696,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the element rectangles; unit of 'feed current' vs filament current (turns / series connection) is NOT given in the geometry"
+  },
+  {
+   "name": "AMC_SOL CURRENT",
+   "group": "solenoid_i",
+   "kind": "solenoid_current",
+   "quantity": "I_solenoid (direct measurement)",
+   "geometry_channel": "sol",
+   "R": 0.138219,
+   "Z": -0.005682713414634146,
+   "phi_deg": null,
+   "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group pf_active, arrays <coil>_r/_z/_width/_height (rectangular turn elements)); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)",
+   "orientation_basis": "centroid of the solenoid elements"
+  },
+  {
+   "name": "summary/ip",
+   "group": "ip",
+   "kind": "rogowski",
+   "quantity": "I_p (total plasma current)",
+   "geometry_channel": null,
+   "R": null,
+   "Z": null,
+   "phi_deg": null,
+   "provenance": "no spatial geometry: global quantity",
+   "orientation_basis": "sum of plasma current"
+  }
+ ],
+ "pf_coil_elements": {
+  "P2IL": {
+   "geometry_prefix": "p2_inner_lower",
+   "n_elements": 12,
+   "elements": [
+    {
+     "R": 0.487,
+     "Z": -1.65413,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.487,
+     "Z": -1.69213,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.487,
+     "Z": -1.73013,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.487,
+     "Z": -1.76813,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.487,
+     "Z": -1.80613,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.487,
+     "Z": -1.84413,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.65413,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.69213,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.73013,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.76813,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.80613,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.461,
+     "Z": -1.84413,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 0.474,
+   "Z_centroid": -1.74913
+  },
+  "P2IU": {
+   "geometry_prefix": "p2_inner_upper",
+   "n_elements": 12,
+   "elements": [
+    {
+     "R": 0.4884,
+     "Z": 1.65875,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4884,
+     "Z": 1.69675,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4884,
+     "Z": 1.73475,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4884,
+     "Z": 1.77275,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4884,
+     "Z": 1.81075,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4884,
+     "Z": 1.84875,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.65875,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.69675,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.73475,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.77275,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.81075,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.4624,
+     "Z": 1.84875,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 0.4754,
+   "Z_centroid": 1.7537500000000001
+  },
+  "P2OL": {
+   "geometry_prefix": "p2_outer_lower",
+   "n_elements": 8,
+   "elements": [
+    {
+     "R": 0.514,
+     "Z": -1.65413,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.514,
+     "Z": -1.69213,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.514,
+     "Z": -1.73013,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.514,
+     "Z": -1.76813,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.54,
+     "Z": -1.65413,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.54,
+     "Z": -1.69213,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.54,
+     "Z": -1.73013,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.54,
+     "Z": -1.76813,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 0.527,
+   "Z_centroid": -1.71113
+  },
+  "P2OU": {
+   "geometry_prefix": "p2_outer_upper",
+   "n_elements": 8,
+   "elements": [
+    {
+     "R": 0.5154,
+     "Z": 1.65875,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5154,
+     "Z": 1.69675,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5154,
+     "Z": 1.73475,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5154,
+     "Z": 1.77275,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5414,
+     "Z": 1.65875,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5414,
+     "Z": 1.69675,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5414,
+     "Z": 1.73475,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 0.5414,
+     "Z": 1.77275,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 0.5284,
+   "Z_centroid": 1.7157499999999999
+  },
+  "P3L": {
+   "geometry_prefix": "p3_lower",
+   "n_elements": 8,
+   "elements": [
+    {
+     "R": 1.0682,
+     "Z": -1.070175,
+     "width": 0.021,
+     "height": 0.043189
+    },
+    {
+     "R": 1.0682,
+     "Z": -1.116365,
+     "width": 0.021,
+     "height": 0.04319
+    },
+    {
+     "R": 1.0912,
+     "Z": -1.06577,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.0912,
+     "Z": -1.12077,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1142,
+     "Z": -1.06577,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1142,
+     "Z": -1.12077,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1372,
+     "Z": -1.070175,
+     "width": 0.021,
+     "height": 0.043189
+    },
+    {
+     "R": 1.1372,
+     "Z": -1.116365,
+     "width": 0.021,
+     "height": 0.04319
+    }
+   ],
+   "R_centroid": 1.1027,
+   "Z_centroid": -1.09327
+  },
+  "P3U": {
+   "geometry_prefix": "p3_upper",
+   "n_elements": 8,
+   "elements": [
+    {
+     "R": 1.0685,
+     "Z": 1.076745,
+     "width": 0.021,
+     "height": 0.043189
+    },
+    {
+     "R": 1.0685,
+     "Z": 1.122935,
+     "width": 0.021,
+     "height": 0.04319
+    },
+    {
+     "R": 1.0915,
+     "Z": 1.07234,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.0915,
+     "Z": 1.12734,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1145,
+     "Z": 1.07234,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1145,
+     "Z": 1.12734,
+     "width": 0.021,
+     "height": 0.052
+    },
+    {
+     "R": 1.1375,
+     "Z": 1.076745,
+     "width": 0.021,
+     "height": 0.043189
+    },
+    {
+     "R": 1.1375,
+     "Z": 1.122935,
+     "width": 0.021,
+     "height": 0.04319
+    }
+   ],
+   "R_centroid": 1.103,
+   "Z_centroid": 1.09984
+  },
+  "P4L": {
+   "geometry_prefix": "p4_lower",
+   "n_elements": 23,
+   "elements": [
+    {
+     "R": 1.461,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.461,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.461,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.487,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.487,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.487,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.513,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.513,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.513,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.539,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.539,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.539,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.565,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.565,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.565,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.435,
+     "Z": -1.04201,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.435,
+     "Z": -1.08001,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.435,
+     "Z": -1.11801,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.435,
+     "Z": -1.15601,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.46,
+     "Z": -1.15901,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.485,
+     "Z": -1.15901,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.51,
+     "Z": -1.15901,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.535,
+     "Z": -1.15901,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 1.4967391304347826,
+   "Z_centroid": -1.0970534782608696
+  },
+  "P4U": {
+   "geometry_prefix": "p4_upper",
+   "n_elements": 23,
+   "elements": [
+    {
+     "R": 1.4595,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4595,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4595,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4865,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4865,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4865,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5135,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5135,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5135,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5405,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5405,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5405,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5675,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5675,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5675,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4325,
+     "Z": 1.04519,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4325,
+     "Z": 1.08319,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4325,
+     "Z": 1.12119,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4325,
+     "Z": 1.15919,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4575,
+     "Z": 1.16619,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.4825,
+     "Z": 1.16619,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5075,
+     "Z": 1.16619,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.5325,
+     "Z": 1.16619,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 1.496195652173913,
+   "Z_centroid": 1.1009291304347826
+  },
+  "P5L": {
+   "geometry_prefix": "p5_lower",
+   "n_elements": 23,
+   "elements": [
+    {
+     "R": 1.611,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.611,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.611,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": -0.438792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": -0.476792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": -0.514792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": -0.552792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.61,
+     "Z": -0.555792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.635,
+     "Z": -0.555792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.66,
+     "Z": -0.555792,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.685,
+     "Z": -0.555792,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 1.6467391304347827,
+   "Z_centroid": -0.4938354782608696
+  },
+  "P5U": {
+   "geometry_prefix": "p5_upper",
+   "n_elements": 23,
+   "elements": [
+    {
+     "R": 1.611,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.611,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.611,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.637,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.663,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.689,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.715,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": 0.447466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": 0.485466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": 0.523466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.585,
+     "Z": 0.561466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.61,
+     "Z": 0.564466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.635,
+     "Z": 0.564466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.66,
+     "Z": 0.564466,
+     "width": 0.024,
+     "height": 0.037
+    },
+    {
+     "R": 1.685,
+     "Z": 0.564466,
+     "width": 0.024,
+     "height": 0.037
+    }
+   ],
+   "R_centroid": 1.6467391304347827,
+   "Z_centroid": 0.5025094782608696
+  }
+ },
+ "solenoid_elements": [
+  {
+   "R": 0.119,
+   "Z": -1.470606,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.470606,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.470606,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.470606,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.452632,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.452632,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.452632,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.452632,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.434657,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.434657,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.434657,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.434657,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.416683,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.416683,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.416683,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.416683,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.398708,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.398708,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.398708,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.398708,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.380734,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.380734,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.380734,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.380734,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.362759,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.362759,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.362759,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.362759,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.344785,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.344785,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.344785,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.344785,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.32681,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.32681,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.32681,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.32681,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.308836,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.308836,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.308836,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.308836,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.290861,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.290861,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.290861,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.290861,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.272887,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.272887,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.272887,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.272887,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.254912,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.254912,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.254912,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.254912,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.236938,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.236938,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.236938,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.236938,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.218963,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.218963,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.218963,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.218963,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.200989,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.200989,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.200989,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.200989,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.183014,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.183014,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.183014,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.183014,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.16504,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.16504,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.16504,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.16504,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.147065,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.147065,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.147065,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.147065,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.12909,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.12909,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.12909,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.12909,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.111116,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.111116,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.111116,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.111116,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.093141,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.093141,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.093141,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.093141,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.075167,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.075167,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.075167,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.075167,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.057192,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.057192,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.057192,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.057192,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.039218,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.039218,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.039218,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.039218,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.021243,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.021243,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.021243,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.021243,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -1.003269,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -1.003269,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -1.003269,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -1.003269,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.985294,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.985294,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.985294,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.985294,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.96732,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.96732,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.96732,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.96732,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.949345,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.949345,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.949345,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.949345,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.931371,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.931371,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.931371,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.931371,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.913396,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.913396,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.913396,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.913396,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.895422,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.895422,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.895422,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.895422,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.877447,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.877447,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.877447,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.877447,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.859473,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.859473,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.859473,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.859473,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.841498,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.841498,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.841498,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.841498,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.823524,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.823524,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.823524,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.823524,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.805549,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.805549,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.805549,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.805549,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.787575,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.787575,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.787575,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.787575,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.7696,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.7696,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.7696,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.7696,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.751625,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.751625,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.751625,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.751625,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.733651,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.733651,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.733651,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.733651,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.715676,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.715676,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.715676,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.715676,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.697702,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.697702,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.697702,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.697702,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.679727,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.679727,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.679727,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.679727,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.661753,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.661753,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.661753,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.661753,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.643778,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.643778,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.643778,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.643778,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.625804,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.625804,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.625804,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.625804,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.607829,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.607829,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.607829,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.607829,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.589855,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.589855,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.589855,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.589855,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.57188,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.57188,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.57188,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.57188,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.553906,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.553906,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.553906,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.553906,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.535931,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.535931,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.535931,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.535931,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.517957,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.517957,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.517957,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.517957,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.499982,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.499982,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.499982,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.499982,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.482008,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.482008,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.482008,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.482008,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.464033,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.464033,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.464033,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.464033,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.446059,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.446059,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.446059,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.446059,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.428084,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.428084,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.428084,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.428084,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.410109,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.410109,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.410109,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.410109,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.392135,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.392135,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.392135,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.392135,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.37416,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.37416,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.37416,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.37416,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.356186,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.356186,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.356186,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.356186,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.338211,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.338211,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.338211,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.338211,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.320237,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.320237,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.320237,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.320237,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.302262,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.302262,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.302262,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.302262,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.284288,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.284288,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.284288,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.284288,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.266313,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.266313,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.266313,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.266313,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.248339,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.248339,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.248339,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.248339,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.230364,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.230364,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.230364,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.230364,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.21239,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.21239,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.21239,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.21239,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.194415,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.194415,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.194415,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.194415,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.176441,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.176441,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.176441,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.176441,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.158466,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.158466,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.158466,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.158466,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.140492,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.140492,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.140492,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.140492,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.122517,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.122517,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.122517,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.122517,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.104543,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.104543,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.104543,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.104543,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.086568,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.086568,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.086568,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.086568,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.068594,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.068594,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.068594,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.068594,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.050619,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.050619,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.050619,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.050619,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.032644,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.032644,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.032644,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.032644,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": -0.01467,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": -0.01467,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": -0.01467,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": -0.01467,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.003304,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.003304,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.003304,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.003304,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.021279,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.021279,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.021279,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.021279,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.039254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.039254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.039254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.039254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.057228,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.057228,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.057228,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.057228,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.075203,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.075203,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.075203,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.075203,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.093177,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.093177,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.093177,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.093177,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.111152,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.111152,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.111152,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.111152,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.129126,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.129126,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.129126,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.129126,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.147101,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.147101,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.147101,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.147101,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.165075,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.165075,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.165075,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.165075,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.18305,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.18305,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.18305,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.18305,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.201024,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.201024,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.201024,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.201024,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.218999,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.218999,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.218999,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.218999,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.236973,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.236973,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.236973,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.236973,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.254948,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.254948,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.254948,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.254948,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.272922,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.272922,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.272922,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.272922,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.290897,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.290897,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.290897,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.290897,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.308871,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.308871,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.308871,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.308871,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.326846,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.326846,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.326846,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.326846,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.34482,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.34482,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.34482,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.34482,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.362795,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.362795,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.362795,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.362795,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.38077,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.38077,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.38077,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.38077,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.398744,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.398744,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.398744,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.398744,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.416719,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.416719,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.416719,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.416719,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.434693,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.434693,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.434693,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.434693,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.452668,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.452668,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.452668,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.452668,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.470642,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.470642,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.470642,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.470642,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.488617,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.488617,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.488617,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.488617,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.506591,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.506591,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.506591,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.506591,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.524566,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.524566,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.524566,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.524566,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.54254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.54254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.54254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.54254,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.560515,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.560515,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.560515,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.560515,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.578489,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.578489,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.578489,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.578489,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.596464,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.596464,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.596464,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.596464,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.614438,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.614438,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.614438,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.614438,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.632413,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.632413,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.632413,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.632413,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.650387,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.650387,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.650387,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.650387,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.668362,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.668362,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.668362,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.668362,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.686337,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.686337,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.686337,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.686337,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.704311,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.704311,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.704311,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.704311,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.722286,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.722286,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.722286,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.722286,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.74026,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.74026,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.74026,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.74026,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.758235,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.758235,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.758235,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.758235,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.776209,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.776209,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.776209,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.776209,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.794184,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.794184,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.794184,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.794184,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.812158,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.812158,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.812158,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.812158,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.830133,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.830133,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.830133,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.830133,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.848107,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.848107,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.848107,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.848107,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.866082,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.866082,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.866082,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.866082,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.884056,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.884056,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.884056,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.884056,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.902031,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.902031,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.902031,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.902031,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.920005,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.920005,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.920005,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.920005,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.93798,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.93798,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.93798,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.93798,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.955954,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.955954,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.955954,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.955954,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.973929,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.973929,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.973929,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.973929,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 0.991903,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 0.991903,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 0.991903,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 0.991903,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.009878,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.009878,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.009878,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.009878,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.027852,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.027852,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.027852,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.027852,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.045827,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.045827,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.045827,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.045827,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.063801,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.063801,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.063801,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.063801,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.081776,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.081776,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.081776,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.081776,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.099751,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.099751,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.099751,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.099751,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.117725,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.117725,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.117725,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.117725,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.1357,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.1357,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.1357,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.1357,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.153674,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.153674,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.153674,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.153674,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.171649,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.171649,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.171649,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.171649,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.189623,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.189623,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.189623,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.189623,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.207598,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.207598,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.207598,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.207598,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.225572,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.225572,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.225572,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.225572,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.243547,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.243547,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.243547,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.243547,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.261521,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.261521,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.261521,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.261521,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.279496,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.279496,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.279496,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.279496,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.29747,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.29747,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.29747,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.29747,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.315445,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.315445,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.315445,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.315445,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.333419,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.333419,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.333419,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.333419,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.351394,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.351394,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.351394,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.351394,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.369368,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.369368,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.369368,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.369368,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.387343,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.387343,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.387343,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.387343,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.405317,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.405317,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.405317,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.405317,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.423292,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.423292,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.423292,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.423292,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.441266,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.441266,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.441266,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.441266,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.119,
+   "Z": 1.459241,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.131813,
+   "Z": 1.459241,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.144625,
+   "Z": 1.459241,
+   "width": 0.0115,
+   "height": 0.017
+  },
+  {
+   "R": 0.157438,
+   "Z": 1.459241,
+   "width": 0.0115,
+   "height": 0.017
+  }
+ ],
+ "p6_elements_not_in_inputs": {
+  "p6_lower": [
+   {
+    "R": 1.4294,
+    "Z": -0.9331,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4514,
+    "Z": -0.9331,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4294,
+    "Z": -0.8571,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4514,
+    "Z": -0.8571,
+    "width": 0.021,
+    "height": 0.052
+   }
+  ],
+  "p6_upper": [
+   {
+    "R": 1.4298,
+    "Z": 0.8567,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4518,
+    "Z": 0.8567,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4298,
+    "Z": 0.9327,
+    "width": 0.021,
+    "height": 0.052
+   },
+   {
+    "R": 1.4518,
+    "Z": 0.9327,
+    "width": 0.021,
+    "height": 0.052
+   }
+  ]
+ },
+ "limiter": {
+  "R": [
+   1.9,
+   1.555104,
+   1.555104,
+   1.407931,
+   1.407931,
+   1.039931,
+   1.039931,
+   1.9,
+   1.9,
+   0.564931,
+   0.564931,
+   0.7835,
+   0.7835,
+   0.58259,
+   0.4165,
+   0.28,
+   0.28,
+   0.195244,
+   0.195244,
+   0.28,
+   0.28,
+   0.4165,
+   0.58259,
+   0.7835,
+   0.7835,
+   0.564931,
+   0.564931,
+   1.9,
+   1.9,
+   1.039931,
+   1.039931,
+   1.407931,
+   1.407931,
+   1.555104,
+   1.555104,
+   1.9,
+   1.9
+  ],
+  "Z": [
+   0.405,
+   0.405,
+   0.8225,
+   0.8225,
+   1.033,
+   1.033,
+   1.195,
+   1.195,
+   1.825,
+   1.825,
+   1.728082,
+   1.728082,
+   1.715582,
+   1.547,
+   1.547,
+   1.6835,
+   1.229089,
+   1.0835,
+   -1.0835,
+   -1.229089,
+   -1.6835,
+   -1.547,
+   -1.547,
+   -1.715582,
+   -1.728082,
+   -1.728082,
+   -1.825,
+   -1.825,
+   -1.195,
+   -1.195,
+   -1.033,
+   -1.033,
+   -0.8225,
+   -0.8225,
+   -0.405,
+   -0.405,
+   0.405
+  ],
+  "provenance": "FAIR-MAST level-2 zarr, shot 30421: https://s3.echo.stfc.ac.uk/mast/level2/shots/30421.zarr (group wall, arrays limiter_r, limiter_z); geometry ingested by https://github.com/ukaea/fair-mast-ingestion from the MAST EFIT++ XML configs (mapping pointers: https://github.com/ukaea/IMAS_MAST_mappings, unprocessed/magnetics_sql_dump.txt: magnetics.xml, pfSystems.xml, limiter.xml)"
+ },
+ "cross_check_FreeGS": {
+  "source": "https://github.com/freegs-plasma/freegs/blob/master/freegs/machine.py, def MAST()",
+  "coils": {
+   "P2U": [
+    0.49,
+    1.76
+   ],
+   "P2L": [
+    0.49,
+    -1.76
+   ],
+   "P3U": [
+    1.1,
+    1.1
+   ],
+   "P3L": [
+    1.1,
+    -1.1
+   ],
+   "P4U": [
+    1.51,
+    1.095
+   ],
+   "P4L": [
+    1.51,
+    -1.095
+   ],
+   "P5U": [
+    1.66,
+    0.52
+   ],
+   "P5L": [
+    1.66,
+    -0.52
+   ],
+   "P6U": [
+    1.5,
+    0.9
+   ],
+   "P6L": [
+    1.5,
+    -0.9
+   ],
+   "P1_solenoid": {
+    "R": 0.15,
+    "Zmin": -1.4,
+    "Zmax": 1.4,
+    "turns": 100
+   }
+  }
+ }
+}

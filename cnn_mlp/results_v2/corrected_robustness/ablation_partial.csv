@@ -1,0 +1,5 @@
+config,"Clean boundary_cm_mean,boundary_cm_std,nrmse_mean,nrmse_std","Channel loss (6) boundary_cm_mean,boundary_cm_std,nrmse_mean,nrmse_std","Group loss (magnetics) boundary_cm_mean,boundary_cm_std,nrmse_mean,nrmse_std","Temporal gap (40%) boundary_cm_mean,boundary_cm_std,nrmse_mean,nrmse_std","Pre-disruption (25%) boundary_cm_mean,boundary_cm_std,nrmse_mean,nrmse_std",latency_ms,seeds
++ flux-loop consistency loss (mask + PINN),3.6509 0 0.15138 0,21.479 0 0.39924 0,15.29 0 0.26262 0,23.283 0 0.48431 0,12.11 0 0.31457 0,,1
+(supp.) mask+PINN + best fixed imputation,3.6509 0 0.15138 0,19.06 0 0.41128 0,15.29 0 0.26262 0,5.3269 0 0.16449 0,3.6523 0 0.15088 0,,1
++ adaptive mitigation,   ,   ,   ,   ,   ,,0
+Oracle mitigation,   ,   ,   ,   ,   ,,0

@@ -1,0 +1,1925 @@
+#!/usr/bin/env python
+"""TokaMark task_1-3 CNN baseline on Kaggle: prep | train | eval | plot | summary.
+
+Usage: python pipeline.py {prep,train,eval,plot,summary} [--split random|temporal]
+All settings come from environment variables (see CFG below), set by the notebook.
+
+Protocol notes (deviations from the official run_training.py / run_evaluation.py):
+- Custom step-based training loop mirroring src/trainer.py:BatchStepTrainer (same
+  Adam(lr, wd=1e-4) + MultiOutputMSELoss, validate_every, patience, drop_last=True),
+  extended with: wall-clock deadline, periodic + atomic checkpointing, resume from
+  last.pt, CUDA-OOM reporting, and non-finite-loss skipping.
+- Shots are a random subset OF THE OFFICIAL SPLIT LISTS (membership never mixed),
+  chosen under a byte budget; official stats/outlier/split files always match the
+  split protocol. test uses shuffle_windows=False (official eval behaviour).
+"""
+import os, sys, json, time, math, random, shutil, zipfile, argparse, subprocess
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+T0 = float(os.environ.get("TM_T0", time.time()))  # session start (set by notebook)
+
+
+def env(k, d):
+    return type(d)(os.environ.get(k, d))
+
+
+# Tuned hyper-parameters (written by `tune`): explicit env var > TM_TUNED file > default.
+_TUNED = json.load(open(os.environ["TM_TUNED"]))["chosen"] if os.environ.get("TM_TUNED") else {}
+
+
+def hp(var, key, d):
+    return type(d)(os.environ[var]) if var in os.environ else type(d)(_TUNED.get(key, d))
+
+
+# Ablation variant: plain | mask (failure-aware mask + augmentation, no PINN) | mask_pinn (+ flux-loop loss).
+# TM_VARIANT is a convenience over TM_FAILURE_AWARE / TM_PINN_LAMBDA; unset -> the legacy two variables decide.
+_VAR = os.environ.get("TM_VARIANT", "").lower().strip()
+if _VAR not in ("", "plain", "mask", "mask_pinn"):
+    raise ValueError(f"TM_VARIANT must be plain|mask|mask_pinn, got {_VAR!r}")
+_FA = (_VAR != "plain") if _VAR else env("TM_FAILURE_AWARE", "0") == "1"
+_PINN = {"plain": 0.0, "mask": 0.0}.get(_VAR, env("TM_PINN_LAMBDA", 0.1))
+if _VAR == "mask_pinn" and _PINN <= 0:
+    raise ValueError("TM_VARIANT=mask_pinn needs TM_PINN_LAMBDA > 0")
+
+CFG = dict(
+    task=env("TM_TASK", "task_1-3"),
+    model=env("TM_MODEL", "mlp"),                         # mlp (CNN+MLP) | lstm (CNN+LSTM) | transformer (one token per sensor)
+    seed=env("TM_SEED", 23),                              # init, augmentation and data order (NOT the shot selection)
+    select_seed=env("TM_SELECT_SEED", 23),                # shot selection only; selection.json is reused when present
+    run_tag=env("TM_RUN_TAG", ""),                        # "" legacy out/<split>/; "auto" -> <model>_<variant>_s<seed>; else literal
+    repo_id="UKAEA-IBM-STFC/tokamark-v1",
+    work=env("TM_WORK", "/kaggle/working"),
+    data_root=env("TM_DATA_ROOT", "/tmp/tokamark_data"),
+    tokamark_dir=env("TM_TOKAMARK", "/kaggle/working/tokamark"),
+    baseline_dir=env("TM_BASELINE", "/kaggle/working/tokamark_baseline"),
+    data_budget_gb=env("TM_DATA_GB", 40.0),
+    prep_deadline_h=env("TM_PREP_DEADLINE_H", 1.75),      # hours since T0: stop downloading
+    train_deadline_h=env("TM_TRAIN_DEADLINE_H", 8.0),     # hours since T0: stop training
+    batch_size=env("TM_BATCH", 512),
+    validate_every=env("TM_VALIDATE_EVERY", 100),
+    patience=env("TM_PATIENCE", 10),
+    lr=hp("TM_LR", "lr", 1e-4),
+    weight_decay=hp("TM_WEIGHT_DECAY", "weight_decay", 1e-4),   # official Adam weight decay
+    dropout=hp("TM_DROPOUT", "dropout", 0.0),             # latent dropout before the psi decoder (all models); also inside the transformer
+    d_model=hp("TM_D_MODEL", "d_model", 64),              # transformer token width
+    tx_layers=env("TM_TX_LAYERS", 3),
+    tx_heads=env("TM_TX_HEADS", 4),
+    tune_trials=env("TM_TUNE_TRIALS", 6),                 # `tune`: random-search trials per model
+    tune_steps=env("TM_TUNE_STEPS", 300),                 # `tune`: training steps per trial (validation split only)
+    tune_seed=env("TM_TUNE_SEED", 7),                     # `tune`: same sampled lr/wd/dropout list for every model
+    train_from_scratch=env("TM_TRAIN_FROM_SCRATCH", "0") == "1",
+    max_steps=env("TM_MAX_STEPS", 10_000_000),
+    dl_workers=env("TM_DL_WORKERS", -1),                  # -1 -> auto; 0 -> main process only; N -> N workers
+    use_dp=env("TM_USE_DP", "auto"),                      # auto|0|1
+    ckpt_every_s=env("TM_CKPT_EVERY_S", 600),
+    force_reselect=env("TM_FORCE_RESELECT", "0") == "1",
+    plot_windows=env("TM_PLOT_WINDOWS", 3),
+    git_revs=env("TM_GIT_REVS", "unknown"),
+    index_threads=env("TM_INDEX_THREADS", 12),            # concurrency; global req/s throttle (_RL_RPS) is the real limiter
+    index_stop_gb=env("TM_INDEX_STOP_GB", 0.0),           # 0 -> auto: max(3, 1.6 x data budget)
+    index_min_tars=env("TM_INDEX_MIN_TARS", 6),           # spread subset across >= this many archives
+    failure_aware=_FA,                                    # True -> Module 2 failure-aware masked architecture + augmentation
+    fail_aug_p=env("TM_FAIL_AUG_P", 0.5),                 # probability of failure augmentation during training
+    pinn_lambda=_PINN,                                    # weight of flux-loop consistency loss (0 -> term not computed at all)
+    pinn_mode=env("TM_PINN_MODE", "measured").lower().strip(),   # measured: real loop positions + measured flux | legacy: old pixels vs true psi
+    variant=_VAR or ("plain" if not _FA else ("mask" if _PINN <= 0 else "mask_pinn")),
+)
+if CFG["pinn_mode"] not in ("measured", "legacy"):
+    raise ValueError(f"TM_PINN_MODE must be measured|legacy, got {CFG['pinn_mode']!r}")
+if CFG["run_tag"].lower() == "auto":   # legacy-PINN runs get their own dir so they never collide with measured ones
+    CFG["run_tag"] = (f"{CFG['model'].lower().strip()}_{CFG['variant']}"
+                      f"{'_legacy' if CFG['variant'] == 'mask_pinn' and CFG['pinn_mode'] == 'legacy' else ''}_s{CFG['seed']}")
+
+
+def log(*a):
+    print(f"[{(time.time() - T0) / 60:7.1f}m]", *a, flush=True)
+
+
+def paths(split):
+    base = os.path.join(CFG["work"], "out", split)
+    out = os.path.join(base, CFG["run_tag"]) if CFG["run_tag"] else base   # per-run dir; selection stays shared in base
+    return dict(
+        base=base,
+        out=out,
+        data=os.path.join(CFG["data_root"], split),
+        index=os.path.join(CFG["work"], "out", "tar_index.json"),
+        sel=os.path.join(base, "selection.json"),
+        model_dir=os.path.join(out, "model") + "/",
+        results=os.path.join(out, "results") + "/",
+        figures=os.path.join(out, "figures") + "/",
+    )
+
+
+def setup_imports():
+    for p in (os.path.join(CFG["tokamark_dir"], "src"), CFG["baseline_dir"]):
+        if p not in sys.path:
+            sys.path.insert(0, p)
+    os.chdir(CFG["baseline_dir"])
+
+
+def split_files(split):
+    """Official split CSV + stats + outlier file; ALWAYS matched per protocol."""
+    setup_imports()
+    from tokamark.tools.path import (RANDOM_SPLIT_TOKAMARK_DATA_SPLITS_FILE as RS, RANDOM_SPLIT_SIGNALS_STATS_FILE as RT,
+                                     TEMPORAL_SPLIT_TOKAMARK_DATA_SPLITS_FILE as TS, TEMPORAL_SPLIT_SIGNALS_STATS_FILE as TT)
+    from MAST_tools.utils.path_utils import RANDOM_SPLIT_OUTLIER_METADATA_FILE as RO, TEMPORAL_SPLIT_OUTLIER_METADATA_FILE as TO
+    if split == "random":
+        return RS, RT, RO
+    if split == "temporal":
+        return TS, TT, TO
+    raise ValueError(f"unknown split {split}")
+
+
+def patch_stats_module(stats):
+    """Point get_signals_metadata at the stats file of the CURRENT split protocol.
+
+    Upstream get_task_metadata() always reads the RANDOM-split stats file, and
+    tokamark.evaluator binds get_signals_metadata at import time; patch both module
+    references so metadata and NRMSE normalisation always match the protocol.
+    """
+    setup_imports()
+    import tokamark.tasks as _tt
+    import tokamark.evaluator as _te
+    if getattr(_tt, "_tm_patched", None) == stats:
+        return
+    orig = getattr(_tt, "_tm_orig", None) or _tt.get_signals_metadata
+    _tt._tm_orig = orig
+    patched = lambda file_path=stats, _o=orig: _o(file_path=file_path)  # noqa: E731
+    _tt.get_signals_metadata = patched
+    _te.get_signals_metadata = patched
+    _tt._tm_patched = stats
+    log(f"patched get_signals_metadata -> {os.path.basename(stats)}")
+
+
+def first_batch(loader, tries=100):
+    """Return the first non-empty batch (collate_fn may yield None for empty batches)."""
+    it = iter(loader)
+    for _ in range(tries):
+        b = next(it, None)
+        if b is not None:
+            return b
+    raise RuntimeError("loader produced no non-empty batch")
+
+
+def first_batch_timed(loader, tag="first batch", tries=100, timeout_s=1800):
+    """first_batch with a heartbeat + hard wall-clock cap.
+
+    A silent hang here (workers stuck on IPC / fork-after-CUDA / slow zarr reads) used
+    to look like training forever; now it is visible every 30 s and fails loudly.
+    """
+    import threading
+    res, done = {}, threading.Event()
+
+    def _work():
+        try:
+            res["b"] = first_batch(loader, tries)
+        except BaseException as e:  # noqa
+            res["e"] = e
+        finally:
+            done.set()
+
+    threading.Thread(target=_work, daemon=True).start()
+    t0 = time.time()
+    while not done.wait(30):
+        log(f"  waiting for {tag}... {time.time() - t0:.0f}s (workers are still producing it)")
+        if time.time() - t0 > timeout_s:
+            raise RuntimeError(
+                f"{tag} did not arrive within {timeout_s}s. This is a dataloader hang, not training. "
+                f"Try TM_DL_WORKERS=0 (main-process loading, no workers/IPC) or a smaller TM_BATCH "
+                f"({CFG['batch_size']} -> 128/64).")
+    if "e" in res:
+        raise res["e"]
+    return res["b"]
+
+
+# ======================================================================================
+# PREP: index tars with range requests, select shots per official split, fetch members
+# ======================================================================================
+def hf_headers():
+    tok = os.environ.get("HF_TOKEN")
+    return {"Authorization": f"Bearer {tok}"} if tok else {}
+
+
+import threading
+_TLS = threading.local()
+
+
+def _session():
+    """Per-thread requests.Session: TLS keep-alive turns ~1-3 s/request into ~0.2 s."""
+    s = getattr(_TLS, "session", None)
+    if s is None:
+        import requests
+        s = _TLS.session = requests.Session()
+    return s
+
+
+class _Deadline(Exception):
+    pass
+
+
+_RL_LOCK = threading.Lock()
+_RL_NEXT = [0.0]        # earliest wall-clock time the next request may start (shared throttle)
+_RL_RPS = [float(os.environ.get("TM_HF_RPS", 8))]    # current allowed req/s (adaptive)
+_RL_RPS_MIN = max(1.0, float(os.environ.get("TM_HF_RPS_MIN", 2)))    # floor when throttled
+_RL_429 = [0]           # consecutive-ish 429 counter (decays on success)
+
+
+def _throttle():
+    """Block until this thread may issue the next HF range request.
+
+    All threads share one token budget (req/s). The rate is ADAPTIVE: each 429
+    halves it (down to _RL_RPS_MIN) and every ~50 clean requests nudges it back up
+    toward the configured ceiling. So an over-aggressive TM_HF_RPS self-corrects
+    instead of failing — the setting sets the ceiling, the server decides the pace.
+    """
+    with _RL_LOCK:
+        now = time.time()
+        wait = _RL_NEXT[0] - now
+        if wait > 0:
+            time.sleep(wait)
+        _RL_NEXT[0] = max(now, _RL_NEXT[0]) + 1.0 / max(0.5, _RL_RPS[0])
+
+
+def _throttle_on_429():
+    """Called on HTTP 429: halve the shared rate (floor _RL_RPS_MIN) so all threads slow."""
+    with _RL_LOCK:
+        _RL_429[0] += 1
+        _RL_RPS[0] = max(_RL_RPS_MIN, _RL_RPS[0] / 2.0)
+        return _RL_RPS[0]
+
+
+def _throttle_on_ok():
+    """Called on success: slowly recover toward the configured ceiling."""
+    with _RL_LOCK:
+        _RL_429[0] = max(0, _RL_429[0] - 1)
+        if _RL_429[0] == 0:
+            ceiling = float(os.environ.get("TM_HF_RPS", 8))
+            _RL_RPS[0] = min(ceiling, _RL_RPS[0] * 1.05)
+
+
+def ranged_get(url, a, b, tries=10, deadline=None):
+    last = None
+    for i in range(tries):
+        if deadline is not None and time.time() > deadline:
+            raise _Deadline()
+        _throttle()
+        try:
+            r = _session().get(url, headers={**hf_headers(), "Range": f"bytes={a}-{b}"}, timeout=60)
+            if r.status_code in (200, 206):
+                if r.status_code == 200 and len(r.content) > (b - a + 1):  # server ignored Range
+                    raise RuntimeError("Range ignored by server")
+                _throttle_on_ok()
+                return r.content
+            last = f"HTTP {r.status_code}"
+            if r.status_code == 429:
+                # 429 = Too Many Requests. Shrink the shared rate (adaptive), honour
+                # Retry-After, and push the shared clock forward so siblings slow too.
+                rate = _throttle_on_429()
+                ra = r.headers.get("Retry-After")
+                try:
+                    pause = float(ra) if ra is not None else 0.0
+                except ValueError:
+                    pause = 0.0
+                pause = max(pause, min(120.0, 3.0 * (2 ** i)))
+                with _RL_LOCK:
+                    _RL_NEXT[0] = max(_RL_NEXT[0], time.time() + pause)
+                time.sleep(pause + random.random() * 2.0)
+                if i == 2:
+                    log(f"  HF rate-limiting (429): shared rate -> {rate:.1f} req/s (auto-adapting)")
+                continue
+            if r.status_code in (500, 502, 503, 504):
+                time.sleep(min(60.0, 2.0 * (2 ** i)) + random.random())
+                continue
+            time.sleep(min(30.0, 1.0 * (2 ** i)))
+        except _Deadline:
+            raise
+        except Exception as e:  # noqa
+            last = repr(e)
+            time.sleep(min(30.0, 1.0 * (2 ** i)) + random.random())
+    raise RuntimeError(f"range {a}-{b} failed after {tries} tries: {last}")
+
+
+def make_ranged_reader(url, total, deadline=None, span=4096):
+    """Small-read-optimised reader for parse_tar_headers.
+
+    Header walks issue many 512-byte reads a few KB apart; HF resolve latency makes
+    one-request-per-read prohibitively slow, so each read pulls a `span`-byte window
+    and serves nearby reads from a one-window cache.
+    """
+    buf = {"start": -1, "data": b""}
+
+    def read(a, n):
+        end = min(a + n, total)
+        if a >= total or end <= a:
+            return b""
+        if buf["start"] <= a and end <= buf["start"] + len(buf["data"]):
+            o = a - buf["start"]
+            return buf["data"][o:o + (end - a)]
+        b = min(a + max(span, n) - 1, total - 1)
+        data = ranged_get(url, a, b, deadline=deadline)
+        buf["start"], buf["data"] = a, data
+        return data[: end - a]
+
+    return read
+
+
+def _octal_or_b256(field):
+    if field[0] & 0x80:
+        return int.from_bytes(field, "big") & ((1 << (8 * len(field) - 1)) - 1)
+    s = field.split(b"\0")[0].strip()
+    return int(s, 8) if s else 0
+
+
+def parse_tar_headers(read, total):
+    """Walk a tar using read(offset, length)->bytes. Returns [(name, data_offset, size)]."""
+    members, off, pending = [], 0, None
+    while off + 512 <= total:
+        h = read(off, 512)
+        if len(h) < 512 or h.count(0) == 512:
+            break
+        name = h[:100].split(b"\0")[0].decode("utf8", "replace")
+        if h[257:262] == b"ustar" and h[345:500].strip(b"\0"):
+            name = h[345:500].split(b"\0")[0].decode("utf8", "replace") + "/" + name
+        size = _octal_or_b256(h[124:136])
+        flag = h[156:157]
+        data_off = off + 512
+        nxt = data_off + ((size + 511) // 512) * 512
+        if flag in (b"L", b"x", b"g", b"K"):
+            data = read(data_off, size)
+            if flag == b"L":
+                pending = data.split(b"\0")[0].decode("utf8", "replace")
+            elif flag == b"x":
+                for rec in data.split(b"\n"):
+                    if b" path=" in rec:
+                        pending = rec.split(b" path=", 1)[1].decode("utf8", "replace")
+            off = nxt
+            continue
+        if flag in (b"0", b"\0"):
+            members.append((pending or name, data_off, size))
+        pending = None
+        off = nxt
+    return members
+
+
+def build_index(deadline_ts, hard_deadline=None):
+    """Index HF tars via range-request header walks. Resumable (index saved per tar).
+
+    Tars are walked in a seeded-shuffled order and indexing stops early once the
+    indexed shot bytes cover the download budget (x1.6 margin) - we only need enough
+    archives to draw the subset, not the whole 500+ GB repo.
+
+    `deadline_ts` is a SOFT deadline: once it passes, in-flight walks are cancelled
+    when we already have enough (stop_reached) OR enough tars to draw a valid subset;
+    otherwise indexing continues up to `hard_deadline` (the prep deadline), because an
+    under-sized index risks the fatal <5-shot guard. Re-runs continue from the index.
+    """
+    hard_deadline = hard_deadline or deadline_ts
+    from huggingface_hub import HfApi, hf_hub_url
+    P = paths("random")
+    os.makedirs(os.path.dirname(P["index"]), exist_ok=True)
+    idx = json.load(open(P["index"])) if os.path.exists(P["index"]) else {"tars": {}, "shots": {}}
+    api = HfApi()
+    files = [f for f in api.list_repo_tree(CFG["repo_id"], repo_type="dataset", recursive=True)
+             if getattr(f, "size", None) is not None and f.path.endswith(".tar")]
+    files.sort(key=lambda f: f.path)
+    log(f"HF repo lists {len(files)} tar files, {sum(f.size for f in files) / 1e9:.1f} GB total")
+    indexed_bytes = sum(v[2] for v in idx["shots"].values())
+    stop_gb = CFG["index_stop_gb"] or max(3.0, 1.6 * CFG["data_budget_gb"])
+    min_tars = max(1, CFG["index_min_tars"])
+    log(f"index: {len(idx['shots'])} shots / {indexed_bytes / 1e9:.1f} GB indexed (cached) across {len(idx['tars'])} tars; "
+        f"stop submitting beyond {stop_gb:.1f} GB and >= {min_tars} tars")
+    todo = [f for f in files if f.path not in idx["tars"]]
+    random.Random(CFG["seed"]).shuffle(todo)  # seeded spread across the archive
+
+    def stop_reached():
+        return indexed_bytes >= stop_gb * 1e9 and len(idx["tars"]) >= min_tars
+
+    def usable():
+        # enough to select a valid subset even if a few tars still fail
+        return len(idx["tars"]) >= min(3, min_tars)
+
+    def work(f):
+        url = hf_hub_url(CFG["repo_id"], f.path, repo_type="dataset")
+        # reads may run until the HARD deadline; the loop cancels in-flight walks at the
+        # soft deadline when the index is already usable.
+        read = make_ranged_reader(url, f.size, deadline=hard_deadline)
+        nreq = [0]
+        mem = parse_tar_headers(lambda a, n: (nreq.__setitem__(0, nreq[0] + 1), read(a, n))[1], f.size)
+        return f.path, url, mem
+
+    with ThreadPoolExecutor(CFG["index_threads"]) as ex:
+        it = iter(todo)
+        pending = {}
+        retries = {}
+        inflight = set()
+
+        def submit():
+            if stop_reached():
+                return False
+            try:
+                f = next(it)
+            except StopIteration:
+                # second pass: re-queue tars that failed transiently (e.g. HTTP 429),
+                # never ones still being walked in another thread.
+                cand = [f for f in todo
+                        if f.path not in idx["tars"] and f.path not in inflight and retries.get(f.path, 0) < 3]
+                if not cand:
+                    return False
+                f = cand[0]
+                retries[f.path] = retries.get(f.path, 0) + 1
+            fu = ex.submit(work, f)
+            pending[fu] = f.path
+            inflight.add(f.path)
+            return True
+
+        need = stop_gb * 1e9 - indexed_bytes
+        cum, n_need = 0, 0
+        if need > 0:
+            for f in todo:
+                cum += f.size
+                n_need += 1
+                if cum >= need:
+                    break
+        min_tars_left = max(0, min_tars - len(idx["tars"]))
+        initial = min(CFG["index_threads"], max(n_need, min_tars_left), len(todo))
+        log(f"submitting {initial} tars now (need ~{n_need} for budget, {min_tars_left} for archive spread)")
+        for _ in range(initial):
+            if not submit():
+                break
+        last_tick = time.time()
+        while pending:
+            now = time.time()
+            if now > hard_deadline:
+                log(f"index HARD deadline reached ({len(idx['tars'])} tars, {indexed_bytes / 1e9:.1f} GB): "
+                    "cancelling remaining tar walks (download phase needs the rest)")
+                for fu in pending:
+                    fu.cancel()
+                break
+            if now > deadline_ts and (usable() or stop_reached()):
+                log(f"index soft deadline reached with a usable index ({len(idx['tars'])} tars, "
+                    f"{indexed_bytes / 1e9:.1f} GB): reserving the rest of prep for downloads")
+                for fu in pending:
+                    fu.cancel()
+                break
+            if now > deadline_ts and not usable():
+                # too small to guarantee a valid subset -> keep going to the hard deadline
+                if time.time() - last_tick > 120:
+                    log(f"  index past soft deadline but only {len(idx['tars'])} tars: continuing to hard deadline")
+                    last_tick = time.time()
+            if stop_reached():
+                log(f"enough archives indexed ({indexed_bytes / 1e9:.1f} GB across {len(idx['tars'])} tars): "
+                    "cancelling remaining tar walks")
+                for fu in pending:
+                    fu.cancel()
+                break
+            try:
+                done_fu = next(as_completed(list(pending), timeout=30), None)
+            except TimeoutError:
+                if time.time() - last_tick > 120:
+                    log(f"  indexing... {len(pending)} tars in flight, {len(idx['tars'])} done, {indexed_bytes / 1e9:.1f} GB")
+                    last_tick = time.time()
+                continue
+            fpath = pending.pop(done_fu)
+            inflight.discard(fpath)
+            try:
+                path, url, mem = done_fu.result()
+            except _Deadline:
+                log(f"  {fpath}: walk aborted at indexing deadline (will resume next run)")
+                continue
+            except Exception as e:  # noqa
+                log(f"  index FAILED for {fpath}: {repr(e)[:200]}")
+                submit()
+                continue
+            n = 0
+            for name, off, size in mem:
+                base = os.path.basename(name)
+                if not base.endswith(".zarr.zip"):
+                    continue
+                try:
+                    sid = int(base[: -len(".zarr.zip")])
+                except ValueError:
+                    log("  skip unparsable member", name)
+                    continue
+                if str(sid) not in idx["shots"]:
+                    idx["shots"][str(sid)] = [url, off, size]
+                    indexed_bytes += size
+                n += 1
+            idx["tars"][path] = n
+            log(f"  indexed {path}: {n} shots ({indexed_bytes / 1e9:.1f} GB total indexed)")
+            json.dump(idx, open(P["index"], "w"))
+            submit()
+    missing = [f.path for f in files if f.path not in idx["tars"]]
+    if missing and not stop_reached():
+        log(f"WARNING: {len(missing)} tars not indexed (deadline/network?): {missing[:5]} - re-run prep to continue")
+    log(f"index: {len(idx['shots'])} shots across {len(idx['tars'])} tars ({indexed_bytes / 1e9:.1f} GB)")
+    return idx
+
+
+def _quota_select(budget, official, avail, rng):
+    """Random-priority selection of shots under a byte quota (order stays random)."""
+    rng.shuffle(avail)
+    used, chosen = 0, []
+    for s in avail:
+        sz = s[1]
+        if used + sz > budget:
+            continue  # keep scanning: smaller shots may still fit
+        chosen.append(s[0])
+        used += sz
+    return chosen, used
+
+
+def choose_shots(split, idx):
+    from tokamark.data_split import read_data_split_csv
+    csv, _, _ = split_files(split)
+    tr, te, va = read_data_split_csv(csv)
+    official = {"train": [int(s) for s in tr], "val": [int(s) for s in va], "test": [int(s) for s in te]}
+    total = sum(len(v) for v in official.values())
+    free = shutil.disk_usage(paths(split)["data"]).free
+    budget = min(CFG["data_budget_gb"] * 1e9, max(0.0, free - 6e9))
+    log(f"[{split}] official counts: " + ", ".join(f"{k}={len(v)}" for k, v in official.items()) + f" (total {total}); byte budget {budget / 1e9:.1f} GB")
+    rng = random.Random(CFG["select_seed"])   # NOT TM_SEED: all seeds train on the same shots
+    MIN_SHOTS = 5  # matches the fatal guard in cmd_prep
+    sel, report = {}, {}
+    for k, shots in official.items():
+        avail = [(s, idx["shots"][str(s)][2]) for s in shots if str(s) in idx["shots"]]
+        quota = budget * len(shots) / total
+        rng.shuffle(avail)
+        # guarantee >= MIN_SHOTS per split even when the byte quota is tiny: the 5
+        # smallest available (cost-bounded), then fill the rest of the quota randomly.
+        guard = sorted(avail, key=lambda t: t[1])[:MIN_SHOTS]
+        guard_ids = {s for s, _ in guard}
+        used1 = sum(sz for _, sz in guard)
+        rest = [t for t in avail if t[0] not in guard_ids]
+        extra, used2 = _quota_select(max(0.0, quota - used1), shots, rest, rng)
+        chosen = [s for s, _ in guard] + extra
+        used = used1 + used2
+        sel[k] = chosen
+        report[k] = dict(official=len(shots), in_archives=len(avail), selected=len(chosen), gb=round(used / 1e9, 2),
+                         fraction_of_official=round(len(chosen) / max(1, len(shots)), 4))
+    log(f"[{split}] selection: {json.dumps(report)}")
+    return sel, report
+
+
+def fetch_member(sid, meta, data_dir):
+    url, off, size = meta
+    final = os.path.join(data_dir, f"{sid}.zarr")
+    if os.path.isdir(final):
+        return sid, True, "cached"
+    zpath = os.path.join(data_dir, f"{sid}.zip.part")
+    tmpd = os.path.join(data_dir, f"{sid}.extract")
+    try:
+        with open(zpath, "wb") as fh:
+            pos, CH = off, 64 * 2 ** 20
+            while pos < off + size:
+                end = min(pos + CH, off + size) - 1
+                fh.write(ranged_get(url, pos, end))
+                pos = end + 1
+        if os.path.getsize(zpath) != size:
+            raise RuntimeError("size mismatch")
+        shutil.rmtree(tmpd, ignore_errors=True)
+        with zipfile.ZipFile(zpath) as z:
+            z.extractall(tmpd)
+        root = tmpd
+        if not (os.path.exists(os.path.join(root, "zarr.json")) or os.path.exists(os.path.join(root, ".zgroup"))):
+            kids = [d for d in os.listdir(tmpd) if os.path.isdir(os.path.join(tmpd, d))]
+            if len(kids) == 1 and (os.path.exists(os.path.join(tmpd, kids[0], "zarr.json")) or os.path.exists(os.path.join(tmpd, kids[0], ".zgroup"))):
+                root = os.path.join(tmpd, kids[0])
+            else:
+                raise RuntimeError("no zarr root found in archive")
+        import zarr
+        zarr.open_group(root, mode="r")  # must open
+        os.replace(root, final)
+        return sid, True, "ok"
+    except Exception as e:  # noqa
+        return sid, False, repr(e)[:200]
+    finally:
+        shutil.rmtree(tmpd, ignore_errors=True)
+        if os.path.exists(zpath):
+            os.remove(zpath)
+
+
+def cmd_prep(split):
+    setup_imports()
+    P = paths(split)
+    os.makedirs(P["data"], exist_ok=True)
+    os.makedirs(P["base"], exist_ok=True)
+    deadline = T0 + CFG["prep_deadline_h"] * 3600
+    # Indexing gets a soft sub-deadline (a fraction of the prep window) so a slow or
+    # re-throttled index cannot starve downloads. But if the index is still short of the
+    # size it needs when the soft deadline hits, build_index is allowed to use up to the
+    # hard prep deadline instead - an under-sized index (which risks the fatal <5-shot
+    # guard) is worse than a shorter download window. See build_index(soft, hard).
+    index_frac = float(os.environ.get("TM_INDEX_TIME_FRAC", 0.25))
+    index_soft = min(deadline, T0 + CFG["prep_deadline_h"] * 3600 * index_frac)
+    idx = build_index(index_soft, hard_deadline=deadline)
+
+    reuse = None
+    if os.path.exists(P["sel"]) and not CFG["force_reselect"]:
+        prev = json.load(open(P["sel"]))
+        if prev.get("split") == split and min((len(v) for v in prev.get("shots", {}).values()), default=0) >= 5:
+            reuse = prev
+            log("reusing previous selection.json "
+                f"({json.dumps({k: len(v) for k, v in reuse['shots'].items()})}); "
+                "set TM_FORCE_RESELECT=1 to re-select shots")
+    if reuse:
+        sel, report = reuse["shots"], reuse["report"]
+        for k in sel:
+            report.setdefault(k, {})
+            report[k]["official"] = report[k].get("official", len(sel[k]))
+    else:
+        sel, report = choose_shots(split, idx)
+
+    # round-robin across splits so a deadline cut keeps the proportions; skip cached shots
+    prep_splits = [s.strip() for s in os.environ.get("TM_PREP_SPLITS", "train,val,test").split(",") if s.strip()]
+    order, lists = [], {k: [s for s in v if not os.path.isdir(os.path.join(P["data"], f"{s}.zarr"))]
+                        for k, v in sel.items() if k in prep_splits}
+    n_cached = sum(len(sel[k]) for k in prep_splits) - sum(len(lists[k]) for k in prep_splits)
+    if n_cached:
+        log(f"{n_cached} selected shots already on disk (cached)")
+    while any(lists.values()):
+        for k in prep_splits:
+            if lists.get(k):
+                order.append((k, lists[k].pop()))
+    done, failed = set(), {}
+    nworkers = int(os.environ.get("TM_FETCH_WORKERS", 4))
+    attempts = {}
+    inflight = set()
+    with ThreadPoolExecutor(nworkers) as ex:
+        it = iter(order)
+        futs = {}
+        def submit():
+            try:
+                k, s = next(it)
+            except StopIteration:
+                # re-queue shots that failed transiently (HTTP 429 etc.), bounded
+                # retries, and never ones already in flight in another thread.
+                cand = [(k, s) for (k, s) in order
+                        if s not in done and s not in inflight and attempts.get(s, 0) < 3]
+                if not cand:
+                    return False
+                k, s = cand[0]
+                attempts[s] = attempts.get(s, 0) + 1
+            futs[ex.submit(fetch_member, s, idx["shots"][str(s)], P["data"])] = (k, s)
+            inflight.add(s)
+            return True
+        for _ in range(nworkers * 2):
+            submit()
+        while futs:
+            fu = next(as_completed(list(futs)))
+            k, s = futs.pop(fu)
+            inflight.discard(s)
+            sid, ok, msg = fu.result()
+            if ok:
+                done.add(sid)
+                failed.pop(sid, None)
+            else:
+                failed[sid] = msg
+            if len(done) % 25 == 0:
+                log(f"  fetched {len(done)}/{len(order)} shots, failed {len(failed)}")
+            if time.time() < deadline:
+                submit()
+        # one last pass for still-failed shots while time remains (paced = fewer 429s)
+        for (k, s) in [t for t in order if t[1] not in done]:
+            if time.time() >= deadline or s in done or attempts.get(s, 0) >= 3:
+                continue
+            attempts[s] = attempts.get(s, 0) + 1
+            sid, ok, msg = fetch_member(s, idx["shots"][str(s)], P["data"])
+            if ok:
+                done.add(sid); failed.pop(sid, None)
+            else:
+                failed[sid] = msg
+    final = {}
+    for k, v in sel.items():
+        if k in prep_splits:
+            final[k] = [s for s in v if (s in done or os.path.isdir(os.path.join(P["data"], f"{s}.zarr")))]
+        else:
+            final[k] = v  # preserve the selected shot list for splits not being fetched
+    if time.time() >= deadline and any(len(final[k]) < len(sel[k]) for k in prep_splits):
+        log(f"prep deadline reached: using the {sum(len(final[k]) for k in prep_splits)} shots fetched so far "
+            f"({sum(len(sel[k]) for k in prep_splits) - sum(len(final[k]) for k in prep_splits)} still missing)")
+    report2 = {k: dict(report.get(k, {}), downloaded=len(final[k])) for k in final}
+    meta = dict(split=split, shots=final, report=report2, failed=failed,
+                config=dict(seed=CFG["select_seed"], task=CFG["task"], data_budget_gb=CFG["data_budget_gb"],
+                            repo_id=CFG["repo_id"], git_revs=CFG["git_revs"], selected_at_min=round((time.time() - T0) / 60, 1)))
+    json.dump(meta, open(P["sel"], "w"), indent=1)
+    log(f"[{split}] FINAL shot counts: " + json.dumps({k: len(v) for k, v in final.items()}))
+    if failed:
+        log(f"  {len(failed)} shots failed and were excluded; first errors: {list(failed.items())[:3]}")
+    req_splits = [k for k in prep_splits if k in final]
+    if req_splits and min(len(final[k]) for k in req_splits) < 5:
+        raise SystemExit(f"FATAL: fewer than 5 shots in some requested split ({req_splits}); refusing to train on a misleading subset. "
+                         "Check network/index logs above, extend TM_DATA_GB / TM_PREP_DEADLINE_H, and re-run prep.")
+
+
+# ======================================================================================
+# Datasets / model (mirrors tokamark_baseline/run_training.py exactly, minus subset_of_shots)
+# ======================================================================================
+def build_data(split, which, shuffle_windows=True):
+    setup_imports()
+    import torch
+    from torch.utils.data import DataLoader
+    from tokamark.tasks import get_task_config, get_task_metadata
+    from tokamark.tools.transforms.compose_transform import ComposeTransforms
+    from tokamark.data import initialize_MAST_dataset, initialize_TokaMark_dataset
+    from src.model_transform import ModelTransform_1, ModelTransform_2
+    from src.trainer import model_collate_fn
+    from utils import seed_worker
+
+    P = paths(split)
+    sel = json.load(open(P["sel"]))
+    assert sel["split"] == split, "selection file belongs to another split protocol!"
+    _, stats, outl = split_files(split)
+    patch_stats_module(stats)
+    cfgt = get_task_config(task_name=CFG["task"])
+    cfgt["stride_window"] = 0.005  # same override as run_training.py for task_1-x/2-x
+    meta = get_task_metadata(config_task=cfgt, verbose=False)
+    tf = ComposeTransforms([ModelTransform_1(meta | cfgt), ModelTransform_2(meta | cfgt)])
+    nw = CFG["dl_workers"]
+    if nw < 0:
+        nw = max(2, min(8, os.cpu_count() or 2))
+    smgr = {"base_local_zarr_path": P["data"]}
+    loaders, g = {}, torch.Generator()
+    g.manual_seed(CFG["seed"])
+    # Tensor IPC must not go through /dev/shm (Docker default is 64 MB; a 512-window
+    # batch deadlocks the workers silently). file_system uses /tmp instead.
+    torch.multiprocessing.set_sharing_strategy("file_system")
+    for w in which:
+        mast = initialize_MAST_dataset(config_task=cfgt, shots_list=sel["shots"][w], local_flag=True, use_std_scaling=True,
+                                       stats_metadata_file_path=stats, use_nan_filling=False, remove_outliers=True,
+                                       outlier_metadata_file=outl, remove_bad_efit_rating=True,
+                                       store_manager_settings=smgr, verbose=False)
+        kw = dict(test_mode=True)
+        if w == "test":
+            kw["shuffle_windows"] = False
+        ds = initialize_TokaMark_dataset(dataset=mast, task_metadata=meta, config_metadata=cfgt, custom_transform=tf, **kw)
+        if ds is None:
+            raise RuntimeError(f"{w} dataset empty after official filtering (outliers/bad EFIT)")
+        # TokaMarkDataset is an IterableDataset (no __getitem__), so probe via the
+        # iterator: time how long one window takes to materialise. A real failure here
+        # (empty dataset, bad zarr) is fatal, not a harmless warning.
+        t_probe = time.time()
+        first = next(iter(ds), None)
+        dt = time.time() - t_probe
+        if first is None:
+            raise RuntimeError(f"{w} dataset yielded no windows after official filtering "
+                               f"(outliers/bad EFIT / empty shots) - cannot train on it")
+        est = dt * CFG["batch_size"] / max(1, min(max(nw, 1), CFG["batch_size"]))
+        log(f"{w} dataset: {len(sel['shots'][w])} shots ({type(ds).__name__}, streaming windows); "
+            f"first window took {dt:.2f}s "
+            f"(=> first batch of {CFG['batch_size']} will take roughly {est / 60:.1f} min)")
+        extra = dict(drop_last=True) if w == "train" else {}
+        if nw > 0:
+            extra["persistent_workers"] = True
+        loaders[w] = DataLoader(ds, batch_size=CFG["batch_size"], num_workers=nw, collate_fn=model_collate_fn,
+                                worker_init_fn=seed_worker, generator=g, pin_memory=torch.cuda.is_available(),
+                                prefetch_factor=2 if nw > 0 else None, **extra)
+        log(f"{w} loader ready: {len(sel['shots'][w])} shots, batch_size={CFG['batch_size']}, workers={nw}")
+    return loaders, meta | cfgt
+
+
+# ======================================================================================
+# MODULE 2: FAILURE-AWARE ARCHITECTURE & PINN LOSS (MASK DROP + FLUX-LOOP CONSISTENCY)
+# ======================================================================================
+FLUX_LOOP_COORDS = (
+    (2, 13), (2, 22), (2, 32), (2, 42), (2, 51),
+    (60, 6), (60, 13), (60, 19), (60, 26), (60, 32),
+    (60, 38), (60, 45), (60, 51), (60, 58), (60, 62)
+)
+
+
+# ---- measured-flux PINN (TM_PINN_MODE=measured, default) ------------------------------------------------------------
+# Real (R, Z) [m] of the 15 flux loops = input group 0, channel order (cnn_mlp/src/study/geometry/mast_sensor_geometry.json,
+# FAIR-MAST level-2 geometry of shot 30421). psi grid: R = 0.06 + 0.03 i (column), Z = -2 + 0.0625 j (row), psi[z_row, r_col].
+FLUX_LOOP_RZ = ((0.1785, 0.6249), (0.1785, 0.3199), (0.1785, 0.0149), (0.1785, -0.3231), (0.1785, -0.9331),
+                (1.0354, -1.0886), (1.163, 1.08259), (1.0354, 1.08309), (1.5984, -1.04443), (1.4005, -1.14403),
+                (1.4001, 1.15079), (1.7463, -0.44224), (1.5495, -0.54724), (1.7493, 0.44221), (1.4025, -0.8876))
+PSI_GRID = dict(r0=0.06, dr=0.03, z0=-2.0, dz=0.0625, n=65)
+# Measured flux through a loop = 2*pi*psi_EFIT (Wb vs Wb/rad): fit on 16 local shots / 1083 windows, slope 6.2-6.3 on the four
+# well-resolved inboard loops, offset -0.002 Wb (first window sample). rms |2*pi*psi(loop) - measured| in standardised-psi units
+# per loop (all shots, first window sample): the inboard CC loops 0-4 agree to ~0.03, the outer loops only to 0.23-0.32 (EFIT psi
+# is not accurate next to the PF coils), so each loop is weighted min(1, (0.1/resid)^2).
+FLUX_LOOP_RESID = (0.030, 0.028, 0.029, 0.029, 0.031, 0.255, 0.261, 0.231, 0.317, 0.290, 0.304, 0.258, 0.230, 0.238, 0.286)
+FLUX_LOOP_WEIGHT = tuple(min(1.0, (0.1 / r) ** 2) for r in FLUX_LOOP_RESID)
+FLUX_LOOP_DEAD_WB = 2e-3      # a loop whose |flux| stays below 2 mWb over the whole window is dead (CC04 reads ~0 in the 27xxx shots)
+_FL_STATS = {}                # {mu_f, sd_f, mu_p, sd_p}: input flux-loop / output psi standardisation, set from the task metadata
+
+
+def set_flux_loop_stats(meta):
+    """Take the standardisation the dataset really applied (meta['input'][...flux_loop_flux], meta['output'][...psi])."""
+    f, p = meta["input"]["magnetics-flux_loop_flux"], meta["output"]["equilibrium-psi"]
+    _FL_STATS.update(mu_f=float(f["mean"]), sd_f=float(f["std"]), mu_p=float(p["mean"]), sd_p=float(p["std"]))
+    return _FL_STATS
+
+
+def flux_loop_sample(pred_psi):
+    """Bilinear sample of a (B, 1, 65, 65) psi map at the 15 real loop positions -> (B, 15). Differentiable."""
+    import torch
+    g = PSI_GRID
+    c = torch.tensor([(R - g["r0"]) / g["dr"] for R, _ in FLUX_LOOP_RZ], dtype=torch.float64)
+    r = torch.tensor([(Z - g["z0"]) / g["dz"] for _, Z in FLUX_LOOP_RZ], dtype=torch.float64)
+    c0, r0 = c.floor().clamp(0, g["n"] - 2), r.floor().clamp(0, g["n"] - 2)
+    fc, fr = (c - c0).to(pred_psi.dtype).to(pred_psi.device), (r - r0).to(pred_psi.dtype).to(pred_psi.device)
+    c0, r0 = c0.long().to(pred_psi.device), r0.long().to(pred_psi.device)
+    f = pred_psi[:, 0]
+    return ((1 - fr) * ((1 - fc) * f[:, r0, c0] + fc * f[:, r0, c0 + 1])
+            + fr * ((1 - fc) * f[:, r0 + 1, c0] + fc * f[:, r0 + 1, c0 + 1]))
+
+
+def flux_loop_measured_target(x0):
+    """x0: input group 0, (B, W, Cin, T, 15), standardised. -> (target (B,15) in psi standardisation, alive (B,15) bool).
+
+    Target = first window sample (closest in time to the psi slice, which is the window start): raw = x*sd_f + mu_f [Wb],
+    psi = raw / (2*pi) [Wb/rad], standardised with the psi stats. Alive = not NaN-filled (all-zero) and not a ~0 dead loop."""
+    import math as _m
+    S = _FL_STATS
+    if not S:
+        raise RuntimeError("flux-loop stats not set: call set_flux_loop_stats(meta) before using TM_PINN_MODE=measured")
+    x = x0.reshape(x0.shape[0], -1, x0.shape[-1])                   # (B, W*Cin*T, 15), time ascending
+    raw_first = x[:, 0] * S["sd_f"] + S["mu_f"]
+    target = (raw_first / (2 * _m.pi) - S["mu_p"]) / S["sd_p"]
+    alive = (x.abs().amax(1) > 0) & ((x * S["sd_f"] + S["mu_f"]).abs().amax(1) >= FLUX_LOOP_DEAD_WB)
+    return target, alive
+
+
+def flux_loop_pinn_loss_measured(pred_psi, x0, health):
+    """Real-geometry consistency: psi_pred(loop position) vs the loop's own MEASURED flux, same window.
+
+    health (B, 15) float: availability of each loop (failure-mask; 0 = lost -> no term). Weighted by FLUX_LOOP_WEIGHT."""
+    import torch
+    target, alive = flux_loop_measured_target(x0)
+    w = torch.tensor(FLUX_LOOP_WEIGHT, dtype=pred_psi.dtype, device=pred_psi.device) * health * alive.to(pred_psi.dtype)
+    err = (flux_loop_sample(pred_psi) - target.detach()) ** 2
+    return (w * err).sum(1).mean() / len(FLUX_LOOP_RZ)
+
+
+def flux_loop_pinn_loss(pred_psi, true_psi, mask_fl=None):
+    """LEGACY (TM_PINN_MODE=legacy): hard-coded pixels vs the TRUE psi y. Enforce boundary flux consistency at 15 pixels."""
+    loss = 0.0
+    for r_idx, z_idx in FLUX_LOOP_COORDS:
+        diff_sq = (pred_psi[:, 0, z_idx, r_idx] - true_psi[:, 0, z_idx, r_idx]) ** 2
+        if mask_fl is not None:
+            diff_sq = diff_sq * mask_fl
+        loss = loss + diff_sq.mean()
+    return loss / len(FLUX_LOOP_COORDS)
+
+
+def channel_layout(x):
+    """Sensors per input group: (B, W, Cin, T, N) -> N sensors on the last axis; (B, W, Cin, T) -> 1 sensor."""
+    return [int(t.shape[-1]) if t.dim() >= 5 else 1 for t in x]
+
+
+def _zero_sensor(t, b, n, sl=slice(None)):
+    """Zero sensor n of sample b (optionally only the time slice sl, which indexes the T axis)."""
+    if t.dim() >= 5:
+        t[b, :, :, sl, n] = 0.0
+    else:
+        t[b, :, :, sl] = 0.0
+
+
+def _apply_structured_failure_channels(x, p_fail):
+    """Per-sensor version for the transformer: mask (B, sum_g N_g) with 0 = sensor missing.
+
+    Same three scenario families as the group-level version, at sensor granularity:
+    40% k in 1..6 random individual sensors, 30% one correlated group, 30% temporal gap on k in 1..6 sensors."""
+    import torch
+    n_ch = channel_layout(x)
+    offs = [0]
+    for n in n_ch:
+        offs.append(offs[-1] + n)
+    C, B = offs[-1], x[0].shape[0]
+    mask = torch.ones((B, C), device=x[0].device, dtype=x[0].dtype)
+    x_aug = [t.clone() for t in x]
+    groups = [[0], [1, 2, 3], [4], [5, 6], [7]]
+    where = lambda c: next(g for g in range(len(n_ch)) if offs[g] <= c < offs[g + 1])  # noqa: E731
+    for b in range(B):
+        if torch.rand(1).item() >= p_fail:
+            continue
+        r = torch.rand(1).item()
+        if r < 0.70 and r >= 0.40:
+            chans = [c for g in groups[int(torch.randint(0, len(groups), (1,)).item())] for c in range(offs[g], offs[g + 1])]
+        else:
+            chans = torch.randperm(C)[:int(torch.randint(1, 7, (1,)).item())].tolist()
+        for c in chans:
+            g = where(c)
+            if r < 0.70:
+                _zero_sensor(x_aug[g], b, c - offs[g])
+            else:
+                L = x_aug[g].shape[-2] if x_aug[g].dim() >= 5 else x_aug[g].shape[-1]
+                half = max(1, L // 2)
+                start = int(torch.randint(0, max(1, L - half + 1), (1,)).item())
+                _zero_sensor(x_aug[g], b, c - offs[g], slice(start, start + half))
+            mask[b, c] = 0.0
+    return x_aug, mask
+
+
+def apply_structured_failure(x, p_fail=0.5, per_channel=False):
+    """Structured failure augmentation: drops channels, correlated groups, or temporal gaps.
+
+    per_channel=False (CNN models): mask (B, 8) over the 8 sensor groups. per_channel=True (transformer): mask (B, 115)."""
+    import torch
+    if per_channel:
+        return _apply_structured_failure_channels(x, p_fail)
+    B = x[0].shape[0]
+    dev = x[0].device
+    dtype = x[0].dtype
+    mask = torch.ones((B, 8), device=dev, dtype=dtype)
+    x_aug = [t.clone() for t in x]
+    groups = [[0], [1, 2, 3], [4], [5, 6], [7]]
+    for b in range(B):
+        if torch.rand(1).item() < p_fail:
+            r = torch.rand(1).item()
+            if r < 0.40:
+                k = int(torch.randint(1, 4, (1,)).item())
+                chans = torch.randperm(8)[:k].tolist()
+                for c in chans:
+                    x_aug[c][b] = 0.0
+                    mask[b, c] = 0.0
+            elif r < 0.70:
+                grp = groups[int(torch.randint(0, len(groups), (1,)).item())]
+                for c in grp:
+                    x_aug[c][b] = 0.0
+                    mask[b, c] = 0.0
+            else:
+                k = int(torch.randint(1, 3, (1,)).item())
+                chans = torch.randperm(8)[:k].tolist()
+                for c in chans:
+                    L = x_aug[c].shape[-1]
+                    half = max(1, L // 2)
+                    start = int(torch.randint(0, max(1, L - half + 1), (1,)).item())
+                    x_aug[c][b, :, :, start:start + half] = 0.0
+                    mask[b, c] = 0.0
+    return x_aug, mask
+
+
+def train_loss(runner, crit, x, y):
+    """One training-step loss, shared by every model/variant: (total, mse, pinn). pinn is None unless variant mask_pinn.
+
+    plain: MSE on raw inputs. mask: MSE with structured failure augmentation + health mask. mask_pinn: + lambda * flux-loop
+    consistency (not even evaluated when TM_PINN_LAMBDA = 0)."""
+    if not CFG["failure_aware"]:
+        loss = crit(runner(*x), y)
+        return loss, loss, None
+    per_ch = CFG["model"].lower().strip() == "transformer"   # transformer: per-sensor mask (B, 115)
+    x_train, mask_train = apply_structured_failure(x, p_fail=CFG["fail_aug_p"], per_channel=per_ch)
+    out = runner(*x_train, mask_train)
+    loss_mse = crit(out, y)
+    if CFG["pinn_lambda"] <= 0:
+        return loss_mse, loss_mse, None
+    if CFG["pinn_mode"] == "measured":
+        # per-loop availability: transformer -> its 15 sensor columns; CNN models -> the flux-loop group flag for all loops
+        health = mask_train[:, :15] if per_ch else mask_train[:, :1].expand(-1, 15)
+        loss_fl = flux_loop_pinn_loss_measured(out[0], x[0], health)     # x = clean window (before augmentation)
+        return loss_mse + CFG["pinn_lambda"] * loss_fl, loss_mse, loss_fl
+    # legacy: weight by the health of the flux-loop group (group 0 = its first n0 sensor columns)
+    mask_fl = mask_train[:, :channel_layout(x)[0]].mean(1) if per_ch else mask_train[:, 0]
+    loss_fl = flux_loop_pinn_loss(out[0], y[0], mask_fl=mask_fl)
+    return loss_mse + CFG["pinn_lambda"] * loss_fl, loss_mse, loss_fl
+
+
+def _resolve_mask(model, args, kwargs):
+    """Split forward args into (inputs, exogenous, health mask (B, n_in)).
+
+    A missing mask is inferred from the inputs: a branch that is exactly zero counts as dead."""
+    import torch
+    n_in, n_exo = len(model.input_branches), len(model.exogenous_branches)
+    inputs, exogenous = args[:n_in], args[n_in:n_in + n_exo]
+    mask = kwargs.get("mask", None)
+    if mask is None and len(args) > n_in + n_exo:
+        mask = args[n_in + n_exo]
+    B, dev, dtype = inputs[0].shape[0], inputs[0].device, inputs[0].dtype
+    if mask is None:
+        mask = torch.ones((B, n_in), device=dev, dtype=dtype)
+        for i, x_chan in enumerate(inputs):
+            is_zero = (x_chan.abs().sum(dim=tuple(range(1, x_chan.dim()))) == 0.0)
+            mask[:, i] = torch.where(is_zero, 0.0, 1.0)
+    elif mask.dim() == 1:
+        mask = mask.unsqueeze(0).expand(B, -1)
+    return inputs, exogenous, mask
+
+
+def _first_shapes(loader):
+    """(input, exogenous, output) per-sample shapes from the first usable window of the loader's dataset."""
+    for first_window in loader.dataset:
+        try:
+            return ([arr.shape for arr in first_window["input"]], [arr.shape for arr in first_window["exogenous"]],
+                    [arr.shape for arr in first_window["y"]])
+        except Exception:
+            continue
+    return [], [], []
+
+
+def make_failure_aware_model(loader, meta, shapes=None):
+    """Module 2 network for the chosen backbone (TM_MODEL = mlp | lstm).
+
+    Both keep the upstream one-CNN-encoder-per-sensor layout. Each encoder output is gated by its sensor's health
+    flag, and the flag vector is also fed to the backbone (MLP bottleneck / LSTM input) so it knows what is missing."""
+    setup_imports()
+    import torch
+    import torch.nn as nn
+    from torch.utils.checkpoint import checkpoint
+    is_lstm = CFG["model"].lower().strip() == "lstm"
+    if is_lstm:
+        from src.multi_conv_lstm_model import LSTM_v3 as Base, bb_factor
+    else:
+        from src.multi_conv_mlp_model import MultiConv_MLP as Base, bb_factor
+    from tokamark.tools.utils import get_device
+
+    device = get_device()
+    input_shapes, exogenous_shapes, output_shapes = shapes or _first_shapes(loader)
+
+    class MultiConv_FailureAware_MLP(Base):
+        def __init__(self, in_shapes, exo_shapes, out_shapes, dict_meta, D=16):
+            super().__init__(in_shapes, exo_shapes, out_shapes, dict_meta, D=D)
+            self.n_in = len(self.input_branches)
+            in_features = self.D * bb_factor * self.n_in * self.W_in + self.n_in
+            self.encoder_mlp = nn.Sequential(
+                nn.Linear(in_features, 2 * self.D * bb_factor),
+                nn.ReLU(),
+                nn.Linear(2 * self.D * bb_factor, self.D * bb_factor),
+            )
+
+        def forward(self, *args, **kwargs):
+            n_in = self.n_in
+            n_exo = len(self.exogenous_branches)
+            inputs = args[:n_in]
+            exogenous = args[n_in:n_in + n_exo]
+            mask = kwargs.get("mask", None)
+            if mask is None and len(args) > n_in + n_exo:
+                mask = args[n_in + n_exo]
+            B = inputs[0].shape[0]
+            dev = inputs[0].device
+            dtype = inputs[0].dtype
+            if mask is None:
+                mask = torch.ones((B, n_in), device=dev, dtype=dtype)
+                for i, x_chan in enumerate(inputs):
+                    is_zero = (x_chan.abs().sum(dim=tuple(range(1, x_chan.dim()))) == 0.0)
+                    mask[:, i] = torch.where(is_zero, 0.0, 1.0)
+            elif mask.dim() == 1:
+                mask = mask.unsqueeze(0).expand(B, -1)
+
+            input_branch_outputs = []
+            for i, (branch, x) in enumerate(zip(self.input_branches, inputs)):
+                out = checkpoint(self._run_cnn_encoder, branch, x, use_reentrant=False)
+                m_i = mask[:, i].view(-1, 1, 1)
+                out = out * m_i
+                input_branch_outputs.append(out)
+
+            input_seq = torch.cat(input_branch_outputs, dim=2)
+            enc_in = input_seq.reshape(B, -1)
+            enc_in = torch.cat([enc_in, mask], dim=1)
+            context = self.encoder_mlp(enc_in)
+
+            if len(self.exogenous_branches) > 0 and len(exogenous) > 0:
+                exo_branch_outputs = [checkpoint(self._run_cnn_encoder, b, x, use_reentrant=False)
+                                      for b, x in zip(self.exogenous_branches, exogenous)]
+                exo_seq = torch.cat(exo_branch_outputs, dim=2)
+                exo_flat = exo_seq.reshape(B, -1)
+                decoder_in = torch.cat([context, exo_flat], dim=1)
+            else:
+                decoder_in = context
+
+            dec_flat = self.decoder_mlp(decoder_in)
+            dec_out = dec_flat.unsqueeze(1).repeat(1, self.W_out, 1)
+
+            outputs = []
+            for branch, goal_shape in zip(self.output_branches, self.output_shapes):
+                out = checkpoint(self._run_cnn_decoder, branch, goal_shape, dec_out, use_reentrant=False)
+                outputs.append(out)
+            return outputs
+
+    class MultiConv_FailureAware_LSTM(Base):
+        def __init__(self, in_shapes, exo_shapes, out_shapes, dict_meta, D=16):
+            super().__init__(in_shapes, exo_shapes, out_shapes, dict_meta, D=D)
+            self.n_in = len(self.input_branches)
+            old = self.encoder_lstm  # same LSTM, with room for the health flags appended to every timestep
+            self.encoder_lstm = nn.LSTM(input_size=old.input_size + self.n_in, hidden_size=old.hidden_size,
+                                        num_layers=old.num_layers, batch_first=True, dropout=old.dropout)
+
+        def forward(self, *args, **kwargs):
+            inputs, exogenous, mask = _resolve_mask(self, args, kwargs)
+
+            input_branch_outputs = []
+            for i, (branch, x) in enumerate(zip(self.input_branches, inputs)):
+                out = checkpoint(self._run_cnn_encoder, branch, x, use_reentrant=False)
+                input_branch_outputs.append(out * mask[:, i].view(-1, 1, 1))  # mask feature gating h_i * m_i
+            input_seq = torch.cat(input_branch_outputs, dim=2)
+            input_seq = torch.cat([input_seq, mask.unsqueeze(1).expand(-1, input_seq.shape[1], -1)], dim=2)
+
+            enc_out, (h, c) = self.encoder_lstm(input_seq)
+            decoder_input = self.start_token.to(enc_out.device).repeat(enc_out.size(0), self.W_out, 1)
+            if len(self.exogenous_branches) > 0 and len(exogenous) > 0:
+                exo_branch_outputs = [checkpoint(self._run_cnn_encoder, b, x, use_reentrant=False)
+                                      for b, x in zip(self.exogenous_branches, exogenous)]
+                decoder_input = torch.cat([decoder_input, torch.cat(exo_branch_outputs, dim=2)], dim=2)
+            dec_out, _ = self.decoder_lstm(decoder_input, (h, c))
+
+            return [checkpoint(self._run_cnn_decoder, branch, goal_shape, dec_out, use_reentrant=False)
+                    for branch, goal_shape in zip(self.output_branches, self.output_shapes)]
+
+    FailureAware = MultiConv_FailureAware_LSTM if is_lstm else MultiConv_FailureAware_MLP
+    return FailureAware(in_shapes=input_shapes, exo_shapes=exogenous_shapes, out_shapes=output_shapes,
+                        dict_meta=meta, D=16).to(device)
+
+
+def make_transformer_model(loader, meta, shapes=None):
+    """One token per sensor (115 = 15+40+18+18+12+10+1+1) in a Transformer; missing sensors are DROPPED.
+
+    Each sensor's 5 ms series -> per-group Linear (group time lengths differ: 25/250/20) + learned sensor-ID and
+    sensor-group embeddings. A missing sensor is removed from attention via key_padding_mask and from the masked-mean
+    pool (never zero-filled). A learned always-valid CLS token keeps the all-sensors-lost case finite. Pooling =
+    masked mean of sensor tokens + learned-query attention pooling. The head feeds the SAME decoder_mlp and 65x65
+    ConvTranspose output branches as the CNN models (inherited from MultiConv_MLP)."""
+    setup_imports()
+    import torch
+    import torch.nn as nn
+    from src.multi_conv_mlp_model import MultiConv_MLP as Base, bb_factor
+    from tokamark.tools.utils import get_device
+
+    in_shapes, exo_shapes, out_shapes = shapes or _first_shapes(loader)
+    d, heads, layers, p = CFG["d_model"], CFG["tx_heads"], CFG["tx_layers"], CFG["dropout"]
+    assert d % heads == 0, f"d_model {d} not divisible by tx_heads {heads}"
+
+    class SensorEmbed(nn.Module):
+        """Group branch: window of one diagnostic group -> (B, N_sensors, d_model) tokens."""
+        def __init__(self, shape):  # per-sample shape without batch axis, e.g. (1, 1, 25, 15) or (1, 1, 20)
+            super().__init__()
+            self.n = int(shape[-1]) if len(shape) >= 4 else 1
+            L = int(math.prod(shape)) // self.n
+            self.proj = nn.Sequential(nn.Linear(L, d), nn.GELU(), nn.Linear(d, d))
+
+        def raw(self, x):  # (B, N, L): one row per sensor
+            x = x.movedim(-1, 1) if x.dim() >= 5 else x.unsqueeze(1)
+            return x.reshape(x.shape[0], self.n, -1)
+
+        def forward(self, x):
+            return self.proj(self.raw(x))
+
+    class MultiConv_Transformer(Base):
+        def __init__(self):
+            super().__init__(in_shapes, exo_shapes, out_shapes, meta, D=16)
+            self.input_branches = nn.ModuleList([SensorEmbed(s) for s in in_shapes])   # replaces the CNN encoders
+            self.n_in = len(self.input_branches)
+            self.n_sensors = sum(b.n for b in self.input_branches)
+            self.register_buffer("group_id", torch.tensor([g for g, b in enumerate(self.input_branches) for _ in range(b.n)]),
+                                 persistent=False)
+            self.sensor_emb = nn.Embedding(self.n_sensors, d)
+            self.group_emb = nn.Embedding(self.n_in, d)
+            self.cls = nn.Parameter(torch.zeros(1, 1, d))
+            self.query = nn.Parameter(torch.randn(1, 1, d) * 0.02)
+            for e in (self.sensor_emb, self.group_emb):
+                nn.init.normal_(e.weight, std=0.02)
+            layer = nn.TransformerEncoderLayer(d, heads, dim_feedforward=2 * d, dropout=p, activation="gelu",
+                                               batch_first=True, norm_first=True)
+            self.encoder = nn.TransformerEncoder(layer, layers, norm=nn.LayerNorm(d), enable_nested_tensor=False)
+            self.pool = nn.MultiheadAttention(d, heads, dropout=p, batch_first=True)
+            ctx = self.D * bb_factor
+            self.encoder_mlp = nn.Sequential(nn.Linear(2 * d, 2 * ctx), nn.ReLU(), nn.Linear(2 * ctx, ctx))
+
+        def sensor_mask(self, inputs, mask):
+            """(B, n_sensors) bool, True = sensor present. mask: None (infer: an exactly-zero sensor is missing, the
+            fallback rule of the failure-aware CNNs), (B or 1, n_in) group health, or (B or 1, n_sensors) per sensor."""
+            B = inputs[0].shape[0]
+            if mask is None:
+                return torch.cat([b.raw(x).abs().sum(-1) != 0 for b, x in zip(self.input_branches, inputs)], dim=1)
+            if mask.dim() == 1:
+                mask = mask.unsqueeze(0)
+            if mask.shape[-1] == self.n_in:
+                mask = mask[:, self.group_id]
+            elif mask.shape[-1] != self.n_sensors:
+                raise ValueError(f"mask has {mask.shape[-1]} columns; expected {self.n_in} groups or {self.n_sensors} sensors")
+            return (mask > 0.5).expand(B, -1)
+
+        def forward(self, *args, **kwargs):
+            n_in, n_exo = self.n_in, len(self.exogenous_branches)
+            inputs, exogenous = args[:n_in], args[n_in:n_in + n_exo]
+            mask = kwargs.get("mask", None)
+            if mask is None and len(args) > n_in + n_exo:
+                mask = args[n_in + n_exo]
+            B = inputs[0].shape[0]
+            ok = self.sensor_mask(inputs, mask)
+            tok = torch.cat([b(x) for b, x in zip(self.input_branches, inputs)], dim=1)
+            tok = tok + self.sensor_emb.weight + self.group_emb(self.group_id)
+            seq = torch.cat([self.cls.expand(B, -1, -1), tok], dim=1)
+            valid = torch.cat([ok.new_ones(B, 1), ok], dim=1)
+            h = self.encoder(seq, src_key_padding_mask=~valid)
+            sens = h[:, 1:].masked_fill(~ok.unsqueeze(-1), 0.0)
+            mean = sens.sum(1) / ok.sum(1, keepdim=True).clamp(min=1).to(h.dtype)
+            att = self.pool(self.query.expand(B, -1, -1), h, h, key_padding_mask=~valid, need_weights=False)[0].squeeze(1)
+            context = self.encoder_mlp(torch.cat([mean, att], dim=1))
+            if n_exo > 0 and len(exogenous) > 0:
+                exo = torch.cat([self._run_cnn_encoder(b, x) for b, x in zip(self.exogenous_branches, exogenous)], dim=2)
+                context = torch.cat([context, exo.reshape(B, -1)], dim=1)
+            dec_out = self.decoder_mlp(context).unsqueeze(1).repeat(1, self.W_out, 1)
+            return [self._run_cnn_decoder(br, gs, dec_out) for br, gs in zip(self.output_branches, self.output_shapes)]
+
+    return MultiConv_Transformer().to(get_device())
+
+
+def add_latent_dropout(model, p):
+    """Dropout on the latent that feeds each psi decoder branch (same knob for every model; p=0 -> no-op)."""
+    if p > 0:
+        import torch.nn.functional as F
+        for br in model.output_branches:
+            br.register_forward_pre_hook(lambda m, a: (F.dropout(a[0], p, m.training),) + tuple(a[1:]))
+    return model
+
+
+def count_params(model):
+    return sum(q.numel() for q in model.parameters())
+
+
+def make_model(loader, meta, shapes=None):
+    setup_imports()
+    model_type = CFG["model"].lower().strip()
+    if model_type == "transformer":
+        m = make_transformer_model(loader, meta, shapes)
+    elif CFG["failure_aware"]:
+        m = make_failure_aware_model(loader, meta, shapes)
+    elif model_type == "lstm":
+        from src.multi_conv_lstm_model import create_lstm_architecture
+        m = create_lstm_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
+    else:
+        from src.multi_conv_mlp_model import create_cnn_architecture
+        m = create_cnn_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
+    return add_latent_dropout(m, CFG["dropout"])
+
+
+# ======================================================================================
+# TRAIN: resumable, deadline-aware, optional DataParallel (benchmarked)
+# ======================================================================================
+def atomic_save(obj, path):
+    import torch
+    tmp = path + ".tmp"
+    torch.save(obj, tmp)
+    os.replace(tmp, path)
+
+
+def pick_parallel(model, loader, dev, criterion, move):
+    """Return (module_to_call, label). Benchmarks 1 GPU vs DataParallel on one cached batch."""
+    import torch, torch.nn as nn
+    n = torch.cuda.device_count()
+    if n < 2 or CFG["use_dp"] == "0":
+        return model, f"single GPU ({n} visible)"
+    if CFG["use_dp"] == "1":
+        return nn.DataParallel(model), f"DataParallel x{n} (forced)"
+    try:
+        batch = first_batch_timed(loader, tag="benchmark batch")
+        x, y = move(batch, dev)
+        def bench(m):
+            opt = torch.optim.SGD(m.parameters(), lr=0.0)  # lr 0: benchmark does not change weights
+            m.train()
+            for i in range(14):
+                if i == 4:
+                    torch.cuda.synchronize(); t = time.time()
+                opt.zero_grad()
+                if CFG["failure_aware"]:
+                    c_mask = torch.ones((x[0].shape[0], 8), device=dev, dtype=x[0].dtype)
+                    criterion(m(*x, c_mask), y).backward()
+                else:
+                    criterion(m(*x), y).backward()
+                opt.step()
+            torch.cuda.synchronize()
+            return (time.time() - t) / 10
+        sd = {k: v.clone() for k, v in model.state_dict().items()}
+        t1 = bench(model)
+        dp = nn.DataParallel(model)
+        t2 = bench(dp)
+        model.load_state_dict(sd)
+        log(f"GPU benchmark (compute only, same batch): 1 GPU {t1 * 1e3:.0f} ms/step, DataParallel {t2 * 1e3:.0f} ms/step")
+        if t2 < t1 / 1.15:
+            return dp, f"DataParallel x{n} (benchmark {t1 / t2:.2f}x faster)"
+        return model, "single GPU (DataParallel not clearly faster)"
+    except Exception as e:  # noqa
+        log("parallel benchmark failed, using single GPU:", repr(e)[:200])
+        return model, "single GPU (benchmark error)"
+
+
+def cmd_train(split):
+    setup_imports()
+    import torch
+    from src.trainer import MultiOutputMSELoss, move_batch_to_device
+    from utils import set_seed
+    set_seed(CFG["seed"])
+    P = paths(split)
+    os.makedirs(P["model_dir"], exist_ok=True)
+    sel = json.load(open(P["sel"]))
+    run_config = dict(task=CFG["task"], model=CFG["model"], split=split, seed=CFG["seed"], batch_size=CFG["batch_size"],
+                      lr=CFG["lr"], weight_decay=CFG["weight_decay"], max_steps=CFG["max_steps"],
+                      validate_every=CFG["validate_every"], patience=CFG["patience"],
+                      train_deadline_h=CFG["train_deadline_h"], use_dp=CFG["use_dp"],
+                      failure_aware=CFG["failure_aware"], fail_aug_p=CFG["fail_aug_p"],
+                      pinn_lambda=CFG["pinn_lambda"], variant=CFG["variant"], run_tag=CFG["run_tag"],
+                      pinn_mode=CFG["pinn_mode"] if CFG["failure_aware"] and CFG["pinn_lambda"] > 0 else "none",
+                      dropout=CFG["dropout"], d_model=CFG["d_model"] if CFG["model"] == "transformer" else None,
+                      tuned=os.environ.get("TM_TUNED", ""),
+                      git_revs=CFG["git_revs"],
+                      shots={k: len(v) for k, v in sel["shots"].items()},
+                      report=sel["report"])
+    rc_path = os.path.join(P["out"], "run_config.json")
+    if os.path.exists(rc_path) and not CFG["train_from_scratch"]:   # resuming: never silently switch the PINN definition
+        old = json.load(open(rc_path)).get("pinn_mode", "legacy" if run_config["pinn_mode"] != "none" else "none")
+        if old != run_config["pinn_mode"]:
+            raise SystemExit(f"FATAL: {rc_path} was trained with pinn_mode={old}, now {run_config['pinn_mode']}; "
+                             "use a new TM_RUN_TAG or set TM_TRAIN_FROM_SCRATCH=1")
+    json.dump(run_config, open(rc_path, "w"), indent=1)
+    log(f"run_config: {json.dumps(run_config)}")
+    dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+    log(f"device={dev}, gpus={torch.cuda.device_count()}, cpus={os.cpu_count()}")
+    phase = {"p": "building dataloaders", "step": 0}
+
+    def _heartbeat():
+        while True:
+            time.sleep(60)
+            log(f"  heartbeat: {phase['p']} (step {phase['step']})")
+
+    if not getattr(cmd_train, "_hb", False):   # one heartbeat thread even when `tune` calls cmd_train repeatedly
+        cmd_train._hb = True
+        threading.Thread(target=_heartbeat, daemon=True).start()
+    t_train0 = time.time()
+    loaders, meta = build_data(split, ["train", "val"])
+    set_flux_loop_stats(meta)
+    phase["p"] = "building model"
+    t_model = time.time()
+    log("building model (shape inference walks the dataset for one sample)...")
+    model = make_model(loaders["train"], meta).to(dev)
+    n_params = count_params(model)
+    log(f"model built in {time.time() - t_model:.1f}s, {n_params / 1e6:.3f}M params")
+    crit = MultiOutputMSELoss()
+
+    # ---- fail-fast smoke check (a few seconds): shapes, NaNs, forward/backward ----
+    phase["p"] = "first batch (smoke)"
+    b = first_batch_timed(loaders["train"], tag="first train batch")
+    sid, wid, xs, ys = b
+    x, y = move_batch_to_device(b, dev)
+    if CFG["failure_aware"]:
+        clean_mask = torch.ones((x[0].shape[0], 8), device=dev, dtype=x[0].dtype)
+        out = model(*x, clean_mask)
+    else:
+        out = model(*x)
+    log("smoke: input shapes", [tuple(t.shape) for t in x], "| target shapes", [tuple(t.shape) for t in y],
+        "| output shapes", [tuple(o.shape) for o in out])
+    assert all(o.shape == t.shape for o, t in zip(out, y)), "output/target shape mismatch"
+    assert all(torch.isfinite(t).all() for t in x), "non-finite inputs after collate"
+    l = crit(out, y); l.backward()
+    assert torch.isfinite(l), "non-finite initial loss"
+    log(f"smoke OK: initial loss {l.item():.4f}")
+    model.zero_grad(set_to_none=True)
+
+    opt = torch.optim.Adam(model.parameters(), lr=CFG["lr"], weight_decay=CFG["weight_decay"])
+    sched = torch.optim.lr_scheduler.ReduceLROnPlateau(opt, mode="min", factor=0.5, patience=3, min_lr=1e-6)
+    st = dict(step=0, best=float("inf"), no_improve=0, epoch=0, oom=0,
+              hist=dict(step=[], train_loss=[], val_loss=[], lr=[], t=[], mse=[], pinn=[]))
+    last = os.path.join(P["model_dir"], "last.pt")
+    if os.path.exists(last) and not CFG["train_from_scratch"]:
+        ck = torch.load(last, map_location=dev, weights_only=False)
+        model.load_state_dict(ck["model"]); opt.load_state_dict(ck["opt"]); st = ck["state"]
+        if "sched" in ck and ck["sched"] is not None:
+            sched.load_state_dict(ck["sched"])
+        st.setdefault("oom", 0)
+        st["hist"].setdefault("t", [])
+        st["hist"].setdefault("lr", [])
+        st["hist"].setdefault("mse", [])
+        st["hist"].setdefault("pinn", [])
+        log(f"RESUMED from step {st['step']} (best val {st['best']:.5f})")
+    elif CFG["train_from_scratch"] and os.path.exists(last):
+        log("TM_TRAIN_FROM_SCRATCH=1: ignoring existing checkpoint, training from step 0")
+    runner, label = pick_parallel(model, loaders["train"], dev, crit, move_batch_to_device) if st["step"] == 0 else (model, "single GPU (resumed)")
+    log("parallel mode:", label)
+
+    @torch.no_grad()
+    def validate():
+        phase["p"] = "validation"
+        runner.eval(); tot = n = 0
+        for vb in loaders["val"]:
+            if vb is None: continue
+            vx, vy = move_batch_to_device(vb, dev)
+            bs = vy[0].shape[0]
+            if CFG["failure_aware"]:
+                clean_mask = torch.ones((bs, 8), device=dev, dtype=vx[0].dtype)
+                lv = crit(runner(*vx, clean_mask), vy)
+            else:
+                lv = crit(runner(*vx), vy)
+            tot += lv.item() * bs; n += bs
+        phase["p"] = "training loop"
+        if n == 0:
+            raise RuntimeError("validation loader produced zero samples - check selection.json / val shots")
+        return tot / n
+
+    def save_last():
+        sched_st = sched.state_dict() if sched is not None else None
+        atomic_save(dict(model=model.state_dict(), opt=opt.state_dict(), sched=sched_st, state=st), last)
+        atomic_save(st["hist"], os.path.join(P["model_dir"], "training_history.pt"))
+        json.dump(st["hist"], open(os.path.join(P["model_dir"], "training_history.json"), "w"))
+
+    deadline = T0 + CFG["train_deadline_h"] * 3600
+    phase["p"] = "training loop"
+    it, run_loss, errs, bad, oom, t_last_ck, t_tr = iter(loaders["train"]), [], 0, 0, 0, time.time(), time.time()
+    stop_reason = "max_steps"
+    run_parts = []  # (mse, pinn) per step, for the loss-component plot
+    while st["step"] < CFG["max_steps"]:
+        if time.time() > deadline:
+            stop_reason = "time deadline"; break
+        phase["p"] = f"waiting for batch (step {st['step']})"
+        try:
+            batch = next(it)
+        except StopIteration:
+            it = iter(loaders["train"]); st["epoch"] += 1; run_loss = []; run_parts = []; log(f"epoch {st['epoch']} done"); continue
+        except Exception as e:  # noqa  (e.g. a corrupt shot inside a worker)
+            errs += 1; log(f"data error #{errs}: {repr(e)[:200]}")
+            if errs > 20: raise
+            it = iter(loaders["train"]); continue
+        if batch is None: continue
+        phase["p"] = f"train step {st['step'] + 1}"
+        try:
+            runner.train()
+            x, y = move_batch_to_device(batch, dev)
+            opt.zero_grad(set_to_none=True)
+            loss, loss_mse, loss_fl = train_loss(runner, crit, x, y)
+            if loss_fl is not None:
+                run_parts.append((loss_mse.item(), loss_fl.item()))
+            if not torch.isfinite(loss):
+                bad += 1; log(f"non-finite loss, skipping (#{bad})")
+                if bad > 200: raise RuntimeError("too many non-finite losses")
+                continue
+            bad = 0
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
+            opt.step()
+        except torch.cuda.OutOfMemoryError:
+            oom += 1; st["oom"] = oom
+            torch.cuda.empty_cache()
+            log(f"CUDA OOM at step {st['step']} (#{oom}) - batch skipped; current batch_size={CFG['batch_size']}")
+            if oom >= 3:
+                raise RuntimeError(
+                    f"CUDA out of memory {oom}x with batch_size={CFG['batch_size']} on this GPU. "
+                    "Re-run the train cell with a smaller TM_BATCH in the config cell (e.g. 256 or 128); "
+                    f"training will resume from {last} without losing progress.")
+            continue
+        st["step"] += 1; run_loss.append(loss.item()); phase["step"] = st["step"]
+        if st["step"] <= 10 or st["step"] % 20 == 0:
+            el = time.time() - t_tr; t_tr = time.time()
+            log(f"step {st['step']} loss {sum(run_loss) / len(run_loss):.4f} "
+                f"({(CFG['batch_size'] if st['step'] <= 10 else 20 * CFG['batch_size']) / el:.0f} samples/s)")
+        if st["step"] == 1:
+            save_last()  # keep progress even if the session dies early
+        if st["step"] % CFG["validate_every"] == 0:
+            v = validate(); h = st["hist"]
+            cur_lr = opt.param_groups[0]["lr"]
+            for k, val in zip(("step", "train_loss", "val_loss", "lr", "t"), (st["step"], sum(run_loss) / len(run_loss), v, cur_lr, time.time() - T0)):
+                h[k].append(val)
+            if run_parts:
+                h["mse"].append(sum(a for a, _ in run_parts) / len(run_parts))
+                h["pinn"].append(sum(b for _, b in run_parts) / len(run_parts))
+            sched.step(v)
+            if v < st["best"]:
+                st["best"], st["no_improve"] = v, 0
+                atomic_save(model.state_dict(), os.path.join(P["model_dir"], "best_model.pt"))
+            else:
+                st["no_improve"] += 1
+            log(f"VAL step {st['step']} val_loss {v:.5f} best {st['best']:.5f} no_improve {st['no_improve']}/{CFG['patience']}")
+            save_last(); t_last_ck = time.time()
+            if st["no_improve"] >= CFG["patience"]:
+                stop_reason = "early stopping (official patience rule)"; break
+        elif time.time() - t_last_ck > CFG["ckpt_every_s"]:
+            save_last(); t_last_ck = time.time()
+    v = validate()
+    if v < st["best"] or not os.path.exists(os.path.join(P["model_dir"], "best_model.pt")):
+        st["best"] = v; atomic_save(model.state_dict(), os.path.join(P["model_dir"], "best_model.pt"))
+    save_last()
+    summary = dict(stop_reason=stop_reason, steps=st["step"], epochs=st["epoch"], best_val=st["best"],
+                   parallel=label, cuda_oom_events=st.get("oom", 0), data_errors=errs,
+                   duration_min=round((time.time() - T0) / 60, 1),          # since session start (includes prep)
+                   train_duration_min=round((time.time() - t_train0) / 60, 1),
+                   model=CFG["model"], variant=CFG["variant"], run_tag=CFG["run_tag"], params=n_params,
+                   model_dir=P["model_dir"], **{k: run_config[k] for k in ("task", "split", "seed", "batch_size", "lr",
+                                                                           "weight_decay", "dropout", "d_model", "pinn_lambda",
+                                                                           "fail_aug_p", "pinn_mode", "tuned", "validate_every", "patience",
+                                                                           "git_revs", "shots", "report")})
+    json.dump(summary, open(os.path.join(P["out"], "train_summary.json"), "w"), indent=1)
+    log(f"TRAIN DONE ({stop_reason}) at step {st['step']}, best val {st['best']:.5f}; summary -> train_summary.json")
+    return summary
+
+
+# ======================================================================================
+# TUNE: small random search with the SAME training loop (cmd_train), validation split only
+# ======================================================================================
+TUNE_KEYS = ("lr", "weight_decay", "dropout", "d_model")
+
+
+def cmd_tune(split):
+    """TM_TUNE_TRIALS trials of TM_TUNE_STEPS steps each over lr / weight decay / dropout (+ d_model for the transformer).
+
+    Every model sees the same sampled (lr, wd, dropout) list (TM_TUNE_SEED), so budget and search space are equal.
+    Only train/val shots are used (the test split is never touched). Writes
+    out/<split>/tune/<model>_<variant>/tuning.json with trials + `chosen`; point TM_TUNED at that file for the final runs."""
+    P = paths(split)
+    tdir = os.path.join(P["base"], "tune", f"{CFG['model'].lower().strip()}_{CFG['variant']}")
+    os.makedirs(tdir, exist_ok=True)
+    rng, rng_d = random.Random(CFG["tune_seed"]), random.Random(CFG["tune_seed"] + 1)
+    plan = [dict(lr=10 ** rng.uniform(-4.5, -3.0), weight_decay=10 ** rng.uniform(-6.0, -3.0), dropout=rng.choice([0.0, 0.1, 0.2]),
+                 d_model=rng_d.choice([64, 128])) for _ in range(CFG["tune_trials"])]
+    use_dm = CFG["model"].lower().strip() == "transformer"
+    keys = [k for k in TUNE_KEYS if k != "d_model" or use_dm]
+    saved = {k: CFG[k] for k in ("seed", "run_tag", "max_steps", "validate_every", "patience", "train_from_scratch", *TUNE_KEYS)}
+    trials = []
+    for i, t in enumerate(plan):
+        hpar = {k: t[k] for k in keys}
+        tag = f"tune/{CFG['model'].lower().strip()}_{CFG['variant']}/t{i}"
+        CFG.update(hpar, seed=CFG["tune_seed"], run_tag=tag, max_steps=CFG["tune_steps"], validate_every=CFG["tune_steps"] + 1,
+                   patience=10 ** 9, train_from_scratch=True)
+        rec = dict(trial=i, **hpar)
+        tout = paths(split)["out"]
+        sp = os.path.join(tout, "train_summary.json")
+        try:
+            if os.path.exists(sp):                      # finished in an earlier session: reuse
+                summ = json.load(open(sp))
+            else:
+                summ = cmd_train(split)
+            rec.update(val_loss=summ["best_val"], steps=summ["steps"], params=summ["params"])
+        except Exception as e:  # noqa  (e.g. OOM for d_model=128): record and carry on
+            rec.update(val_loss=None, error=repr(e)[:200])
+        finally:
+            CFG.update(saved)
+        shutil.rmtree(os.path.join(tout, "model"), ignore_errors=True)   # keep the json, drop the checkpoints
+        trials.append(rec)
+        log(f"TUNE trial {i}: {json.dumps(rec)}")
+    ok = [r for r in trials if r.get("val_loss") is not None and math.isfinite(r["val_loss"])]
+    if not ok:
+        raise SystemExit("FATAL: every tuning trial failed; see tuning log above")
+    best = min(ok, key=lambda r: r["val_loss"])
+    out = dict(model=CFG["model"], variant=CFG["variant"], split=split, selection="lowest validation loss (validation split only)",
+               budget=dict(trials=CFG["tune_trials"], steps_per_trial=CFG["tune_steps"], batch_size=CFG["batch_size"]),
+               tune_seed=CFG["tune_seed"], trials=trials, chosen_trial=best["trial"], chosen={k: best[k] for k in keys})
+    path = os.path.join(tdir, "tuning.json")
+    json.dump(out, open(path, "w"), indent=1)
+    log(f"TUNE DONE: chosen {json.dumps(out['chosen'])} -> {path}")
+    log(f"  final runs: set TM_TUNED={path}")
+    return out
+
+
+# ======================================================================================
+# EVAL: official evaluator on test shots, un-standardized NRMSE
+# ======================================================================================
+def cmd_eval(split):
+    setup_imports()
+    import torch
+    from tokamark.evaluator import WindowMetricsAccumulator, compute_metrics
+    from src.evaluator import cnn_unstd_evaluation_per_shot
+    P = paths(split)
+    os.makedirs(P["results"], exist_ok=True)
+    if not os.path.exists(os.path.join(P["model_dir"], "best_model.pt")):
+        raise SystemExit(f"FATAL: {P['model_dir']}best_model.pt not found - run train first")
+    loaders, meta = build_data(split, ["test"])
+    model = make_model(loaders["test"], meta)
+    acc = WindowMetricsAccumulator(CFG["task"])
+    cnn_unstd_evaluation_per_shot(test_dataloader=loaders["test"], config_task=meta, cnn_model=model,
+                                  output_dir=P["model_dir"], accumulator=acc)
+    compute_metrics(task=CFG["task"], output_dir=P["results"], window_metrics_accumulator=acc,
+                    save_windows_metrics=True, save_task_metrics=True)
+    sel = json.load(open(P["sel"]))
+    log(f"[{split}] EVAL DONE. Results in {P['results']}")
+    log(f"[{split}] shot counts used: {json.dumps(sel['report'])}")
+    for f in sorted(os.listdir(P["results"])):
+        if f.endswith((".json", ".yaml", ".yml")):
+            print(f"--- {f}\n" + open(os.path.join(P["results"], f)).read()[:3000])
+    for root, _, files in os.walk(P["results"]):
+        for f in sorted(files):
+            if f.endswith(".csv"):
+                print(f"--- {os.path.join(root, f)}")
+                with open(os.path.join(root, f)) as fh:
+                    for i, line in enumerate(fh):
+                        if i > 12: print("  ..."); break
+                        print("  " + line.rstrip())
+
+
+# ======================================================================================
+# PLOT: training dashboard, reconstruction samples, LCFS overlay, error diagnostics, per-shot error
+# (never blocks core results)
+# ======================================================================================
+_DR_CM, _DZ_CM = 180.0 / 64, 300.0 / 64          # MAST 65x65 grid: cm per pixel (R, Z)
+_PSI_EXTENT = [0.2, 2.0, -1.5, 1.5]               # R [m], Z [m]; array rows = Z, columns = R
+
+
+def _run_title():
+    kind = {"plain": "baseline", "mask": "failure-aware", "mask_pinn": "failure-aware + PINN"}[CFG["variant"]]
+    return f"TokaMark {CFG['task']} CNN+{CFG['model'].upper()} ({kind})"
+
+
+def _lcfs_segments(field, level):
+    """Contour vertices (col, row) of `field` at `level`; short speckle segments are dropped."""
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots()
+    segs = [s for s in ax.contour(field, levels=[level]).allsegs[0] if len(s) >= 8]
+    plt.close(fig)
+    return segs
+
+
+def _boundary_offset_cm(true, pred, frac=0.35):
+    """Mean symmetric distance (cm) between the true and predicted LCFS, both cut at the TRUE field's flux level."""
+    import numpy as np
+    level = true.min() + frac * (true.max() - true.min())
+    st, sp = _lcfs_segments(true, level), _lcfs_segments(pred, level)
+    if not st or not sp:
+        return None
+    a = np.concatenate(st) * [_DR_CM, _DZ_CM]
+    b = np.concatenate(sp) * [_DR_CM, _DZ_CM]
+    d = np.sqrt(((a[:, None, :] - b[None, :, :]) ** 2).sum(-1))
+    return float(0.5 * (d.min(1).mean() + d.min(0).mean()))
+
+
+def _fig_loss_dashboard(h, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    steps, tr, va = np.array(h["step"]), np.array(h["train_loss"]), np.array(h["val_loss"])
+    best_i = int(np.argmin(va))
+    fig, ax = plt.subplots(2, 2, figsize=(12, 7.5))
+    a = ax[0, 0]
+    a.plot(steps, tr, color="#4C78A8", lw=1.8, label="train (running mean)")
+    a.plot(steps, va, color="#E4572E", lw=1.8, label="validation")
+    a.axvline(steps[best_i], color="grey", ls="--", lw=1)
+    a.scatter([steps[best_i]], [va[best_i]], color="#E4572E", zorder=5, s=45)
+    a.annotate(f"best val {va[best_i]:.4f}\nstep {int(steps[best_i])}", (steps[best_i], va[best_i]),
+               textcoords="offset points", xytext=(12, -42), fontsize=8,
+               arrowprops=dict(arrowstyle="->", color="grey", lw=0.8))
+    a.set_title("Train vs validation loss"); a.set_xlabel("step"); a.set_ylabel("MultiOutputMSELoss (standardised)")
+    a.legend(); a.grid(alpha=0.3)
+    a = ax[0, 1]
+    a.fill_between(steps, 0, va - tr, color="#9467BD", alpha=0.35)
+    a.plot(steps, va - tr, color="#9467BD", lw=1.5)
+    a.axvline(steps[best_i], color="grey", ls="--", lw=1)
+    a.set_title("Generalisation gap (val - train)"); a.set_xlabel("step"); a.set_ylabel("loss gap"); a.grid(alpha=0.3)
+    a = ax[1, 0]
+    if h.get("lr"):
+        a.semilogy(steps[:len(h["lr"])], h["lr"], color="#2CA02C", drawstyle="steps-post", lw=1.8)
+    a.set_title("Learning rate (ReduceLROnPlateau)"); a.set_xlabel("step"); a.set_ylabel("lr"); a.grid(alpha=0.3, which="both")
+    a = ax[1, 1]
+    if h.get("mse") and h.get("pinn") and len(h["mse"]) == len(steps):
+        a.plot(steps, h["mse"], color="#4C78A8", lw=1.8, label="MSE term")
+        a.set_ylabel("MSE term", color="#4C78A8"); a.set_xlabel("step")
+        b = a.twinx()
+        b.plot(steps, h["pinn"], color="#F58518", lw=1.8, label="flux-loop PINN term (unweighted)")
+        b.set_ylabel("PINN term", color="#F58518")
+        a.set_title("Loss components (train, running mean)")
+    elif h.get("t"):
+        a.plot(steps[:len(h["t"])], np.array(h["t"]) / 60, color="#17BECF", lw=1.8)
+        a.set_title("Wall-clock time"); a.set_xlabel("step"); a.set_ylabel("minutes since session start")
+    a.grid(alpha=0.3)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_samples(true, pred, labels, path, title):
+    """true/pred: (n, H, W) in Wb. One row per window: true | pred | |error|."""
+    import numpy as np
+    import matplotlib.pyplot as plt
+    n = len(true)
+    fig, axes = plt.subplots(n, 3, figsize=(12, 3.6 * n), squeeze=False)
+    for i in range(n):
+        err = np.abs(pred[i] - true[i])
+        lo, hi = min(true[i].min(), pred[i].min()), max(true[i].max(), pred[i].max())
+        for j, (img, ttl, cm, kw) in enumerate((
+                (true[i], "True psi", "viridis", dict(vmin=lo, vmax=hi)),
+                (pred[i], "Predicted psi", "viridis", dict(vmin=lo, vmax=hi)),
+                (err, f"|Error|  (MAE {err.mean():.4f} Wb, max {err.max():.4f})", "magma", {}))):
+            im = axes[i][j].imshow(img, cmap=cm, origin="lower", extent=_PSI_EXTENT, aspect="auto", **kw)
+            axes[i][j].set_title(f"{ttl}\n{labels[i]}" if j == 0 else ttl, fontsize=9)
+            axes[i][j].set_xlabel("R [m]", fontsize=8); axes[i][j].set_ylabel("Z [m]", fontsize=8)
+            fig.colorbar(im, ax=axes[i][j], fraction=0.046)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.97))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_boundary(true, pred, labels, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    n = len(true)
+    fig, axes = plt.subplots(1, n, figsize=(5.2 * n, 5.2), squeeze=False)
+    for i in range(n):
+        a = axes[0][i]
+        level = true[i].min() + 0.35 * (true[i].max() - true[i].min())
+        a.imshow(true[i], cmap="Greys", origin="lower", extent=_PSI_EXTENT, aspect="auto", alpha=0.55)
+        x = np.linspace(_PSI_EXTENT[0], _PSI_EXTENT[1], true[i].shape[1])
+        z = np.linspace(_PSI_EXTENT[2], _PSI_EXTENT[3], true[i].shape[0])
+        a.contour(x, z, true[i], levels=[level], colors="#1F77B4", linewidths=2.2)
+        a.contour(x, z, pred[i], levels=[level], colors="#D62728", linewidths=1.8, linestyles="--")
+        off = _boundary_offset_cm(true[i], pred[i])
+        a.set_title(f"{labels[i]}\nLCFS offset: " + (f"{off:.2f} cm" if off is not None else "n/a"), fontsize=9)
+        a.set_xlabel("R [m]"); a.set_ylabel("Z [m]")
+    axes[0][0].plot([], [], color="#1F77B4", lw=2.2, label="true LCFS")
+    axes[0][0].plot([], [], color="#D62728", lw=1.8, ls="--", label="predicted LCFS")
+    axes[0][0].legend(loc="upper right", fontsize=8)
+    fig.suptitle(title + " - last closed flux surface (35% level of the true field)", fontsize=11)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_error_diagnostics(err_map, win_mae, sc_t, sc_p, path, title):
+    import numpy as np
+    import matplotlib.pyplot as plt
+    fig, ax = plt.subplots(2, 2, figsize=(12, 9))
+    a = ax[0, 0]
+    im = a.imshow(err_map, cmap="magma", origin="lower", extent=_PSI_EXTENT, aspect="auto")
+    fig.colorbar(im, ax=a, fraction=0.046, label="mean |error| [Wb]")
+    fl = np.array(FLUX_LOOP_COORDS)
+    a.scatter(_PSI_EXTENT[0] + fl[:, 0] / 64 * 1.8, _PSI_EXTENT[2] + fl[:, 1] / 64 * 3.0, s=22, facecolors="none",
+              edgecolors="cyan", linewidths=1, label="15 flux loops (PINN)")
+    a.set_title("Mean absolute error over all test windows"); a.set_xlabel("R [m]"); a.set_ylabel("Z [m]")
+    a.legend(loc="upper right", fontsize=8)
+    a = ax[0, 1]
+    a.hist(win_mae, bins=40, color="#4C78A8", alpha=0.9)
+    a.axvline(np.mean(win_mae), color="#E4572E", lw=1.8, label=f"mean {np.mean(win_mae):.4f}")
+    a.axvline(np.median(win_mae), color="k", ls="--", lw=1.5, label=f"median {np.median(win_mae):.4f}")
+    a.set_title(f"Per-window MAE ({len(win_mae)} windows)"); a.set_xlabel("MAE [Wb]"); a.set_ylabel("windows")
+    a.legend(); a.grid(alpha=0.3)
+    a = ax[1, 0]
+    hb = a.hexbin(sc_t, sc_p, gridsize=60, bins="log", cmap="viridis", mincnt=1)
+    lim = [min(sc_t.min(), sc_p.min()), max(sc_t.max(), sc_p.max())]
+    a.plot(lim, lim, color="white", lw=1.2, ls="--")
+    r2 = 1.0 - np.sum((sc_t - sc_p) ** 2) / max(np.sum((sc_t - sc_t.mean()) ** 2), 1e-12)
+    a.set_title(f"Predicted vs true psi (R2 = {r2:.4f})"); a.set_xlabel("true psi [Wb]"); a.set_ylabel("predicted psi [Wb]")
+    fig.colorbar(hb, ax=a, fraction=0.046, label="log10 count")
+    a = ax[1, 1]
+    fl_err = np.array([err_map[z, r] for r, z in FLUX_LOOP_COORDS])
+    a.bar(range(len(fl_err)), fl_err, color="#F58518")
+    a.axhline(err_map.mean(), color="k", ls="--", lw=1.3, label=f"grid-wide mean {err_map.mean():.4f}")
+    a.set_title("Error at the 15 flux-loop pixels (PINN anchor points)")
+    a.set_xlabel("flux loop #"); a.set_ylabel("mean |error| [Wb]"); a.legend(); a.grid(alpha=0.3, axis="y")
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.96))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def _fig_per_shot(csv_path, path, title):
+    import csv as _csv
+    import numpy as np
+    import matplotlib.pyplot as plt
+    rows = list(_csv.DictReader(open(csv_path)))
+    by_shot = {}
+    for r in rows:
+        by_shot.setdefault(r["shot_id"], []).append((int(r["window_index"]), float(r["MAE"])))
+    order = sorted(by_shot, key=lambda s: np.mean([m for _, m in by_shot[s]]))
+    means = [float(np.mean([m for _, m in by_shot[s]])) for s in order]
+    overall = float(np.mean([float(r["MAE"]) for r in rows]))
+    fig, ax = plt.subplots(1, 2, figsize=(14, 5))
+    a = ax[0]
+    a.bar(range(len(order)), means, color=["#E4572E" if m > overall else "#4C78A8" for m in means])
+    a.axhline(overall, color="k", ls="--", lw=1.3, label=f"all windows {overall:.4f}")
+    a.set_xticks(range(len(order))); a.set_xticklabels(order, rotation=90, fontsize=6)
+    a.set_title(f"Mean MAE per test shot ({len(order)} shots, red = above average)")
+    a.set_ylabel("MAE [Wb]"); a.legend(); a.grid(alpha=0.3, axis="y")
+    a = ax[1]
+    grid = np.linspace(0, 1, 21)
+    curves = []
+    for s in by_shot:
+        w = sorted(by_shot[s])
+        if len(w) < 5:
+            continue
+        pos = np.linspace(0, 1, len(w))
+        curves.append(np.interp(grid, pos, [m for _, m in w]))
+    if curves:
+        c = np.array(curves)
+        a.fill_between(grid, np.percentile(c, 10, axis=0), np.percentile(c, 90, axis=0), color="#4C78A8", alpha=0.25,
+                       label="10-90th percentile over shots")
+        a.plot(grid, np.median(c, axis=0), color="#4C78A8", lw=2, label="median shot")
+    a.set_title("Error along the discharge (normalised time)"); a.set_xlabel("normalised time in shot"); a.set_ylabel("window MAE [Wb]")
+    a.legend(); a.grid(alpha=0.3)
+    fig.suptitle(title, fontsize=12)
+    fig.tight_layout(rect=(0, 0, 1, 0.95))
+    fig.savefig(path, dpi=130)
+    plt.close(fig)
+
+
+def cmd_plot(split):
+    setup_imports()
+    import numpy as np
+    import torch
+    import matplotlib
+    matplotlib.use("Agg")
+    P = paths(split)
+    os.makedirs(P["figures"], exist_ok=True)
+    title = f"{_run_title()} - {split} split, seed {CFG['seed']}"
+
+    # (a) training dashboard - from the saved history
+    try:
+        h = torch.load(os.path.join(P["model_dir"], "training_history.pt"), map_location="cpu", weights_only=False)
+        _fig_loss_dashboard(h, os.path.join(P["figures"], "loss_curves.png"), title)
+        log(f"saved loss_curves.png ({len(h['step'])} validation points)")
+    except Exception as e:  # noqa
+        log("loss-curve plot failed:", repr(e)[:200])
+
+    # (b)-(d) run the best model over the test windows once and feed the reconstruction figures
+    try:
+        from src.trainer import move_batch_to_device
+        dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+        loaders, meta = build_data(split, ["test"])
+        model = make_model(loaders["test"], meta).to(dev)
+        model.load_state_dict(torch.load(os.path.join(P["model_dir"], "best_model.pt"), map_location=dev, weights_only=False))
+        model.eval()
+        ps = meta["output"]["equilibrium-psi"]
+        mu, sd = float(ps["mean"]), float(ps["std"])
+        err_sum, n_win, win_mae, sc_t, sc_p, first = None, 0, [], [], [], None
+        rng = np.random.default_rng(0)
+        for bi, batch in enumerate(loaders["test"]):
+            if batch is None:
+                continue
+            if bi >= 8:
+                break
+            x, y = move_batch_to_device(batch, dev)
+            with torch.no_grad():
+                yp = model(*x)
+            t = y[0][:, 0].float().cpu().numpy() * sd + mu
+            p = yp[0][:, 0].float().cpu().numpy() * sd + mu
+            e = np.abs(p - t)
+            err_sum = e.sum(0) if err_sum is None else err_sum + e.sum(0)
+            n_win += len(e)
+            win_mae.extend(e.mean((1, 2)).tolist())
+            pick = rng.choice(t.size, size=min(20000, t.size), replace=False)
+            sc_t.append(t.ravel()[pick]); sc_p.append(p.ravel()[pick])
+            if first is None:
+                first = (t, p, [int(s) for s in batch[0]])
+        if n_win == 0:
+            raise RuntimeError("no test windows")
+        win_mae = np.array(win_mae)
+        t, p, sids = first
+        wm = np.abs(p - t).mean((1, 2))
+        pick = [int(np.argmin(wm)), int(np.argsort(wm)[len(wm) // 2]), int(np.argmax(wm))]
+        labels = [f"{nm}: shot {sids[i]}, MAE {wm[i]:.4f} Wb" for nm, i in zip(("best", "median", "worst"), pick)]
+        _fig_samples(t[pick], p[pick], labels, os.path.join(P["figures"], "psi_reconstruction_samples.png"), title)
+        log("saved psi_reconstruction_samples.png")
+        _fig_boundary(t[pick], p[pick], labels, os.path.join(P["figures"], "boundary_overlay.png"), title)
+        log("saved boundary_overlay.png")
+        _fig_error_diagnostics(err_sum / n_win, win_mae, np.concatenate(sc_t), np.concatenate(sc_p),
+                               os.path.join(P["figures"], "test_error_diagnostics.png"), title)
+        log(f"saved test_error_diagnostics.png ({n_win} test windows)")
+    except Exception as e:  # noqa
+        log("reconstruction figures failed (core results unaffected):", repr(e)[:300])
+
+    # (e) per-shot error from the official evaluator's window metrics
+    try:
+        wm_csv = os.path.join(P["results"], CFG["task"], "windows_metrics.csv")
+        _fig_per_shot(wm_csv, os.path.join(P["figures"], "per_shot_error.png"), title)
+        log("saved per_shot_error.png")
+    except Exception as e:  # noqa
+        log("per-shot figure failed (run eval first):", repr(e)[:200])
+    log(f"figures in {P['figures']}")
+
+
+# ======================================================================================
+# SUMMARY: one human-readable recap of the whole run
+# ======================================================================================
+def cmd_summary(split):
+    setup_imports()
+    import csv as _csv
+    P = paths(split)
+    lines = [f"# TokaMark {CFG['task']} baseline run - {split} split", ""]
+    def add_json(fname, title):
+        p = P["sel"] if fname == "selection.json" else os.path.join(P["out"], fname)
+        if os.path.exists(p):
+            lines.append(f"## {title}")
+            lines.append("```json")
+            lines.append(json.dumps(json.load(open(p)), indent=1))
+            lines.append("```")
+        else:
+            lines.append(f"## {title}\n\nMISSING: {p}")
+        lines.append("")
+    add_json("selection.json", "Data subset & split (official membership, budget-limited selection)")
+    add_json("run_config.json", "Run configuration")
+    add_json("train_summary.json", "Training summary")
+    lines.append("## Evaluation (official evaluator, un-standardised NRMSE)")
+    tm = os.path.join(P["results"], CFG["task"], "task_metrics.csv")
+    if os.path.exists(tm):
+        rows = list(_csv.DictReader(open(tm)))
+        for r in rows:
+            name = r["feature_name"]
+            lines.append(f"- **{name}**: NRMSE={float(r['NRMSE_mean']):.4f} (+/-{float(r['NRMSE_std_pop']):.4f}), "
+                         f"RMSE={float(r['RMSE_mean']):.5f}, MAE={float(r['MAE_mean']):.5f}, n_shots={r['n_shots']}")
+    else:
+        lines.append(f"MISSING: {tm} (eval not run?)")
+    lines.append("")
+    lines.append("## Artifacts")
+    for label, p in (("selection", P["sel"]), ("run config", os.path.join(P["out"], "run_config.json")),
+                     ("train summary", os.path.join(P["out"], "train_summary.json")),
+                     ("best model", os.path.join(P["model_dir"], "best_model.pt")),
+                     ("resume checkpoint", os.path.join(P["model_dir"], "last.pt")),
+                     ("history", os.path.join(P["model_dir"], "training_history.pt")),
+                     ("results dir", P["results"]), ("figures dir", P["figures"])):
+        lines.append(f"- {label}: `{p}` {'OK' if os.path.exists(p) else '**MISSING**'}")
+    text = "\n".join(lines)
+    with open(os.path.join(P["out"], "summary.md"), "w") as fh:
+        fh.write(text)
+    print(text)
+    log(f"summary -> {os.path.join(P['out'], 'summary.md')}")
+
+
+if __name__ == "__main__":
+    ap = argparse.ArgumentParser()
+    ap.add_argument("cmd", choices=["prep", "train", "tune", "eval", "plot", "summary"])
+    ap.add_argument("--split", default="random", choices=["random", "temporal"])
+    a = ap.parse_args()
+    {"prep": cmd_prep, "train": cmd_train, "tune": cmd_tune, "eval": cmd_eval, "plot": cmd_plot, "summary": cmd_summary}[a.cmd](a.split)

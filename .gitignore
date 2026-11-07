@@ -12,6 +12,27 @@ __pycache__/
 *.ckpt
 out/
 
+# Scratch / generated / cache dirs
+tmp/
+report/
+Generated Documents/
+*.npz
+*.aux
+*.blg
+*.bbl
+*.log
+.pytest_cache/
+
+# Embedded tokamark git repos inside results_v2 (not submodules)
+cnn_mlp/results_v2/*/tokamark/
+cnn_mlp/results_v2/*/tokamark_baseline/
+
+# Large sweep/module34 result outputs (robust_metrics.json, criticality.json)
+cnn_mlp/results_v2/corrected_robustness/sweeps/
+cnn_mlp/results_v2/corrected_robustness/mlp_fa_v3/robust_metrics.json
+cnn_mlp/results_v2/corrected_robustness/cache/
+cnn_mlp/results_v2/module34/
+
 # Allow cnn_mlp benchmark tables, reports, and publication figures
 !cnn_mlp/results/
 !cnn_mlp/results/*.md

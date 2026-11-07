@@ -23,10 +23,30 @@ def env(k, d):
     return type(d)(os.environ.get(k, d))
 
 
+# Tuned hyper-parameters (written by `tune`): explicit env var > TM_TUNED file > default.
+_TUNED = json.load(open(os.environ["TM_TUNED"]))["chosen"] if os.environ.get("TM_TUNED") else {}
+
+
+def hp(var, key, d):
+    return type(d)(os.environ[var]) if var in os.environ else type(d)(_TUNED.get(key, d))
+
+
+# Ablation variant: plain | mask (failure-aware mask + augmentation, no PINN) | mask_pinn (+ flux-loop loss).
+# TM_VARIANT is a convenience over TM_FAILURE_AWARE / TM_PINN_LAMBDA; unset -> the legacy two variables decide.
+_VAR = os.environ.get("TM_VARIANT", "").lower().strip()
+if _VAR not in ("", "plain", "mask", "mask_pinn"):
+    raise ValueError(f"TM_VARIANT must be plain|mask|mask_pinn, got {_VAR!r}")
+_FA = (_VAR != "plain") if _VAR else env("TM_FAILURE_AWARE", "0") == "1"
+_PINN = {"plain": 0.0, "mask": 0.0}.get(_VAR, env("TM_PINN_LAMBDA", 0.1))
+if _VAR == "mask_pinn" and _PINN <= 0:
+    raise ValueError("TM_VARIANT=mask_pinn needs TM_PINN_LAMBDA > 0")
+
 CFG = dict(
     task=env("TM_TASK", "task_1-3"),
-    model=env("TM_MODEL", "mlp"),                         # mlp (CNN+MLP) or lstm (CNN+LSTM)
-    seed=env("TM_SEED", 23),
+    model=env("TM_MODEL", "mlp"),                         # mlp (CNN+MLP) | lstm (CNN+LSTM) | transformer (one token per sensor)
+    seed=env("TM_SEED", 23),                              # init, augmentation and data order (NOT the shot selection)
+    select_seed=env("TM_SELECT_SEED", 23),                # shot selection only; selection.json is reused when present
+    run_tag=env("TM_RUN_TAG", ""),                        # "" legacy out/<split>/; "auto" -> <model>_<variant>_s<seed>; else literal
     repo_id="UKAEA-IBM-STFC/tokamark-v1",
     work=env("TM_WORK", "/kaggle/working"),
     data_root=env("TM_DATA_ROOT", "/tmp/tokamark_data"),
@@ -38,8 +58,15 @@ CFG = dict(
     batch_size=env("TM_BATCH", 512),
     validate_every=env("TM_VALIDATE_EVERY", 100),
     patience=env("TM_PATIENCE", 10),
-    lr=1e-4,
-    weight_decay=env("TM_WEIGHT_DECAY", 1e-4),            # official Adam weight decay
+    lr=hp("TM_LR", "lr", 1e-4),
+    weight_decay=hp("TM_WEIGHT_DECAY", "weight_decay", 1e-4),   # official Adam weight decay
+    dropout=hp("TM_DROPOUT", "dropout", 0.0),             # latent dropout before the psi decoder (all models); also inside the transformer
+    d_model=hp("TM_D_MODEL", "d_model", 64),              # transformer token width
+    tx_layers=env("TM_TX_LAYERS", 3),
+    tx_heads=env("TM_TX_HEADS", 4),
+    tune_trials=env("TM_TUNE_TRIALS", 6),                 # `tune`: random-search trials per model
+    tune_steps=env("TM_TUNE_STEPS", 300),                 # `tune`: training steps per trial (validation split only)
+    tune_seed=env("TM_TUNE_SEED", 7),                     # `tune`: same sampled lr/wd/dropout list for every model
     train_from_scratch=env("TM_TRAIN_FROM_SCRATCH", "0") == "1",
     max_steps=env("TM_MAX_STEPS", 10_000_000),
     dl_workers=env("TM_DL_WORKERS", -1),                  # -1 -> auto; 0 -> main process only; N -> N workers
@@ -51,10 +78,17 @@ CFG = dict(
     index_threads=env("TM_INDEX_THREADS", 12),            # concurrency; global req/s throttle (_RL_RPS) is the real limiter
     index_stop_gb=env("TM_INDEX_STOP_GB", 0.0),           # 0 -> auto: max(3, 1.6 x data budget)
     index_min_tars=env("TM_INDEX_MIN_TARS", 6),           # spread subset across >= this many archives
-    failure_aware=env("TM_FAILURE_AWARE", "0") == "1",    # 1 -> Module 2 failure-aware masked architecture
+    failure_aware=_FA,                                    # True -> Module 2 failure-aware masked architecture + augmentation
     fail_aug_p=env("TM_FAIL_AUG_P", 0.5),                 # probability of failure augmentation during training
-    pinn_lambda=env("TM_PINN_LAMBDA", 0.1),               # weight of flux-loop consistency loss
+    pinn_lambda=_PINN,                                    # weight of flux-loop consistency loss (0 -> term not computed at all)
+    pinn_mode=env("TM_PINN_MODE", "measured").lower().strip(),   # measured: real loop positions + measured flux | legacy: old pixels vs true psi
+    variant=_VAR or ("plain" if not _FA else ("mask" if _PINN <= 0 else "mask_pinn")),
 )
+if CFG["pinn_mode"] not in ("measured", "legacy"):
+    raise ValueError(f"TM_PINN_MODE must be measured|legacy, got {CFG['pinn_mode']!r}")
+if CFG["run_tag"].lower() == "auto":   # legacy-PINN runs get their own dir so they never collide with measured ones
+    CFG["run_tag"] = (f"{CFG['model'].lower().strip()}_{CFG['variant']}"
+                      f"{'_legacy' if CFG['variant'] == 'mask_pinn' and CFG['pinn_mode'] == 'legacy' else ''}_s{CFG['seed']}")
 
 
 def log(*a):
@@ -62,12 +96,14 @@ def log(*a):
 
 
 def paths(split):
-    out = os.path.join(CFG["work"], "out", split)
+    base = os.path.join(CFG["work"], "out", split)
+    out = os.path.join(base, CFG["run_tag"]) if CFG["run_tag"] else base   # per-run dir; selection stays shared in base
     return dict(
+        base=base,
         out=out,
         data=os.path.join(CFG["data_root"], split),
         index=os.path.join(CFG["work"], "out", "tar_index.json"),
-        sel=os.path.join(out, "selection.json"),
+        sel=os.path.join(base, "selection.json"),
         model_dir=os.path.join(out, "model") + "/",
         results=os.path.join(out, "results") + "/",
         figures=os.path.join(out, "figures") + "/",
@@ -501,7 +537,7 @@ def choose_shots(split, idx):
     free = shutil.disk_usage(paths(split)["data"]).free
     budget = min(CFG["data_budget_gb"] * 1e9, max(0.0, free - 6e9))
     log(f"[{split}] official counts: " + ", ".join(f"{k}={len(v)}" for k, v in official.items()) + f" (total {total}); byte budget {budget / 1e9:.1f} GB")
-    rng = random.Random(CFG["seed"])
+    rng = random.Random(CFG["select_seed"])   # NOT TM_SEED: all seeds train on the same shots
     MIN_SHOTS = 5  # matches the fatal guard in cmd_prep
     sel, report = {}, {}
     for k, shots in official.items():
@@ -566,7 +602,7 @@ def cmd_prep(split):
     setup_imports()
     P = paths(split)
     os.makedirs(P["data"], exist_ok=True)
-    os.makedirs(P["out"], exist_ok=True)
+    os.makedirs(P["base"], exist_ok=True)
     deadline = T0 + CFG["prep_deadline_h"] * 3600
     # Indexing gets a soft sub-deadline (a fraction of the prep window) so a slow or
     # re-throttled index cannot starve downloads. But if the index is still short of the
@@ -663,7 +699,7 @@ def cmd_prep(split):
             f"({sum(len(sel[k]) for k in prep_splits) - sum(len(final[k]) for k in prep_splits)} still missing)")
     report2 = {k: dict(report.get(k, {}), downloaded=len(final[k])) for k in final}
     meta = dict(split=split, shots=final, report=report2, failed=failed,
-                config=dict(seed=CFG["seed"], task=CFG["task"], data_budget_gb=CFG["data_budget_gb"],
+                config=dict(seed=CFG["select_seed"], task=CFG["task"], data_budget_gb=CFG["data_budget_gb"],
                             repo_id=CFG["repo_id"], git_revs=CFG["git_revs"], selected_at_min=round((time.time() - T0) / 60, 1)))
     json.dump(meta, open(P["sel"], "w"), indent=1)
     log(f"[{split}] FINAL shot counts: " + json.dumps({k: len(v) for k, v in final.items()}))
@@ -751,8 +787,73 @@ FLUX_LOOP_COORDS = (
 )
 
 
+# ---- measured-flux PINN (TM_PINN_MODE=measured, default) ------------------------------------------------------------
+# Real (R, Z) [m] of the 15 flux loops = input group 0, channel order (cnn_mlp/src/study/geometry/mast_sensor_geometry.json,
+# FAIR-MAST level-2 geometry of shot 30421). psi grid: R = 0.06 + 0.03 i (column), Z = -2 + 0.0625 j (row), psi[z_row, r_col].
+FLUX_LOOP_RZ = ((0.1785, 0.6249), (0.1785, 0.3199), (0.1785, 0.0149), (0.1785, -0.3231), (0.1785, -0.9331),
+                (1.0354, -1.0886), (1.163, 1.08259), (1.0354, 1.08309), (1.5984, -1.04443), (1.4005, -1.14403),
+                (1.4001, 1.15079), (1.7463, -0.44224), (1.5495, -0.54724), (1.7493, 0.44221), (1.4025, -0.8876))
+PSI_GRID = dict(r0=0.06, dr=0.03, z0=-2.0, dz=0.0625, n=65)
+# Measured flux through a loop = 2*pi*psi_EFIT (Wb vs Wb/rad): fit on 16 local shots / 1083 windows, slope 6.2-6.3 on the four
+# well-resolved inboard loops, offset -0.002 Wb (first window sample). rms |2*pi*psi(loop) - measured| in standardised-psi units
+# per loop (all shots, first window sample): the inboard CC loops 0-4 agree to ~0.03, the outer loops only to 0.23-0.32 (EFIT psi
+# is not accurate next to the PF coils), so each loop is weighted min(1, (0.1/resid)^2).
+FLUX_LOOP_RESID = (0.030, 0.028, 0.029, 0.029, 0.031, 0.255, 0.261, 0.231, 0.317, 0.290, 0.304, 0.258, 0.230, 0.238, 0.286)
+FLUX_LOOP_WEIGHT = tuple(min(1.0, (0.1 / r) ** 2) for r in FLUX_LOOP_RESID)
+FLUX_LOOP_DEAD_WB = 2e-3      # a loop whose |flux| stays below 2 mWb over the whole window is dead (CC04 reads ~0 in the 27xxx shots)
+_FL_STATS = {}                # {mu_f, sd_f, mu_p, sd_p}: input flux-loop / output psi standardisation, set from the task metadata
+
+
+def set_flux_loop_stats(meta):
+    """Take the standardisation the dataset really applied (meta['input'][...flux_loop_flux], meta['output'][...psi])."""
+    f, p = meta["input"]["magnetics-flux_loop_flux"], meta["output"]["equilibrium-psi"]
+    _FL_STATS.update(mu_f=float(f["mean"]), sd_f=float(f["std"]), mu_p=float(p["mean"]), sd_p=float(p["std"]))
+    return _FL_STATS
+
+
+def flux_loop_sample(pred_psi):
+    """Bilinear sample of a (B, 1, 65, 65) psi map at the 15 real loop positions -> (B, 15). Differentiable."""
+    import torch
+    g = PSI_GRID
+    c = torch.tensor([(R - g["r0"]) / g["dr"] for R, _ in FLUX_LOOP_RZ], dtype=torch.float64)
+    r = torch.tensor([(Z - g["z0"]) / g["dz"] for _, Z in FLUX_LOOP_RZ], dtype=torch.float64)
+    c0, r0 = c.floor().clamp(0, g["n"] - 2), r.floor().clamp(0, g["n"] - 2)
+    fc, fr = (c - c0).to(pred_psi.dtype).to(pred_psi.device), (r - r0).to(pred_psi.dtype).to(pred_psi.device)
+    c0, r0 = c0.long().to(pred_psi.device), r0.long().to(pred_psi.device)
+    f = pred_psi[:, 0]
+    return ((1 - fr) * ((1 - fc) * f[:, r0, c0] + fc * f[:, r0, c0 + 1])
+            + fr * ((1 - fc) * f[:, r0 + 1, c0] + fc * f[:, r0 + 1, c0 + 1]))
+
+
+def flux_loop_measured_target(x0):
+    """x0: input group 0, (B, W, Cin, T, 15), standardised. -> (target (B,15) in psi standardisation, alive (B,15) bool).
+
+    Target = first window sample (closest in time to the psi slice, which is the window start): raw = x*sd_f + mu_f [Wb],
+    psi = raw / (2*pi) [Wb/rad], standardised with the psi stats. Alive = not NaN-filled (all-zero) and not a ~0 dead loop."""
+    import math as _m
+    S = _FL_STATS
+    if not S:
+        raise RuntimeError("flux-loop stats not set: call set_flux_loop_stats(meta) before using TM_PINN_MODE=measured")
+    x = x0.reshape(x0.shape[0], -1, x0.shape[-1])                   # (B, W*Cin*T, 15), time ascending
+    raw_first = x[:, 0] * S["sd_f"] + S["mu_f"]
+    target = (raw_first / (2 * _m.pi) - S["mu_p"]) / S["sd_p"]
+    alive = (x.abs().amax(1) > 0) & ((x * S["sd_f"] + S["mu_f"]).abs().amax(1) >= FLUX_LOOP_DEAD_WB)
+    return target, alive
+
+
+def flux_loop_pinn_loss_measured(pred_psi, x0, health):
+    """Real-geometry consistency: psi_pred(loop position) vs the loop's own MEASURED flux, same window.
+
+    health (B, 15) float: availability of each loop (failure-mask; 0 = lost -> no term). Weighted by FLUX_LOOP_WEIGHT."""
+    import torch
+    target, alive = flux_loop_measured_target(x0)
+    w = torch.tensor(FLUX_LOOP_WEIGHT, dtype=pred_psi.dtype, device=pred_psi.device) * health * alive.to(pred_psi.dtype)
+    err = (flux_loop_sample(pred_psi) - target.detach()) ** 2
+    return (w * err).sum(1).mean() / len(FLUX_LOOP_RZ)
+
+
 def flux_loop_pinn_loss(pred_psi, true_psi, mask_fl=None):
-    """Enforce boundary flux consistency at the 15 wall flux loop locations."""
+    """LEGACY (TM_PINN_MODE=legacy): hard-coded pixels vs the TRUE psi y. Enforce boundary flux consistency at 15 pixels."""
     loss = 0.0
     for r_idx, z_idx in FLUX_LOOP_COORDS:
         diff_sq = (pred_psi[:, 0, z_idx, r_idx] - true_psi[:, 0, z_idx, r_idx]) ** 2
@@ -762,9 +863,62 @@ def flux_loop_pinn_loss(pred_psi, true_psi, mask_fl=None):
     return loss / len(FLUX_LOOP_COORDS)
 
 
-def apply_structured_failure(x, p_fail=0.5):
-    """Structured failure augmentation: drops channels, correlated groups, or temporal gaps."""
+def channel_layout(x):
+    """Sensors per input group: (B, W, Cin, T, N) -> N sensors on the last axis; (B, W, Cin, T) -> 1 sensor."""
+    return [int(t.shape[-1]) if t.dim() >= 5 else 1 for t in x]
+
+
+def _zero_sensor(t, b, n, sl=slice(None)):
+    """Zero sensor n of sample b (optionally only the time slice sl, which indexes the T axis)."""
+    if t.dim() >= 5:
+        t[b, :, :, sl, n] = 0.0
+    else:
+        t[b, :, :, sl] = 0.0
+
+
+def _apply_structured_failure_channels(x, p_fail):
+    """Per-sensor version for the transformer: mask (B, sum_g N_g) with 0 = sensor missing.
+
+    Same three scenario families as the group-level version, at sensor granularity:
+    40% k in 1..6 random individual sensors, 30% one correlated group, 30% temporal gap on k in 1..6 sensors."""
     import torch
+    n_ch = channel_layout(x)
+    offs = [0]
+    for n in n_ch:
+        offs.append(offs[-1] + n)
+    C, B = offs[-1], x[0].shape[0]
+    mask = torch.ones((B, C), device=x[0].device, dtype=x[0].dtype)
+    x_aug = [t.clone() for t in x]
+    groups = [[0], [1, 2, 3], [4], [5, 6], [7]]
+    where = lambda c: next(g for g in range(len(n_ch)) if offs[g] <= c < offs[g + 1])  # noqa: E731
+    for b in range(B):
+        if torch.rand(1).item() >= p_fail:
+            continue
+        r = torch.rand(1).item()
+        if r < 0.70 and r >= 0.40:
+            chans = [c for g in groups[int(torch.randint(0, len(groups), (1,)).item())] for c in range(offs[g], offs[g + 1])]
+        else:
+            chans = torch.randperm(C)[:int(torch.randint(1, 7, (1,)).item())].tolist()
+        for c in chans:
+            g = where(c)
+            if r < 0.70:
+                _zero_sensor(x_aug[g], b, c - offs[g])
+            else:
+                L = x_aug[g].shape[-2] if x_aug[g].dim() >= 5 else x_aug[g].shape[-1]
+                half = max(1, L // 2)
+                start = int(torch.randint(0, max(1, L - half + 1), (1,)).item())
+                _zero_sensor(x_aug[g], b, c - offs[g], slice(start, start + half))
+            mask[b, c] = 0.0
+    return x_aug, mask
+
+
+def apply_structured_failure(x, p_fail=0.5, per_channel=False):
+    """Structured failure augmentation: drops channels, correlated groups, or temporal gaps.
+
+    per_channel=False (CNN models): mask (B, 8) over the 8 sensor groups. per_channel=True (transformer): mask (B, 115)."""
+    import torch
+    if per_channel:
+        return _apply_structured_failure_channels(x, p_fail)
     B = x[0].shape[0]
     dev = x[0].device
     dtype = x[0].dtype
@@ -797,6 +951,31 @@ def apply_structured_failure(x, p_fail=0.5):
     return x_aug, mask
 
 
+def train_loss(runner, crit, x, y):
+    """One training-step loss, shared by every model/variant: (total, mse, pinn). pinn is None unless variant mask_pinn.
+
+    plain: MSE on raw inputs. mask: MSE with structured failure augmentation + health mask. mask_pinn: + lambda * flux-loop
+    consistency (not even evaluated when TM_PINN_LAMBDA = 0)."""
+    if not CFG["failure_aware"]:
+        loss = crit(runner(*x), y)
+        return loss, loss, None
+    per_ch = CFG["model"].lower().strip() == "transformer"   # transformer: per-sensor mask (B, 115)
+    x_train, mask_train = apply_structured_failure(x, p_fail=CFG["fail_aug_p"], per_channel=per_ch)
+    out = runner(*x_train, mask_train)
+    loss_mse = crit(out, y)
+    if CFG["pinn_lambda"] <= 0:
+        return loss_mse, loss_mse, None
+    if CFG["pinn_mode"] == "measured":
+        # per-loop availability: transformer -> its 15 sensor columns; CNN models -> the flux-loop group flag for all loops
+        health = mask_train[:, :15] if per_ch else mask_train[:, :1].expand(-1, 15)
+        loss_fl = flux_loop_pinn_loss_measured(out[0], x[0], health)     # x = clean window (before augmentation)
+        return loss_mse + CFG["pinn_lambda"] * loss_fl, loss_mse, loss_fl
+    # legacy: weight by the health of the flux-loop group (group 0 = its first n0 sensor columns)
+    mask_fl = mask_train[:, :channel_layout(x)[0]].mean(1) if per_ch else mask_train[:, 0]
+    loss_fl = flux_loop_pinn_loss(out[0], y[0], mask_fl=mask_fl)
+    return loss_mse + CFG["pinn_lambda"] * loss_fl, loss_mse, loss_fl
+
+
 def _resolve_mask(model, args, kwargs):
     """Split forward args into (inputs, exogenous, health mask (B, n_in)).
 
@@ -818,7 +997,18 @@ def _resolve_mask(model, args, kwargs):
     return inputs, exogenous, mask
 
 
-def make_failure_aware_model(loader, meta):
+def _first_shapes(loader):
+    """(input, exogenous, output) per-sample shapes from the first usable window of the loader's dataset."""
+    for first_window in loader.dataset:
+        try:
+            return ([arr.shape for arr in first_window["input"]], [arr.shape for arr in first_window["exogenous"]],
+                    [arr.shape for arr in first_window["y"]])
+        except Exception:
+            continue
+    return [], [], []
+
+
+def make_failure_aware_model(loader, meta, shapes=None):
     """Module 2 network for the chosen backbone (TM_MODEL = mlp | lstm).
 
     Both keep the upstream one-CNN-encoder-per-sensor layout. Each encoder output is gated by its sensor's health
@@ -835,15 +1025,7 @@ def make_failure_aware_model(loader, meta):
     from tokamark.tools.utils import get_device
 
     device = get_device()
-    input_shapes, exogenous_shapes, output_shapes = [], [], []
-    for l, first_window in enumerate(loader.dataset):
-        try:
-            input_shapes = [arr.shape for arr in first_window["input"]]
-            exogenous_shapes = [arr.shape for arr in first_window["exogenous"]]
-            output_shapes = [arr.shape for arr in first_window["y"]]
-            break
-        except Exception:
-            continue
+    input_shapes, exogenous_shapes, output_shapes = shapes or _first_shapes(loader)
 
     class MultiConv_FailureAware_MLP(Base):
         def __init__(self, in_shapes, exo_shapes, out_shapes, dict_meta, D=16):
@@ -939,16 +1121,127 @@ def make_failure_aware_model(loader, meta):
                         dict_meta=meta, D=16).to(device)
 
 
-def make_model(loader, meta):
-    if CFG["failure_aware"]:
-        return make_failure_aware_model(loader, meta)
-    model_type = os.environ.get("TM_MODEL", "mlp").lower().strip()
-    if model_type == "lstm":
+def make_transformer_model(loader, meta, shapes=None):
+    """One token per sensor (115 = 15+40+18+18+12+10+1+1) in a Transformer; missing sensors are DROPPED.
+
+    Each sensor's 5 ms series -> per-group Linear (group time lengths differ: 25/250/20) + learned sensor-ID and
+    sensor-group embeddings. A missing sensor is removed from attention via key_padding_mask and from the masked-mean
+    pool (never zero-filled). A learned always-valid CLS token keeps the all-sensors-lost case finite. Pooling =
+    masked mean of sensor tokens + learned-query attention pooling. The head feeds the SAME decoder_mlp and 65x65
+    ConvTranspose output branches as the CNN models (inherited from MultiConv_MLP)."""
+    setup_imports()
+    import torch
+    import torch.nn as nn
+    from src.multi_conv_mlp_model import MultiConv_MLP as Base, bb_factor
+    from tokamark.tools.utils import get_device
+
+    in_shapes, exo_shapes, out_shapes = shapes or _first_shapes(loader)
+    d, heads, layers, p = CFG["d_model"], CFG["tx_heads"], CFG["tx_layers"], CFG["dropout"]
+    assert d % heads == 0, f"d_model {d} not divisible by tx_heads {heads}"
+
+    class SensorEmbed(nn.Module):
+        """Group branch: window of one diagnostic group -> (B, N_sensors, d_model) tokens."""
+        def __init__(self, shape):  # per-sample shape without batch axis, e.g. (1, 1, 25, 15) or (1, 1, 20)
+            super().__init__()
+            self.n = int(shape[-1]) if len(shape) >= 4 else 1
+            L = int(math.prod(shape)) // self.n
+            self.proj = nn.Sequential(nn.Linear(L, d), nn.GELU(), nn.Linear(d, d))
+
+        def raw(self, x):  # (B, N, L): one row per sensor
+            x = x.movedim(-1, 1) if x.dim() >= 5 else x.unsqueeze(1)
+            return x.reshape(x.shape[0], self.n, -1)
+
+        def forward(self, x):
+            return self.proj(self.raw(x))
+
+    class MultiConv_Transformer(Base):
+        def __init__(self):
+            super().__init__(in_shapes, exo_shapes, out_shapes, meta, D=16)
+            self.input_branches = nn.ModuleList([SensorEmbed(s) for s in in_shapes])   # replaces the CNN encoders
+            self.n_in = len(self.input_branches)
+            self.n_sensors = sum(b.n for b in self.input_branches)
+            self.register_buffer("group_id", torch.tensor([g for g, b in enumerate(self.input_branches) for _ in range(b.n)]),
+                                 persistent=False)
+            self.sensor_emb = nn.Embedding(self.n_sensors, d)
+            self.group_emb = nn.Embedding(self.n_in, d)
+            self.cls = nn.Parameter(torch.zeros(1, 1, d))
+            self.query = nn.Parameter(torch.randn(1, 1, d) * 0.02)
+            for e in (self.sensor_emb, self.group_emb):
+                nn.init.normal_(e.weight, std=0.02)
+            layer = nn.TransformerEncoderLayer(d, heads, dim_feedforward=2 * d, dropout=p, activation="gelu",
+                                               batch_first=True, norm_first=True)
+            self.encoder = nn.TransformerEncoder(layer, layers, norm=nn.LayerNorm(d), enable_nested_tensor=False)
+            self.pool = nn.MultiheadAttention(d, heads, dropout=p, batch_first=True)
+            ctx = self.D * bb_factor
+            self.encoder_mlp = nn.Sequential(nn.Linear(2 * d, 2 * ctx), nn.ReLU(), nn.Linear(2 * ctx, ctx))
+
+        def sensor_mask(self, inputs, mask):
+            """(B, n_sensors) bool, True = sensor present. mask: None (infer: an exactly-zero sensor is missing, the
+            fallback rule of the failure-aware CNNs), (B or 1, n_in) group health, or (B or 1, n_sensors) per sensor."""
+            B = inputs[0].shape[0]
+            if mask is None:
+                return torch.cat([b.raw(x).abs().sum(-1) != 0 for b, x in zip(self.input_branches, inputs)], dim=1)
+            if mask.dim() == 1:
+                mask = mask.unsqueeze(0)
+            if mask.shape[-1] == self.n_in:
+                mask = mask[:, self.group_id]
+            elif mask.shape[-1] != self.n_sensors:
+                raise ValueError(f"mask has {mask.shape[-1]} columns; expected {self.n_in} groups or {self.n_sensors} sensors")
+            return (mask > 0.5).expand(B, -1)
+
+        def forward(self, *args, **kwargs):
+            n_in, n_exo = self.n_in, len(self.exogenous_branches)
+            inputs, exogenous = args[:n_in], args[n_in:n_in + n_exo]
+            mask = kwargs.get("mask", None)
+            if mask is None and len(args) > n_in + n_exo:
+                mask = args[n_in + n_exo]
+            B = inputs[0].shape[0]
+            ok = self.sensor_mask(inputs, mask)
+            tok = torch.cat([b(x) for b, x in zip(self.input_branches, inputs)], dim=1)
+            tok = tok + self.sensor_emb.weight + self.group_emb(self.group_id)
+            seq = torch.cat([self.cls.expand(B, -1, -1), tok], dim=1)
+            valid = torch.cat([ok.new_ones(B, 1), ok], dim=1)
+            h = self.encoder(seq, src_key_padding_mask=~valid)
+            sens = h[:, 1:].masked_fill(~ok.unsqueeze(-1), 0.0)
+            mean = sens.sum(1) / ok.sum(1, keepdim=True).clamp(min=1).to(h.dtype)
+            att = self.pool(self.query.expand(B, -1, -1), h, h, key_padding_mask=~valid, need_weights=False)[0].squeeze(1)
+            context = self.encoder_mlp(torch.cat([mean, att], dim=1))
+            if n_exo > 0 and len(exogenous) > 0:
+                exo = torch.cat([self._run_cnn_encoder(b, x) for b, x in zip(self.exogenous_branches, exogenous)], dim=2)
+                context = torch.cat([context, exo.reshape(B, -1)], dim=1)
+            dec_out = self.decoder_mlp(context).unsqueeze(1).repeat(1, self.W_out, 1)
+            return [self._run_cnn_decoder(br, gs, dec_out) for br, gs in zip(self.output_branches, self.output_shapes)]
+
+    return MultiConv_Transformer().to(get_device())
+
+
+def add_latent_dropout(model, p):
+    """Dropout on the latent that feeds each psi decoder branch (same knob for every model; p=0 -> no-op)."""
+    if p > 0:
+        import torch.nn.functional as F
+        for br in model.output_branches:
+            br.register_forward_pre_hook(lambda m, a: (F.dropout(a[0], p, m.training),) + tuple(a[1:]))
+    return model
+
+
+def count_params(model):
+    return sum(q.numel() for q in model.parameters())
+
+
+def make_model(loader, meta, shapes=None):
+    setup_imports()
+    model_type = CFG["model"].lower().strip()
+    if model_type == "transformer":
+        m = make_transformer_model(loader, meta, shapes)
+    elif CFG["failure_aware"]:
+        m = make_failure_aware_model(loader, meta, shapes)
+    elif model_type == "lstm":
         from src.multi_conv_lstm_model import create_lstm_architecture
-        return create_lstm_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
+        m = create_lstm_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
     else:
         from src.multi_conv_mlp_model import create_cnn_architecture
-        return create_cnn_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
+        m = create_cnn_architecture(dataloader_=loader, dict_metadata=meta, verbose=False)
+    return add_latent_dropout(m, CFG["dropout"])
 
 
 # ======================================================================================
@@ -1015,11 +1308,20 @@ def cmd_train(split):
                       validate_every=CFG["validate_every"], patience=CFG["patience"],
                       train_deadline_h=CFG["train_deadline_h"], use_dp=CFG["use_dp"],
                       failure_aware=CFG["failure_aware"], fail_aug_p=CFG["fail_aug_p"],
-                      pinn_lambda=CFG["pinn_lambda"],
+                      pinn_lambda=CFG["pinn_lambda"], variant=CFG["variant"], run_tag=CFG["run_tag"],
+                      pinn_mode=CFG["pinn_mode"] if CFG["failure_aware"] and CFG["pinn_lambda"] > 0 else "none",
+                      dropout=CFG["dropout"], d_model=CFG["d_model"] if CFG["model"] == "transformer" else None,
+                      tuned=os.environ.get("TM_TUNED", ""),
                       git_revs=CFG["git_revs"],
                       shots={k: len(v) for k, v in sel["shots"].items()},
                       report=sel["report"])
-    json.dump(run_config, open(os.path.join(P["out"], "run_config.json"), "w"), indent=1)
+    rc_path = os.path.join(P["out"], "run_config.json")
+    if os.path.exists(rc_path) and not CFG["train_from_scratch"]:   # resuming: never silently switch the PINN definition
+        old = json.load(open(rc_path)).get("pinn_mode", "legacy" if run_config["pinn_mode"] != "none" else "none")
+        if old != run_config["pinn_mode"]:
+            raise SystemExit(f"FATAL: {rc_path} was trained with pinn_mode={old}, now {run_config['pinn_mode']}; "
+                             "use a new TM_RUN_TAG or set TM_TRAIN_FROM_SCRATCH=1")
+    json.dump(run_config, open(rc_path, "w"), indent=1)
     log(f"run_config: {json.dumps(run_config)}")
     dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     log(f"device={dev}, gpus={torch.cuda.device_count()}, cpus={os.cpu_count()}")
@@ -1030,14 +1332,18 @@ def cmd_train(split):
             time.sleep(60)
             log(f"  heartbeat: {phase['p']} (step {phase['step']})")
 
-    threading.Thread(target=_heartbeat, daemon=True).start()
+    if not getattr(cmd_train, "_hb", False):   # one heartbeat thread even when `tune` calls cmd_train repeatedly
+        cmd_train._hb = True
+        threading.Thread(target=_heartbeat, daemon=True).start()
+    t_train0 = time.time()
     loaders, meta = build_data(split, ["train", "val"])
+    set_flux_loop_stats(meta)
     phase["p"] = "building model"
     t_model = time.time()
     log("building model (shape inference walks the dataset for one sample)...")
     model = make_model(loaders["train"], meta).to(dev)
-    log(f"model built in {time.time() - t_model:.1f}s, "
-        f"{sum(p.numel() for p in model.parameters()) / 1e6:.1f}M params")
+    n_params = count_params(model)
+    log(f"model built in {time.time() - t_model:.1f}s, {n_params / 1e6:.3f}M params")
     crit = MultiOutputMSELoss()
 
     # ---- fail-fast smoke check (a few seconds): shapes, NaNs, forward/backward ----
@@ -1128,18 +1434,9 @@ def cmd_train(split):
             runner.train()
             x, y = move_batch_to_device(batch, dev)
             opt.zero_grad(set_to_none=True)
-            if CFG["failure_aware"]:
-                x_train, mask_train = apply_structured_failure(x, p_fail=CFG["fail_aug_p"])
-                out = runner(*x_train, mask_train)
-                loss_mse = crit(out, y)
-                if CFG["pinn_lambda"] > 0:
-                    loss_fl = flux_loop_pinn_loss(out[0], y[0], mask_fl=mask_train[:, 0])
-                    loss = loss_mse + CFG["pinn_lambda"] * loss_fl
-                    run_parts.append((loss_mse.item(), loss_fl.item()))
-                else:
-                    loss = loss_mse
-            else:
-                loss = crit(runner(*x), y)
+            loss, loss_mse, loss_fl = train_loss(runner, crit, x, y)
+            if loss_fl is not None:
+                run_parts.append((loss_mse.item(), loss_fl.item()))
             if not torch.isfinite(loss):
                 bad += 1; log(f"non-finite loss, skipping (#{bad})")
                 if bad > 200: raise RuntimeError("too many non-finite losses")
@@ -1191,12 +1488,73 @@ def cmd_train(split):
     save_last()
     summary = dict(stop_reason=stop_reason, steps=st["step"], epochs=st["epoch"], best_val=st["best"],
                    parallel=label, cuda_oom_events=st.get("oom", 0), data_errors=errs,
-                   duration_min=round((time.time() - T0) / 60, 1),
+                   duration_min=round((time.time() - T0) / 60, 1),          # since session start (includes prep)
+                   train_duration_min=round((time.time() - t_train0) / 60, 1),
+                   model=CFG["model"], variant=CFG["variant"], run_tag=CFG["run_tag"], params=n_params,
                    model_dir=P["model_dir"], **{k: run_config[k] for k in ("task", "split", "seed", "batch_size", "lr",
-                                                                           "weight_decay", "validate_every", "patience",
+                                                                           "weight_decay", "dropout", "d_model", "pinn_lambda",
+                                                                           "fail_aug_p", "pinn_mode", "tuned", "validate_every", "patience",
                                                                            "git_revs", "shots", "report")})
     json.dump(summary, open(os.path.join(P["out"], "train_summary.json"), "w"), indent=1)
     log(f"TRAIN DONE ({stop_reason}) at step {st['step']}, best val {st['best']:.5f}; summary -> train_summary.json")
+    return summary
+
+
+# ======================================================================================
+# TUNE: small random search with the SAME training loop (cmd_train), validation split only
+# ======================================================================================
+TUNE_KEYS = ("lr", "weight_decay", "dropout", "d_model")
+
+
+def cmd_tune(split):
+    """TM_TUNE_TRIALS trials of TM_TUNE_STEPS steps each over lr / weight decay / dropout (+ d_model for the transformer).
+
+    Every model sees the same sampled (lr, wd, dropout) list (TM_TUNE_SEED), so budget and search space are equal.
+    Only train/val shots are used (the test split is never touched). Writes
+    out/<split>/tune/<model>_<variant>/tuning.json with trials + `chosen`; point TM_TUNED at that file for the final runs."""
+    P = paths(split)
+    tdir = os.path.join(P["base"], "tune", f"{CFG['model'].lower().strip()}_{CFG['variant']}")
+    os.makedirs(tdir, exist_ok=True)
+    rng, rng_d = random.Random(CFG["tune_seed"]), random.Random(CFG["tune_seed"] + 1)
+    plan = [dict(lr=10 ** rng.uniform(-4.5, -3.0), weight_decay=10 ** rng.uniform(-6.0, -3.0), dropout=rng.choice([0.0, 0.1, 0.2]),
+                 d_model=rng_d.choice([64, 128])) for _ in range(CFG["tune_trials"])]
+    use_dm = CFG["model"].lower().strip() == "transformer"
+    keys = [k for k in TUNE_KEYS if k != "d_model" or use_dm]
+    saved = {k: CFG[k] for k in ("seed", "run_tag", "max_steps", "validate_every", "patience", "train_from_scratch", *TUNE_KEYS)}
+    trials = []
+    for i, t in enumerate(plan):
+        hpar = {k: t[k] for k in keys}
+        tag = f"tune/{CFG['model'].lower().strip()}_{CFG['variant']}/t{i}"
+        CFG.update(hpar, seed=CFG["tune_seed"], run_tag=tag, max_steps=CFG["tune_steps"], validate_every=CFG["tune_steps"] + 1,
+                   patience=10 ** 9, train_from_scratch=True)
+        rec = dict(trial=i, **hpar)
+        tout = paths(split)["out"]
+        sp = os.path.join(tout, "train_summary.json")
+        try:
+            if os.path.exists(sp):                      # finished in an earlier session: reuse
+                summ = json.load(open(sp))
+            else:
+                summ = cmd_train(split)
+            rec.update(val_loss=summ["best_val"], steps=summ["steps"], params=summ["params"])
+        except Exception as e:  # noqa  (e.g. OOM for d_model=128): record and carry on
+            rec.update(val_loss=None, error=repr(e)[:200])
+        finally:
+            CFG.update(saved)
+        shutil.rmtree(os.path.join(tout, "model"), ignore_errors=True)   # keep the json, drop the checkpoints
+        trials.append(rec)
+        log(f"TUNE trial {i}: {json.dumps(rec)}")
+    ok = [r for r in trials if r.get("val_loss") is not None and math.isfinite(r["val_loss"])]
+    if not ok:
+        raise SystemExit("FATAL: every tuning trial failed; see tuning log above")
+    best = min(ok, key=lambda r: r["val_loss"])
+    out = dict(model=CFG["model"], variant=CFG["variant"], split=split, selection="lowest validation loss (validation split only)",
+               budget=dict(trials=CFG["tune_trials"], steps_per_trial=CFG["tune_steps"], batch_size=CFG["batch_size"]),
+               tune_seed=CFG["tune_seed"], trials=trials, chosen_trial=best["trial"], chosen={k: best[k] for k in keys})
+    path = os.path.join(tdir, "tuning.json")
+    json.dump(out, open(path, "w"), indent=1)
+    log(f"TUNE DONE: chosen {json.dumps(out['chosen'])} -> {path}")
+    log(f"  final runs: set TM_TUNED={path}")
+    return out
 
 
 # ======================================================================================
@@ -1243,7 +1601,7 @@ _PSI_EXTENT = [0.2, 2.0, -1.5, 1.5]               # R [m], Z [m]; array rows = Z
 
 
 def _run_title():
-    kind = "failure-aware + PINN" if CFG["failure_aware"] else "baseline"
+    kind = {"plain": "baseline", "mask": "failure-aware", "mask_pinn": "failure-aware + PINN"}[CFG["variant"]]
     return f"TokaMark {CFG['task']} CNN+{CFG['model'].upper()} ({kind})"
 
 
@@ -1521,7 +1879,7 @@ def cmd_summary(split):
     P = paths(split)
     lines = [f"# TokaMark {CFG['task']} baseline run - {split} split", ""]
     def add_json(fname, title):
-        p = os.path.join(P["out"], fname)
+        p = P["sel"] if fname == "selection.json" else os.path.join(P["out"], fname)
         if os.path.exists(p):
             lines.append(f"## {title}")
             lines.append("```json")
@@ -1561,7 +1919,7 @@ def cmd_summary(split):
 
 if __name__ == "__main__":
     ap = argparse.ArgumentParser()
-    ap.add_argument("cmd", choices=["prep", "train", "eval", "plot", "summary"])
+    ap.add_argument("cmd", choices=["prep", "train", "tune", "eval", "plot", "summary"])
     ap.add_argument("--split", default="random", choices=["random", "temporal"])
     a = ap.parse_args()
-    {"prep": cmd_prep, "train": cmd_train, "eval": cmd_eval, "plot": cmd_plot, "summary": cmd_summary}[a.cmd](a.split)
+    {"prep": cmd_prep, "train": cmd_train, "tune": cmd_tune, "eval": cmd_eval, "plot": cmd_plot, "summary": cmd_summary}[a.cmd](a.split)

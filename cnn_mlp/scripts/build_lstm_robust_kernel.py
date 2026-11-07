@@ -17,6 +17,8 @@ FILES = {  # name inside /kaggle/working -> repo path
     "pipeline.py": "src/pipeline.py",
     "robustness.py": "src/study/pipeline_robustness.py",
     "physics_evaluation.py": "src/study/physics_evaluation.py",
+    "efit_truth.py": "src/study/efit_truth.py",
+    "aggregate_seeds.py": "src/study/aggregate_seeds.py",
     "adaptive_mitigation.py": "src/study/adaptive_mitigation.py",
     "sensor_criticality.py": "src/study/sensor_criticality.py",
     "physics_study.py": "src/study/physics_study.py",

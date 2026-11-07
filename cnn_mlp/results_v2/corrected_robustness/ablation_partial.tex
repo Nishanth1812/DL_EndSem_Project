@@ -1,0 +1,10 @@
+\begin{tabular}{lccccccc}
+\hline
+Configuration & Clean & Channel loss (6) & Group loss (magnetics) & Temporal gap (40\%) & Pre-disruption (25\%) & Latency (ms) & seeds \\
+\hline
++ flux-loop consistency loss (mask + PINN) & 3.65 (0.151) & 21.48 (0.399) & 15.29 (0.263) & 23.28 (0.484) & 12.11 (0.315) & -- & 1 \\
+(supp.) mask+PINN + best fixed imputation & 3.65 (0.151) & 19.06 (0.411) & 15.29 (0.263) & 5.33 (0.164) & 3.65 (0.151) & -- & 1 \\
++ adaptive mitigation & -- & -- & -- & -- & -- & -- & -- \\
+Oracle mitigation & -- & -- & -- & -- & -- & -- & -- \\
+\hline
+\end{tabular}

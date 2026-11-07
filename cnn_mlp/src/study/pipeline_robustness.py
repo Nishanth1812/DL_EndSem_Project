@@ -37,6 +37,25 @@ try:
     from physics_evaluation import evaluate_window_physics, aggregate_physics_metrics
 except ImportError:  # e.g. the Kaggle notebook, which only writes pipeline.py and this file
     evaluate_window_physics = aggregate_physics_metrics = None
+try:  # Module 1 v2: EFIT truth per (shot, window); without it the physics sample falls back to the heuristic mode
+    from efit_truth import TruthIndex
+except ImportError:
+    TruthIndex = None
+try:
+    from aggregate_seeds import bootstrap_ci
+except ImportError:
+    bootstrap_ci = None
+
+_TRUTH = {}  # split -> TruthIndex (built once per process)
+
+
+def get_truth(split):
+    """TruthIndex over the split's data dir with the official outlier yaml (same files build_data uses)."""
+    if TruthIndex is None:
+        return None
+    if split not in _TRUTH:
+        _TRUTH[split] = TruthIndex(P.paths(split)["data"], outlier_yaml=P.split_files(split)[2])
+    return _TRUTH[split]
 
 TASK = CFG["task"]
 
@@ -100,13 +119,15 @@ def rob_cfg():
         seed=envf("TM_ROB_SEED", CFG["seed"]),
         clean_only=os.environ.get("TM_ROB_CLEAN_ONLY", "0") == "1",
         batch=envf("TM_ROB_BATCH", CFG["batch_size"]),
-        phys_stride=envf("TM_ROB_PHYS_STRIDE", 100),
+        phys_stride=envf("TM_ROB_PHYS_STRIDE", 4),  # ~1 in 4 windows (hash-selected, same set in every pass); 0 = off
+        resume=os.environ.get("TM_ROB_RESUME", "0") == "1",
     )
 
 
 def rob_paths(split):
-    out = os.path.join(CFG["work"], "out", split)
-    rdir = os.path.join(out, "robustness")
+    pp = P.paths(split)  # honours TM_RUN_TAG: out/<split>/<tag>/ (same dir load_test_loader_and_model reads the model from)
+    out = pp["out"]
+    rdir = os.environ.get("TM_ROB_DIR") or os.path.join(out, "robustness")
     return dict(
         dir=rdir,
         manifest=os.path.join(rdir, "robust_manifest.json"),
@@ -114,7 +135,7 @@ def rob_paths(split):
         windows=os.path.join(rdir, "robust_windows.csv"),
         figures=os.path.join(rdir, "figures"),
         report=os.path.join(rdir, "robustness.md"),
-        model_dir=os.path.join(out, "model") + "/",
+        model_dir=pp["model_dir"],
     )
 
 
@@ -143,11 +164,17 @@ def _mask_random_dropout(arr, sev, rng):
     return out, holes
 
 
+def _time_axis(arr):
+    """Time axis of a collated branch: profile branches are (B, 1, 1, T, n_sensors) -> -2; scalar branches (B, 1, 1, T) -> -1."""
+    return -2 if arr.ndim >= 5 else -1
+
+
 def _mask_temporal_gap(arr, frac, rng, where="random"):
-    """Zero a contiguous fraction `frac` of the time axis (last axis)."""
+    """Zero a contiguous fraction `frac` of the TIME axis (all sensors of the branch)."""
     out = arr.copy()
     holes = np.zeros_like(arr, dtype=bool)
-    L = arr.shape[-1]
+    ax = _time_axis(arr)
+    L = arr.shape[ax]
     g = max(1, int(round(frac * L)))
     if where == "front":
         s = 0
@@ -155,18 +182,24 @@ def _mask_temporal_gap(arr, frac, rng, where="random"):
         s = L - g
     else:
         s = int(rng.integers(0, max(1, L - g + 1)))
-    out[..., s:s + g] = 0.0
-    holes[..., s:s + g] = True
+    sl = [slice(None)] * arr.ndim
+    sl[ax] = slice(s, s + g)
+    out[tuple(sl)] = 0.0
+    holes[tuple(sl)] = True
     return out, holes
 
 
-def _zero_channels(arr, chans):
-    """Zero whole channels; return (masked, holes) with holes marking the zeroed area."""
+def _zero_channels(arr, chans=None):
+    """Zero whole sensors. chans=None -> the whole branch (every sensor, all time). Sensor axis is -1 on profile branches
+    (B, 1, 1, T, n_sensors); scalar branches (solenoid, ip) are a single sensor, so they are blanked entirely."""
     out = arr.copy()
     holes = np.zeros_like(arr, dtype=bool)
-    for c in chans:
-        out[..., c, :] = 0.0
-        holes[..., c, :] = True
+    if chans is None or arr.ndim < 5:
+        out[...] = 0.0
+        holes[...] = True
+    else:
+        out[..., list(chans)] = 0.0
+        holes[..., list(chans)] = True
     return out, holes
 
 
@@ -186,17 +219,13 @@ def _impute(masked, holes, mode, channel_mean=0.0):
         out[holes] = float(channel_mean)
         return out
     if mode == "ffill":
-        ow = out.reshape(-1, out.shape[-2], out.shape[-1])
-        hw = holes.reshape(-1, holes.shape[-2], holes.shape[-1])
-        for i in range(ow.shape[0]):
-            for c in range(ow.shape[1]):
-                row, hole = ow[i, c], hw[i, c]
-                last = 0.0
-                for t in range(row.shape[0]):
-                    if hole[t]:
-                        row[t] = last
-                    else:
-                        last = row[t]
+        ax = _time_axis(out)  # carry the last valid value forward along TIME, per sensor
+        om, hm = np.moveaxis(out, ax, 0), np.moveaxis(holes, ax, 0)  # views: writes land in `out`
+        last = np.zeros(om.shape[1:], out.dtype)
+        for t in range(om.shape[0]):
+            h = hm[t]
+            om[t][h] = last[h]
+            last = np.where(h, last, om[t])
         return out
     raise ValueError(mode)
 
@@ -228,7 +257,7 @@ def apply_scenario(inputs, scenario, sev, impute, train_means, rng):
             masked, holes = _mask_random_dropout(arr, float(sev), rng)
         elif scenario == "channel_ablation":
             if i in ablate_chans:
-                masked, holes = _zero_channels(arr, [0])
+                masked, holes = _zero_channels(arr)
         elif scenario == "temporal_gap":
             masked, holes = _mask_temporal_gap(arr, float(sev), rng, where="random")
         elif scenario == "disruption_proximate":
@@ -250,7 +279,7 @@ def apply_group(inputs, scenario, sev, impute, train_means, rng, group_key, grou
     for i, t in enumerate(inputs):
         arr = _as_np(t).astype(np.float64)
         if i in group_chans:
-            masked, holes = _zero_channels(arr, [0])
+            masked, holes = _zero_channels(arr)
         else:
             masked, holes = arr, np.zeros_like(arr, dtype=bool)
         masked = _impute(masked, holes, impute, channel_mean=train_means.get(i, 0.0))
@@ -333,7 +362,7 @@ def load_test_loader_and_model(split, batch=None):
                                      prefetch_factor=2 if nw > 0 else None)
     model = make_model(loaders["test"], meta)
     dev = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
-    model.load_state_dict(torch.load(os.path.join(rob_paths(split)["model_dir"], "best_model.pt"),
+    model.load_state_dict(torch.load(os.path.join(P.paths(split)["model_dir"], "best_model.pt"),   # honours TM_RUN_TAG
                                      map_location=dev, weights_only=False))
     model.to(dev).eval()
     n_gpu = torch.cuda.device_count()
@@ -386,17 +415,44 @@ def _train_means_pass(loader, max_batches=40):
     return means
 
 
-def run_pass(loader, model, dev, mu, sd, corrupt_fn=None, accumulate_spatial=False, return_viz=False, phys_stride=0):
+PHYS_REC_KEYS = ("boundary_mean_cm", "boundary_hausdorff_cm", "axis_shift_cm", "xpoint_err_cm", "kappa_err", "delta_err",
+                 "boundary_failed", "is_false_alarm", "is_missed_alarm")
+
+
+def phys_selected(shot, win, stride):
+    """Order-independent window selection: the same (shot, window) pairs are scored in every pass."""
+    return stride > 0 and (int(shot) * 7919 + int(win) * 104729) % stride == 0
+
+
+def _num(v):
+    v = np.asarray(v).item() if np.ndim(v) == 0 else v
+    return bool(v) if isinstance(v, (bool, np.bool_)) else float(v)
+
+
+def phys_summary(recs, rows, no_truth, no_lcfs, boot=1000):
+    """Aggregate EFIT-mode records + the counts the report must quote + shot-level bootstrap CIs (95 %)."""
+    out = dict(agg=aggregate_physics_metrics(recs) if recs else {})
+    out["counts"] = dict(n_selected=len(recs) + no_truth, n_used=len(recs), n_no_truth=no_truth, n_no_efit_lcfs=no_lcfs,
+                         n_boundary_fail=int(sum(1 for r in recs if r.get("boundary_failed"))))
+    out["records"] = rows
+    if bootstrap_ci is not None and rows:
+        out["ci95"] = {k: bootstrap_ci([r["shot"] for r in rows], [r[k] for r in rows], n_boot=boot)
+                       for k in ("boundary_mean_cm", "axis_shift_cm", "boundary_hausdorff_cm")}
+    return out
+
+
+def run_pass(loader, model, dev, mu, sd, corrupt_fn=None, accumulate_spatial=False, return_viz=False, phys_stride=0, truth=None):
     """Forward the whole test loader; return aggregated metrics + per-window rows.
 
     corrupt_fn: callable(x_list) -> (x_corrupted_list, info) applied per batch, or None
                 for the clean pass.
-    phys_stride: every Nth window (same windows in every pass) also gets the Module 1 physics metrics.
+    phys_stride: ~1/N of the windows (hash-selected, same set in every pass) also get the Module 1 v2 physics metrics,
+                 scored against `truth` (a TruthIndex); windows the index has no truth for are skipped and counted.
     A failure-aware model is given a health mask: 0 for every sensor the scenario removed entirely
     (channel / category / group loss), 1 for partial damage (dropout, gaps), which it must handle unaided.
     """
     import torch
-    phys_rows, n_seen = [], 0
+    phys_rows, phys_meta, phys_no_truth, phys_no_lcfs, n_seen = [], [], 0, 0, 0
     sid_all, wid_all, rmse_all, mae_all = [], [], [], []
     spatial_sum = None; spatial_cnt = None
     viz_data = None
@@ -412,8 +468,16 @@ def run_pass(loader, model, dev, mu, sd, corrupt_fn=None, accumulate_spatial=Fal
                 xin_cpu, info = corrupt_fn(x)
                 xin = [t.to(dev, dtype=torch.float32) for t in xin_cpu]
             if CFG["failure_aware"]:
-                health = torch.ones((xin[0].shape[0], len(xin)), device=dev)
-                health[:, info.get("dead_channels", [])] = 0.0
+                dead = info.get("dead_channels", [])
+                if CFG["model"].lower().strip() == "transformer":  # per-sensor mask (B, sum_g n_g): a lost branch = all its sensors
+                    n_ch = P.channel_layout(xin)
+                    offs = np.concatenate([[0], np.cumsum(n_ch)])
+                    health = torch.ones((xin[0].shape[0], int(offs[-1])), device=dev)
+                    for g in dead:
+                        health[:, int(offs[g]):int(offs[g + 1])] = 0.0
+                else:
+                    health = torch.ones((xin[0].shape[0], len(xin)), device=dev)
+                    health[:, dead] = 0.0
                 y_pred = model(*xin, health)
             else:
                 y_pred = model(*xin)
@@ -432,7 +496,21 @@ def run_pass(loader, model, dev, mu, sd, corrupt_fn=None, accumulate_spatial=Fal
                 viz_data = dict(yt=yt2[0].tolist(), yp=yp2[0].tolist(),
                                 shot_id=int(sids_raw[0]) if len(sids_raw) > 0 else 0)
             if phys_stride and evaluate_window_physics is not None:
-                phys_rows += [evaluate_window_physics(yt2[j], yp2[j]) for j in range(n) if (n_seen + j) % phys_stride == 0]
+                sids_b, wids_b = np.asarray(shot_id).reshape(-1), np.asarray(window_id).reshape(-1)
+                per = n // max(1, len(sids_b))  # extra window axis flattened into samples (normally 1)
+                for j in range(n):
+                    s_j, w_j = int(sids_b[j // per]), int(wids_b[j // per])
+                    if not phys_selected(s_j, w_j, phys_stride):
+                        continue
+                    tr = truth.get(s_j, w_j) if truth is not None else None
+                    if truth is not None and tr is None:
+                        phys_no_truth += 1
+                        continue
+                    rec = evaluate_window_physics(yt2[j], yp2[j], truth=tr) if tr is not None else evaluate_window_physics(yt2[j], yp2[j])
+                    if tr is not None and tr.get("lcfs_rz_m") is None:
+                        phys_no_lcfs += 1
+                    phys_rows.append(rec)
+                    phys_meta.append(dict(shot=s_j, win=w_j, **{k: _num(rec[k]) for k in PHYS_REC_KEYS if k in rec}))
             n_seen += n
             rmse, mae = window_metrics(yt2, yp2)
             rmse = rmse.reshape(yt.shape[0], yt.shape[1]).mean(axis=1)
@@ -452,7 +530,11 @@ def run_pass(loader, model, dev, mu, sd, corrupt_fn=None, accumulate_spatial=Fal
     m = aggregate(sid, rmse, mae, sd)
     m["n_batches"] = n_batches
     if phys_rows:
-        m["PHYS"] = aggregate_physics_metrics(phys_rows)
+        ps = phys_summary(phys_rows, phys_meta, phys_no_truth, phys_no_lcfs)
+        m["PHYS"] = ps["agg"]  # schema unchanged (report/build_assets.py reads it); everything below is additive
+        m["PHYS_counts"], m["PHYS_records"] = ps["counts"], ps["records"]
+        if "ci95" in ps:
+            m["PHYS_ci95"] = ps["ci95"]
     if accumulate_spatial and spatial_sum is not None and spatial_cnt is not None:
         m["spatial_abs_err"] = (spatial_sum / np.maximum(spatial_cnt, 1)).tolist()
     if return_viz and viz_data is not None:
@@ -511,12 +593,25 @@ def cmd_eval_robust(split):
     rc = rob_cfg()
     P_ = rob_paths(split); os.makedirs(P_["dir"], exist_ok=True)
     loader, model, meta, dev = load_test_loader_and_model(split, batch=rc["batch"])
+    eval_sweep(loader, model, dev, meta, split, rc, P_)
+
+
+def eval_sweep(loader, model, dev, meta, split, rc, P_, train_means=None):
+    """Clean pass + the corruption sweep. `loader` may be any re-iterable of collated batches (the local CPU run feeds a
+    disk cache). TM_ROB_RESUME=1 reuses finished passes from an existing robust_metrics.json (checkpoint after every pass)."""
     mu, sd = _psi_mean_std(meta)
+    truth = get_truth(split) if rc["phys_stride"] else None
+    if rc["phys_stride"] and truth is None:
+        log("WARNING: efit_truth not importable -> physics sample uses the heuristic mode (NOT EFIT truth)")
+    prev = json.load(open(P_["metrics"])) if rc.get("resume") and os.path.exists(P_["metrics"]) else None
+    if prev and "clean" in prev and not rc["clean_only"]:
+        log(f"RESUME: {len(prev.get('corrupted', {}))} finished passes found in {P_['metrics']}")
 
     # ---- CLEAN GATE: must reproduce the eval-time NRMSE before corruption is trusted
     log("CLEAN pass (sensor-healthy baseline)...")
-    clean = run_pass(loader, model, dev, mu, sd, accumulate_spatial=True, return_viz=True, phys_stride=rc["phys_stride"])
-    viz_samples = dict(clean=clean.pop("viz", None), tasks={})
+    clean = prev["clean"] if prev and "clean" in prev and not rc["clean_only"] else \
+        run_pass(loader, model, dev, mu, sd, accumulate_spatial=True, return_viz=True, phys_stride=rc["phys_stride"], truth=truth)
+    viz_samples = prev["viz_samples"] if prev and "viz_samples" in prev and "clean" in prev else dict(clean=clean.pop("viz", None), tasks={})
     log(f"CLEAN: NRMSE={clean['NRMSE']:.4f} (±{clean['NRMSE_std']:.4f}) NMAE={clean['NMAE']:.4f} "
         f"RMSE={clean['RMSE']:.5f} MAE={clean['MAE']:.5f} n_shots={clean['n_shots']} n_windows={clean['n_windows']}")
     targets = None
@@ -542,15 +637,19 @@ def cmd_eval_robust(split):
         if not ok:
             log("WARNING: clean baseline mismatch; corruption numbers below are suspect")
 
-    result = dict(clean=clean, corrupted={}, config=rc, psi_mean=mu, psi_std=sd, viz_samples=viz_samples)
+    result = dict(clean=clean, corrupted=dict(prev["corrupted"]) if prev else {}, config=rc, psi_mean=mu, psi_std=sd,
+                  viz_samples=viz_samples)
     if rc["clean_only"]:
         clean.pop("_windows", None)
         json.dump(result, open(P_["metrics"], "w"), indent=1)
         log("TM_ROB_CLEAN_ONLY=1 -> wrote clean-only metrics, skipping corruption")
         return
+    json.dump(result, open(P_["metrics"], "w"), indent=1)  # clean pass is a checkpoint too
 
-    log("building TRAIN channel means for mean-imputation...")
-    train_means = train_channel_means(split)
+    if train_means is None:
+        log("building TRAIN channel means for mean-imputation...")
+        train_means = train_channel_means(split)
+    result["train_means"] = {str(k): float(v) for k, v in train_means.items()}
 
     VIZ_TASKS = {"random_dropout|0.5|zero", "random_dropout|0.5|ffill",
                  "category_abl|plasma_current|zero", "category_abl|plasma_current|ffill"}
@@ -560,9 +659,12 @@ def cmd_eval_robust(split):
     for ti, task in enumerate(tasks):
         cf = make_corrupt_fn(task, rc["seed"] * 1000003 + ti, train_means)
         need_viz = task["id"] in VIZ_TASKS
+        if task["id"] in result["corrupted"]:
+            log(f"[{ti + 1}/{len(tasks)}] {task['id']} done (resume)")
+            continue
         log(f"[{ti + 1}/{len(tasks)}] {task['id']} ...")
         try:
-            m = run_pass(loader, model, dev, mu, sd, corrupt_fn=cf, return_viz=need_viz, phys_stride=rc["phys_stride"])
+            m = run_pass(loader, model, dev, mu, sd, corrupt_fn=cf, return_viz=need_viz, phys_stride=rc["phys_stride"], truth=truth)
         except Exception as e:  # noqa
             log(f"  task {task['id']} FAILED: {repr(e)[:200]}")
             continue
