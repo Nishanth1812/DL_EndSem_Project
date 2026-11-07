@@ -5,6 +5,7 @@ runs/
 results/
 __pycache__/
 *.zip
+!inference_package.zip
 
 # Model weights & run outputs
 *.pt
